@@ -1093,7 +1093,7 @@ body {
       <div class="auth__copy reveal" data-delay="2">
         <h2 class="auth__headline" id="auth-headline">Kandungan yang boleh dipercayai</h2>
         <p class="auth__body">Kandungan bMuslim disusun daripada sumber yang muktabar. Amalan yang bersumberkan hadith dipaparkan bersama rujukan, gred kesahihan, dan pautan ke sumbernya.</p>
-        <p class="auth__note">Tiada kandungan agama yang direka oleh mesin. Setiap teks disemak secara manual sebelum dimuatkan ke dalam aplikasi.</p>
+        <p class="auth__note">Setiap kad amalan memaparkan sumber, gred kesahihan, dan pautan asalnya, supaya anda boleh menyemaknya sendiri.</p>
       </div>
     </div>
   </div>
@@ -1384,7 +1384,7 @@ body {
       dot.style.cssText = 'position:absolute;left:' + hX(p.time) + 'px;transform:translateX(-50%);' +
         'display:flex;flex-direction:column;align-items:center;gap:3px;';
       dot.innerHTML =
-        '<div style="width:28px;height:28px;border-radius:10px;background:var(--accent);' +
+        '<div style="width:28px;height:28px;border-radius:var(--r-input);background:var(--accent);' +
         'color:var(--on-accent);display:flex;align-items:center;justify-content:center;' +
         'font-size:9px;font-weight:800;box-shadow:0 4px 12px rgba(var(--accent-rgb),.30)">' +
         bmTime.fmt(p.time) + '</div>' +
@@ -1414,7 +1414,7 @@ body {
       var cWe = Math.min(d.windowEnd,   HOW_E);
 
       var wEl = document.createElement('div');
-      wEl.style.cssText = 'position:absolute;height:38px;border-radius:14px;' +
+      wEl.style.cssText = 'position:absolute;height:38px;border-radius:var(--r-card);' +
         'background:var(--track);border:1.5px dashed rgba(var(--accent-rgb),.28);' +
         'left:' + hX(cWs) + 'px;width:' + ((cWe - cWs) * ppH) + 'px;';
       dL.appendChild(wEl);
@@ -1424,7 +1424,7 @@ body {
           ? 'background:rgba(var(--accent-rgb),.20);border:1.5px solid rgba(var(--accent-rgb),.45);'
           : 'background:rgba(var(--accent-rgb),.10);border:1.5px solid rgba(var(--accent-rgb),.22);';
         var aEl = document.createElement('div');
-        aEl.style.cssText = 'position:absolute;height:38px;padding:0 10px;border-radius:14px;' +
+        aEl.style.cssText = 'position:absolute;height:38px;padding:0 10px;border-radius:var(--r-card);' +
           'display:flex;align-items:center;gap:7px;white-space:nowrap;' + bg +
           'left:' + hX(d.act) + 'px;';
         aEl.innerHTML =

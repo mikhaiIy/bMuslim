@@ -90,7 +90,7 @@
         if (legacy.tidur)  migrated.sleep = legacy.tidur;
         if (legacy.bangun) migrated.wake  = legacy.bangun;
         if (legacy.tahap)  migrated.level = legacy.tahap;
-        if (legacy.bahasa) migrated.lang  = legacy.bahasa;
+        if (legacy.lang)   migrated.lang  = legacy.lang;
         localStorage.setItem(SETT_KEY, JSON.stringify(Object.assign({}, state.settings, migrated)));
       }
       var raw = localStorage.getItem(SETT_KEY);
@@ -328,8 +328,9 @@
         actEl.addEventListener('click', function () {
           var id = this.dataset.deedId;
           state.selectedDeedId = id;
-          /* Bring the needle to this deed so the selection is never rejected
-             for being outside the deed's window. */
+          /* Pin the selection while the needle travels to the deed, so
+             intermediate scroll renders cannot overwrite it. */
+          _pinUntil = Date.now() + 900;
           var deed = null;
           for (var i = 0; i < BM.deeds.length; i++) {
             if (BM.deeds[i].id === id) { deed = BM.deeds[i]; break; }
@@ -350,6 +351,11 @@
       track.appendChild(laneEl);
     }
   }
+
+  /* Selection pin: while set (ms timestamp), renderDetail must not replace
+     state.selectedDeedId. Set by act-marker clicks during their scroll. */
+  var _pinUntil = 0;
+  function pinActive() { return Date.now() < _pinUntil; }
 
   /* ─── Needle position + scrubbing ────────────────────────────────────────── */
   var _scrubTarget    = null;   /* requested scroll position */
@@ -530,7 +536,7 @@
       if (current.length > 1) {
         /* Ensure selectedDeedId is valid */
         var ids = current.map(function (d) { return d.id; });
-        if (!state.selectedDeedId || ids.indexOf(state.selectedDeedId) === -1) {
+        if (!pinActive() && (!state.selectedDeedId || ids.indexOf(state.selectedDeedId) === -1)) {
           state.selectedDeedId = ids[0];
         }
         els.detailSelector.hidden = false;
@@ -549,7 +555,9 @@
         });
       } else {
         els.detailSelector.hidden = true;
-        state.selectedDeedId = current.length ? current[0].id : null;
+        if (!pinActive()) {
+          state.selectedDeedId = current.length ? current[0].id : null;
+        }
       }
     }
 
@@ -744,7 +752,7 @@
       html +=   '</div>';
       html +=   '<button class="suggestion-add btn btn-ghost' + (isAdded ? ' added' : '') + '"' +
                 ' data-suggestion-id="' + s.id + '" aria-pressed="' + isAdded + '"' +
-                ' aria-label="Tambah ' + s.title + '">' +
+                ' aria-label="' + (isAdded ? 'Buang ' : 'Tambah ') + s.title + '">' +
                 (isAdded ? bmIcons.check : bmIcons.plus) + '</button>';
       html += '</div>';
     });
@@ -755,8 +763,13 @@
         var id = this.dataset.suggestionId;
         added[id] = !added[id];
         try { localStorage.setItem(ADDED_KEY, JSON.stringify(added)); } catch (err) { /* private mode */ }
+        var title = '';
+        for (var i = 0; i < BM.planner.suggestions.length; i++) {
+          if (BM.planner.suggestions[i].id === id) { title = BM.planner.suggestions[i].title; break; }
+        }
         this.classList.toggle('added', added[id]);
         this.setAttribute('aria-pressed', added[id] ? 'true' : 'false');
+        this.setAttribute('aria-label', (added[id] ? 'Buang ' : 'Tambah ') + title);
         this.innerHTML = added[id] ? bmIcons.check : bmIcons.plus;
       });
     });
@@ -769,8 +782,14 @@
     var sleepEl = qsel('#setting-sleep');
     var wakeEl  = qsel('#setting-wake');
     if (zoneEl && !zoneEl.dataset.populated) {
-      zoneEl.innerHTML = BM.zones.map(function (z) {
-        return '<option value="' + z.code + '">' + z.code + ': ' + z.area + '</option>';
+      var byState = {};
+      window.BM.zones.forEach(function (z) {
+        (byState[z.state] = byState[z.state] || []).push(z);
+      });
+      zoneEl.innerHTML = Object.keys(byState).map(function (st) {
+        return '<optgroup label="' + st + '">' + byState[st].map(function (z) {
+          return '<option value="' + z.code + '">' + z.code + ': ' + z.area + '</option>';
+        }).join('') + '</optgroup>';
       }).join('');
       zoneEl.dataset.populated = '1';
     }
