@@ -967,7 +967,7 @@ body {
     <p class="hero__sub">Garis masa berasaskan waktu solat sebenar anda. Tahu apa yang perlu dilakukan, bila masanya, dan mengapa.</p>
     <div class="hero__actions">
       <a href="app.html" class="btn btn-primary btn-lg">Buka aplikasi</a>
-      <button class="btn-hero-secondary" onclick="document.getElementById('cara').scrollIntoView({behavior:'smooth'})">Lihat cara ia berfungsi</button>
+      <button class="btn-hero-secondary" onclick="document.getElementById('cara').scrollIntoView({behavior: window.matchMedia('(prefers-reduced-motion: reduce)').matches ? 'auto' : 'smooth'})">Lihat caranya</button>
     </div>
   </div>
 
@@ -1023,21 +1023,21 @@ body {
         <div class="how__caption-icon" aria-hidden="true">
           <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M12 3v6"/><path d="M6 21v-6a6 6 0 0 1 12 0v6"/></svg>
         </div>
-        <div class="how__caption-title">Anchor: Waktu solat</div>
+        <div class="how__caption-title">Terikat pada waktu solat</div>
         <p class="how__caption-body">Setiap amalan terikat kepada waktu solat sebenar, bukan jam tetap. Waktu berubah, amalan mengikut.</p>
       </div>
       <div class="how__caption reveal" data-delay="2">
         <div class="how__caption-icon" aria-hidden="true">
           <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><rect x="3" y="10" width="18" height="4" rx="2"/><path d="M3 14h18"/></svg>
         </div>
-        <div class="how__caption-title">Window: Bukan loceng amaran</div>
+        <div class="how__caption-title">Tetingkap masa, bukan penggera</div>
         <p class="how__caption-body">Setiap amalan mempunyai tetingkap masa. Anda tahu berapa lama peluang itu ada, bukan sekadar terlepas.</p>
       </div>
       <div class="how__caption reveal" data-delay="3">
         <div class="how__caption-icon" aria-hidden="true">
           <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><line x1="12" y1="3" x2="12" y2="21"/><path d="M7 8l5-5 5 5"/></svg>
         </div>
-        <div class="how__caption-title">Needle: Saat ini</div>
+        <div class="how__caption-title">Jarum menunjukkan saat ini</div>
         <p class="how__caption-body">Jarum emas menunjukkan tepat di mana anda berada. Luncur kiri-kanan untuk merancang hari anda.</p>
       </div>
     </div>
@@ -1092,8 +1092,8 @@ body {
 
       <div class="auth__copy reveal" data-delay="2">
         <h2 class="auth__headline" id="auth-headline">Kandungan yang boleh dipercayai</h2>
-        <p class="auth__body">Setiap amalan dalam bMuslim disertai rujukan hadith yang sah, gred kesahihannya, dan pautan terus ke sumber. Tiada andaian, tiada rekaan.</p>
-        <p class="auth__note">Kami menggunakan sahaja teks Arab dan rujukan yang telah disahkan dari sumber yang muktabar. Data selamat untuk berkongsi dan beramal.</p>
+        <p class="auth__body">Kandungan bMuslim disusun daripada sumber yang muktabar. Amalan yang bersumberkan hadith dipaparkan bersama rujukan, gred kesahihan, dan pautan ke sumbernya.</p>
+        <p class="auth__note">Tiada kandungan agama yang direka oleh mesin. Setiap teks disemak secara manual sebelum dimuatkan ke dalam aplikasi.</p>
       </div>
     </div>
   </div>
@@ -1106,7 +1106,7 @@ body {
   <div class="container">
     <div class="dayband__inner">
       <div class="dayband__copy reveal">
-        <h2 class="dayband__headline" id="dayband-headline">Amalan yang sedar akan hari</h2>
+        <h2 class="dayband__headline" id="dayband-headline">Amalan mengikut hari dan tarikh</h2>
         <p class="dayband__body">Puasa Isnin dan Khamis, Ayyam al-Bidh, bacaan Al-Kahf setiap Jumaat. Semua muncul sendiri pada hari yang betul.</p>
       </div>
       <div class="dayband__panel reveal" data-delay="2">
@@ -1175,7 +1175,7 @@ body {
     <footer class="footer-bar">
       <div>
         <div class="footer-bar__wordmark">b<span>Muslim</span></div>
-        <div class="footer-bar__meta">Dibina untuk Malaysia &middot; Data JAKIM</div>
+        <div class="footer-bar__meta">Dibina untuk Malaysia &middot; Waktu solat JAKIM &middot; Pratonton reka bentuk dengan data contoh</div>
       </div>
       <div class="footer-bar__right">
         <a href="onboarding.html" class="footer-link">Pengenalan</a>
@@ -1277,14 +1277,25 @@ body {
   });
   track.appendChild(deedLane);
 
-  /* Position needle */
-  var needleX = hToXMini(NOW);
-  needle.style.left = needleX + 'px';
-  nChip.textContent = bmTime.fmt(NOW);
+  /* The needle lives at the visual centre of the viewport; its time is
+     always derived from the actual scroll position, so they cannot diverge. */
+  needle.style.left = '50%';
+  function miniCenterHour() {
+    return WIN_START + (scroll.scrollLeft + scroll.clientWidth / 2) / MINI_PPH;
+  }
+  function syncMiniChip() {
+    nChip.textContent = bmTime.fmt(miniCenterHour());
+  }
 
-  /* Centre scroll on needle */
-  var scrollerW = scroll.offsetWidth || 340;
-  scroll.scrollLeft = needleX - scrollerW / 2;
+  /* Centre scroll on NOW */
+  var needleX = hToXMini(NOW);
+  scroll.scrollLeft = needleX - scroll.clientWidth / 2;
+  syncMiniChip();
+  scroll.addEventListener('scroll', syncMiniChip, { passive: true });
+  window.addEventListener('resize', function () {
+    scroll.scrollLeft = hToXMini(NOW) - scroll.clientWidth / 2;
+    syncMiniChip();
+  });
 
   /* ─── One-shot gentle scrub animation ───────────────────────────────────── */
   var reduced = window.matchMedia && window.matchMedia('(prefers-reduced-motion: reduce)').matches;
@@ -1308,13 +1319,13 @@ body {
         : 1 - easeInOut((progress - 0.5) * 2);
 
       scroll.scrollLeft = baseScroll + phase * SCRUB_AMT * MINI_PPH;
-      nChip.textContent = bmTime.fmt(NOW + phase * SCRUB_AMT);
+      syncMiniChip();
 
       if (progress < 1) {
         requestAnimationFrame(animateScrub);
       } else {
         scroll.scrollLeft = baseScroll;
-        nChip.textContent = bmTime.fmt(NOW);
+        syncMiniChip();
       }
     }
 
@@ -1389,7 +1400,7 @@ body {
       aL.style.cssText = 'position:absolute;top:95px;left:' + hX(zohor.time) + 'px;' +
         'transform:translateX(-50%);font-size:9px;font-weight:800;letter-spacing:0.1em;' +
         'text-transform:uppercase;color:var(--accent);white-space:nowrap;pointer-events:none;';
-      aL.textContent = 'Anchor';
+      aL.textContent = 'Pautan';
       inner.appendChild(aL);
     }
 
@@ -1433,7 +1444,7 @@ body {
       wLbl.style.cssText = 'position:absolute;bottom:6px;left:' + midX + 'px;' +
         'transform:translateX(-50%);font-size:9px;font-weight:800;letter-spacing:0.1em;' +
         'text-transform:uppercase;color:var(--faint);white-space:nowrap;pointer-events:none;';
-      wLbl.textContent = 'Window';
+      wLbl.textContent = 'Tetingkap';
       inner.appendChild(wLbl);
 
       if (zp.act >= HOW_S && zp.act <= HOW_E) {
@@ -1441,7 +1452,7 @@ body {
         bLbl.style.cssText = 'position:absolute;bottom:6px;left:' + hX(zp.act) + 'px;' +
           'transform:translateX(-50%);font-size:9px;font-weight:800;letter-spacing:0.1em;' +
           'text-transform:uppercase;color:var(--accent);white-space:nowrap;pointer-events:none;';
-        bLbl.textContent = 'Block';
+        bLbl.textContent = 'Amalan';
         inner.appendChild(bLbl);
       }
     }
@@ -1463,19 +1474,28 @@ body {
     nL.style.cssText = 'position:absolute;bottom:6px;left:' + nx + 'px;' +
       'transform:translateX(-50%);font-size:9px;font-weight:800;letter-spacing:0.1em;' +
       'text-transform:uppercase;color:var(--gold);white-space:nowrap;pointer-events:none;';
-    nL.textContent = 'Needle';
+    nL.textContent = 'Jarum';
     inner.appendChild(nL);
   }
 
-  /* Build after layout is measured */
-  if (document.readyState === 'loading') {
-    document.addEventListener('DOMContentLoaded', buildHowStrip);
-  } else {
+  /* Build after layout is measured; rebuild when the viewport changes */
+  function mountHowStrip() {
+    var strip = document.getElementById('how-strip');
+    if (strip) { strip.innerHTML = ''; }
     buildHowStrip();
   }
+  if (document.readyState === 'loading') {
+    document.addEventListener('DOMContentLoaded', mountHowStrip);
+  } else {
+    mountHowStrip();
+  }
+  var _howResizeTimer = null;
+  window.addEventListener('resize', function () {
+    clearTimeout(_howResizeTimer);
+    _howResizeTimer = setTimeout(mountHowStrip, 150);
+  });
 
   /* ─── Scroll reveal ──────────────────────────────────────────────────────── */
-  bmReveal.init();
 
 })();
 </script>

@@ -25,13 +25,24 @@
   var NOW_H     = BM.config.now;         /* 15.0 */
   var S         = BM.strings;
 
-  var hourToX   = bmTime.makeHourToX(PPH, DAY_START);
-  var xToHour   = bmTime.makeXToHour(PPH, DAY_START);
-  var TRACK_W   = Math.round((DAY_END - DAY_START) * PPH);   /* total px width */
+  var hourToXRaw = bmTime.makeHourToX(PPH, DAY_START);
+  var xToHourRaw = bmTime.makeXToHour(PPH, DAY_START);
+  var TRACK_W   = Math.round((DAY_END - DAY_START) * PPH);   /* content px width */
+
+  /* Half-viewport spacer so the centre needle can reach 03:00 and 23:30.
+     Computed from the scroll viewport in buildTimeline(); all hour<->px
+     mapping goes through these wrappers so the offset stays consistent. */
+  var PAD = 0;
+  function hourToX(h) { return hourToXRaw(h) + PAD; }
+  function xToHour(x) { return xToHourRaw(x - PAD); }
+
+  var REDUCED = !!(window.matchMedia &&
+    window.matchMedia('(prefers-reduced-motion: reduce)').matches);
 
   /* Storage keys */
   var DONE_KEY  = 'bm-done-' + BM.config.dateGreg.replace(/\s/g, '');
   var SETT_KEY  = 'bm-settings';
+  var ADDED_KEY = 'bm-planner-added';
 
   /* ─── State ─────────────────────────────────────────────────────────────────── */
   var state = {
@@ -69,6 +80,19 @@
 
   function loadSettings() {
     try {
+      /* Migrate the legacy onboarding schema (bmuslim.settings with
+         zon/tidur/bangun/tahap/bahasa) into the app schema, once. */
+      var legacyRaw = localStorage.getItem('bmuslim.settings');
+      if (legacyRaw && !localStorage.getItem(SETT_KEY)) {
+        var legacy = JSON.parse(legacyRaw);
+        var migrated = {};
+        if (legacy.zon)    migrated.zone  = legacy.zon;
+        if (legacy.tidur)  migrated.sleep = legacy.tidur;
+        if (legacy.bangun) migrated.wake  = legacy.bangun;
+        if (legacy.tahap)  migrated.level = legacy.tahap;
+        if (legacy.bahasa) migrated.lang  = legacy.bahasa;
+        localStorage.setItem(SETT_KEY, JSON.stringify(Object.assign({}, state.settings, migrated)));
+      }
       var raw = localStorage.getItem(SETT_KEY);
       if (raw) {
         var parsed = JSON.parse(raw);
@@ -189,7 +213,8 @@
   /* ─── Timeline rendering ─────────────────────────────────────────────────── */
   function buildTimeline() {
     var track = els.tlTrack;
-    track.style.width = TRACK_W + 'px';
+    PAD = els.tlScroll ? Math.round(els.tlScroll.clientWidth / 2) : 0;
+    track.style.width = (TRACK_W + 2 * PAD) + 'px';
     track.innerHTML = '';
 
     /* Hour ticks + labels */
@@ -221,6 +246,16 @@
     laneLabelP.className = 'tl-lane-label';
     laneLabelP.textContent = 'Solat fardhu';
     prayerLane.appendChild(laneLabelP);
+
+    /* Fardhu windows: each prayer may be performed until the next one, so the
+       base lane shows that range as a faint track behind the time dots. */
+    BM.deeds.filter(function (d) { return d.ruling === 'fardh'; }).forEach(function (d) {
+      var winP = document.createElement('div');
+      winP.className = 'tl-window tl-window-prayer';
+      winP.style.left  = hourToX(d.windowStart) + 'px';
+      winP.style.width = bmTime.durationPx(d.windowStart, d.windowEnd, PPH) + 'px';
+      prayerLane.appendChild(winP);
+    });
 
     BM.prayers.forEach(function (prayer) {
       if (prayer.isSyuruk) {
@@ -293,6 +328,13 @@
         actEl.addEventListener('click', function () {
           var id = this.dataset.deedId;
           state.selectedDeedId = id;
+          /* Bring the needle to this deed so the selection is never rejected
+             for being outside the deed's window. */
+          var deed = null;
+          for (var i = 0; i < BM.deeds.length; i++) {
+            if (BM.deeds[i].id === id) { deed = BM.deeds[i]; break; }
+          }
+          if (deed) { scrollToHour(deed.act, !REDUCED); }
           renderDetail();
         });
         actEl.addEventListener('keydown', function (e) {
@@ -328,8 +370,8 @@
   function scrollToHour(h, animated) {
     if (!els.tlScroll) return;
     var target = hourToX(h) - els.tlScroll.clientWidth / 2;
-    target = Math.max(0, Math.min(target, TRACK_W - els.tlScroll.clientWidth));
-    if (animated) {
+    target = Math.max(0, Math.min(target, TRACK_W + 2 * PAD - els.tlScroll.clientWidth));
+    if (animated && !REDUCED) {
       els.tlScroll.style.scrollBehavior = 'smooth';
       els.tlScroll.scrollLeft = target;
       els.tlScroll.style.scrollBehavior = '';
@@ -347,6 +389,21 @@
     updateNeedleChip();
     updateBackToNow();
     updateDetail();
+    announceNeedle();
+  }
+
+  /* Screen-reader announcement: only after the scrub settles, so the
+     announcement queue is not flooded during movement. */
+  var _liveRegion = null;
+  var _announceTimer = null;
+  function announceNeedle() {
+    if (!_liveRegion) return;
+    clearTimeout(_announceTimer);
+    _announceTimer = setTimeout(function () {
+      var current = deedsAtNow();
+      var what = current.length ? current.map(function (d) { return d.title; }).join(', ') : S.noBlocksNeedle;
+      _liveRegion.textContent = bmTime.fmt(state.needleHour) + '. ' + what;
+    }, 700);
   }
 
   function updateNeedleChip() {
@@ -410,30 +467,8 @@
       startMomentum(sc);
     });
 
-    /* Touch drag */
-    sc.addEventListener('touchstart', function (e) {
-      _isDragging   = true;
-      _lastPointerX = e.touches[0].clientX;
-      _momentum     = 0;
-      _lastDragTime = Date.now();
-    }, { passive: true });
-
-    sc.addEventListener('touchmove', function (e) {
-      if (!_isDragging) return;
-      var dx  = _lastPointerX - e.touches[0].clientX;
-      var now = Date.now();
-      var dt  = now - _lastDragTime || 1;
-      _lastDragTime  = now;
-      _lastPointerX  = e.touches[0].clientX;
-      sc.scrollLeft += dx;
-      _momentum = dx / dt * 16;
-      syncNeedleFromScroll();
-    }, { passive: true });
-
-    sc.addEventListener('touchend', function () {
-      _isDragging = false;
-      startMomentum(sc);
-    });
+    /* Touch: native horizontal scrolling only (touch-action: pan-x in CSS).
+       The scroll listener below keeps the needle in sync. */
 
     /* Wheel / trackpad */
     sc.addEventListener('wheel', function (e) {
@@ -679,7 +714,7 @@
 
     var html = '';
     BM.planner.weekDays.forEach(function (day) {
-      html += '<div class="week-cell' + (day.active ? ' week-cell-active' : '') + '">';
+      html += '<div class="week-cell' + (day.active ? ' week-cell-active' : '') + '" role="listitem">';
       html +=   '<div class="week-cell-name">' + day.short + '</div>';
       html +=   '<div class="week-cell-num">' + day.num + '</div>';
       if (day.fast) {
@@ -692,10 +727,14 @@
     var suggestEl = qsel('#suggestions-grid');
     if (!suggestEl) return;
 
+    var added = {};
+    try { added = JSON.parse(localStorage.getItem(ADDED_KEY)) || {}; } catch (err) { added = {}; }
+
     html = '';
     BM.planner.suggestions.forEach(function (s) {
       var isGold = s.type === 'Sawm';
-      html += '<div class="suggestion-card card">';
+      var isAdded = !!added[s.id];
+      html += '<div class="suggestion-card card" role="listitem">';
       html +=   '<div class="icon-box' + (isGold ? ' icon-box-gold' : '') + '">';
       html +=     bmIcons.forType(s.type);
       html +=   '</div>';
@@ -703,10 +742,24 @@
       html +=     '<div class="suggestion-title">' + s.title + '</div>';
       html +=     '<div class="suggestion-desc">' + s.desc + '</div>';
       html +=   '</div>';
-      html +=   '<button class="suggestion-add btn btn-ghost" aria-label="Tambah ' + s.title + '">' + bmIcons.plus + '</button>';
+      html +=   '<button class="suggestion-add btn btn-ghost' + (isAdded ? ' added' : '') + '"' +
+                ' data-suggestion-id="' + s.id + '" aria-pressed="' + isAdded + '"' +
+                ' aria-label="Tambah ' + s.title + '">' +
+                (isAdded ? bmIcons.check : bmIcons.plus) + '</button>';
       html += '</div>';
     });
     suggestEl.innerHTML = html;
+
+    suggestEl.querySelectorAll('.suggestion-add').forEach(function (btn) {
+      btn.addEventListener('click', function () {
+        var id = this.dataset.suggestionId;
+        added[id] = !added[id];
+        try { localStorage.setItem(ADDED_KEY, JSON.stringify(added)); } catch (err) { /* private mode */ }
+        this.classList.toggle('added', added[id]);
+        this.setAttribute('aria-pressed', added[id] ? 'true' : 'false');
+        this.innerHTML = added[id] ? bmIcons.check : bmIcons.plus;
+      });
+    });
   }
 
   /* ─── Tetapan view ────────────────────────────────────────────────────────── */
@@ -715,6 +768,12 @@
     var zoneEl  = qsel('#setting-zone');
     var sleepEl = qsel('#setting-sleep');
     var wakeEl  = qsel('#setting-wake');
+    if (zoneEl && !zoneEl.dataset.populated) {
+      zoneEl.innerHTML = BM.zones.map(function (z) {
+        return '<option value="' + z.code + '">' + z.code + ': ' + z.area + '</option>';
+      }).join('');
+      zoneEl.dataset.populated = '1';
+    }
     if (zoneEl)  zoneEl.value  = state.settings.zone;
     if (sleepEl) sleepEl.value = state.settings.sleep;
     if (wakeEl)  wakeEl.value  = state.settings.wake;
@@ -722,13 +781,17 @@
     /* Level segmented */
     var levelBtns = document.querySelectorAll('.setting-level-btn');
     levelBtns.forEach(function (btn) {
-      btn.classList.toggle('active', btn.dataset.value === state.settings.level);
+      var on = btn.dataset.value === state.settings.level;
+      btn.classList.toggle('active', on);
+      btn.setAttribute('aria-pressed', on ? 'true' : 'false');
     });
 
     /* Lang segmented */
     var langBtns = document.querySelectorAll('.setting-lang-btn');
     langBtns.forEach(function (btn) {
-      btn.classList.toggle('active', btn.dataset.value === state.settings.lang);
+      var on = btn.dataset.value === state.settings.lang;
+      btn.classList.toggle('active', on);
+      btn.setAttribute('aria-pressed', on ? 'true' : 'false');
     });
 
     /* Notification toggles */
@@ -744,7 +807,11 @@
     });
   }
 
+  var _tetapanBound = false;
   function initTetapanEvents() {
+    if (_tetapanBound) return;
+    _tetapanBound = true;
+
     /* Zone */
     var zoneEl = qsel('#setting-zone');
     if (zoneEl) {
@@ -776,7 +843,9 @@
         state.settings.level = this.dataset.value;
         saveSettings();
         document.querySelectorAll('.setting-level-btn').forEach(function (b) {
-          b.classList.toggle('active', b.dataset.value === state.settings.level);
+          var on = b.dataset.value === state.settings.level;
+          b.classList.toggle('active', on);
+          b.setAttribute('aria-pressed', on ? 'true' : 'false');
         });
       });
     });
@@ -787,7 +856,9 @@
         state.settings.lang = this.dataset.value;
         saveSettings();
         document.querySelectorAll('.setting-lang-btn').forEach(function (b) {
-          b.classList.toggle('active', b.dataset.value === state.settings.lang);
+          var on = b.dataset.value === state.settings.lang;
+          b.classList.toggle('active', on);
+          b.setAttribute('aria-pressed', on ? 'true' : 'false');
         });
       });
     });
@@ -854,6 +925,7 @@
     window.addEventListener('hashchange', function () {
       var view = getView();
       showView(view);
+      if (view === 'hari-ini')  ensureTimelineGeometry();
       if (view === 'perancang') renderPerancang();
       if (view === 'tetapan')   { renderTetapan(); initTetapanEvents(); }
     });
@@ -898,6 +970,31 @@
     renderPerancang();
     renderTetapan();
     initTetapanEvents();
+
+    /* Screen-reader live region (see announceNeedle) */
+    _liveRegion = document.createElement('div');
+    _liveRegion.className = 'sr-only';
+    _liveRegion.setAttribute('aria-live', 'polite');
+    document.body.appendChild(_liveRegion);
+
+    /* Keep needle geometry honest across resizes / orientation changes */
+    var _resizeTimer = null;
+    window.addEventListener('resize', function () {
+      clearTimeout(_resizeTimer);
+      _resizeTimer = setTimeout(ensureTimelineGeometry, 150);
+    });
+  }
+
+  /* Rebuild the track when the viewport half-width no longer matches PAD
+     (resize, orientation change, or first reveal of a view built while hidden). */
+  function ensureTimelineGeometry() {
+    if (!els.tlScroll) return;
+    var want = Math.round(els.tlScroll.clientWidth / 2);
+    if (want === 0 || want === PAD) return;
+    var keep = state.needleHour;
+    buildTimeline();
+    scrollToHour(keep, false);
+    syncNeedleFromScroll();
   }
 
   /* Wait for DOM */

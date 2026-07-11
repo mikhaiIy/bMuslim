@@ -154,7 +154,7 @@
       arabic: null,
       transliteration: null,
       translation: null,
-      description: 'Zikir dan doa petang yang dibaca selepas Asar hingga sebelum Maghrib, sebagai penutup hari.',
+      description: 'Zikir dan doa petang, dibaca selepas Asar hingga sebelum Maghrib.',
       citation: null
     },
     {
@@ -196,7 +196,7 @@
       arabic: null,
       transliteration: null,
       translation: null,
-      description: 'Membaca Surah Al-Mulk (67) sebelum tidur. Rasulullah SAW tidak tidur sebelum membacanya.',
+      description: 'Membaca Surah Al-Mulk (surah ke-67) sebelum tidur.',
       citation: null
     }
   ];
@@ -209,7 +209,7 @@
     type:    'Sawm',
     ruling:  'sunnah',
     arabic:  null,
-    description: 'Puasa sunat hari Khamis mengikut amalan Nabi SAW.',
+    description: 'Puasa sunat pada hari Khamis.',
     citation: null
   };
 
@@ -222,7 +222,7 @@
       type: 'Dhikr',
       ruling: 'sunnah',
       arabic: null,
-      description: 'Membaca Astaghfirullah atau istighfar yang lebih panjang pada bila-bila masa, terutama selepas solat.',
+      description: 'Memohon keampunan pada bila-bila masa sepanjang hari.',
       citation: null
     },
     {
@@ -231,7 +231,7 @@
       type: 'Dhikr',
       ruling: 'sunnah',
       arabic: null,
-      description: 'Berselawat ke atas Nabi Muhammad SAW pada setiap masa, terutama hari Jumaat.',
+      description: 'Berselawat ke atas Nabi Muhammad SAW pada bila-bila masa.',
       citation: null
     },
     {
@@ -240,7 +240,7 @@
       type: 'Sadaqah',
       ruling: 'sunnah',
       arabic: null,
-      description: 'Bersedekah dalam apa jua bentuk: harta, tenaga, atau sekadar senyuman.',
+      description: 'Memberi sedekah dalam apa jua bentuk.',
       citation: null
     }
   ];
@@ -287,6 +287,30 @@
       }
     ]
   };
+
+
+  /* ─── JAKIM prayer-time zones ─────────────────────────────────────────────── */
+  /* Representative subset for the design prototype; both the onboarding and the
+     settings selects are populated from this single list. */
+  var zones = [
+    { code: 'WLY01', area: 'Kuala Lumpur, Putrajaya' },
+    { code: 'WLY02', area: 'Labuan' },
+    { code: 'SGR01', area: 'Gombak, Petaling, Sepang, Hulu Langat, Hulu Selangor, Shah Alam' },
+    { code: 'SGR02', area: 'Kuala Selangor, Sabak Bernam' },
+    { code: 'SGR03', area: 'Klang, Kuala Langat' },
+    { code: 'JHR02', area: 'Johor Bahru, Kota Tinggi, Mersing, Kulai' },
+    { code: 'KDH01', area: 'Kota Setar, Kubang Pasu, Pokok Sena' },
+    { code: 'KTN01', area: 'Kota Bharu dan kebanyakan daerah Kelantan' },
+    { code: 'MLK01', area: 'Seluruh Negeri Melaka' },
+    { code: 'NGS03', area: 'Seremban, Port Dickson' },
+    { code: 'PHG02', area: 'Kuantan, Pekan, Muadzam Shah' },
+    { code: 'PLS01', area: 'Kangar, Padang Besar, Arau' },
+    { code: 'PNG01', area: 'Seluruh Negeri Pulau Pinang' },
+    { code: 'PRK02', area: 'Ipoh, Kuala Kangsar, Batu Gajah, Kampar' },
+    { code: 'SBH07', area: 'Kota Kinabalu, Penampang, Papar, Tuaran' },
+    { code: 'SWK08', area: 'Kuching, Bau, Lundu' },
+    { code: 'TRG01', area: 'Kuala Terengganu, Marang, Kuala Nerus' }
+  ];
 
   /* ─── Shared UI strings ────────────────────────────────────────────────────── */
   var strings = {
@@ -336,7 +360,7 @@
 
     /* Citation links */
     viewSunnah:      'Lihat di sunnah.com',
-    viewFatwa:       'Fatwa berkaitan (Mufti WP)',
+    viewFatwa:       'Portal e-Fatwa',
 
     /* Planner */
     plannerMonth:    'Jun 2026',
@@ -407,6 +431,7 @@
   window.BM = {
     config:    config,
     prayers:   prayers,
+    zones:     zones,
     deeds:     deeds,
     dayBanner: dayBanner,
     anytime:   anytime,

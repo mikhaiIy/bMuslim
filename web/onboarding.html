@@ -12,6 +12,7 @@
   prevent FOUC. bmTheme.init() fires synchronously inside the IIFE.
 -->
 <script src="assets/shared.js"></script>
+<script src="assets/data.js" defer></script>
 <style>
 /* ── Page shell ─────────────────────────────────────────────────────────────── */
 html, body {
@@ -618,95 +619,9 @@ input[type="time"] {
       <div class="field">
         <label for="sel-zon">Zon (JAKIM)</label>
         <select id="sel-zon" aria-describedby="zon-hint">
-          <optgroup label="Wilayah Persekutuan">
-            <option value="WLY01">WLY01: Kuala Lumpur, Putrajaya</option>
-            <option value="WLY02">WLY02: Labuan</option>
-          </optgroup>
-          <optgroup label="Johor">
-            <option value="JHR01">JHR01: Pulau Aur, Pulau Pemanggil</option>
-            <option value="JHR02">JHR02: Johor Bahru, Kota Tinggi, Mersing</option>
-            <option value="JHR03">JHR03: Kluang, Pontian</option>
-            <option value="JHR04">JHR04: Batu Pahat, Muar, Segamat, Gemas</option>
-          </optgroup>
-          <optgroup label="Kedah">
-            <option value="KDH01">KDH01: Kota Setar, Kubang Pasu, Pokok Sena</option>
-            <option value="KDH02">KDH02: Kuala Muda, Yan, Sik</option>
-            <option value="KDH03">KDH03: Pendang, Baling</option>
-            <option value="KDH04">KDH04: Bandar Baharu, Kulim</option>
-            <option value="KDH05">KDH05: Langkawi</option>
-            <option value="KDH06">KDH06: Padang Terap</option>
-            <option value="KDH07">KDH07: Gunung Jerai</option>
-          </optgroup>
-          <optgroup label="Kelantan">
-            <option value="KTN01">KTN01: Kota Bharu, Bachok, Pasir Puteh, Tumpat</option>
-            <option value="KTN03">KTN03: Gua Musang, Kuala Krai, Jeli</option>
-          </optgroup>
-          <optgroup label="Melaka">
-            <option value="MLK01">MLK01: Seluruh Melaka</option>
-          </optgroup>
-          <optgroup label="Negeri Sembilan">
-            <option value="NGS01">NGS01: Jempol, Tampin</option>
-            <option value="NGS02">NGS02: Jelebu, Kuala Pilah, Rembau</option>
-            <option value="NGS03">NGS03: Port Dickson, Seremban</option>
-          </optgroup>
-          <optgroup label="Pahang">
-            <option value="PHG01">PHG01: Pulau Tioman</option>
-            <option value="PHG02">PHG02: Pekan, Rompin, Muadzam Shah</option>
-            <option value="PHG03">PHG03: Maran, Chenor, Temerloh, Bera</option>
-            <option value="PHG04">PHG04: Bentong, Raub, Jerantut</option>
-            <option value="PHG05">PHG05: Kuantan, Lipis, Gua Musang</option>
-          </optgroup>
-          <optgroup label="Perak">
-            <option value="PRK01">PRK01: Tapah, Slim River, Tanjung Malim</option>
-            <option value="PRK02">PRK02: Kuala Kangsar, S. Perak, Ipoh</option>
-            <option value="PRK03">PRK03: Lenggong, Pengkalan Hulu, Grik</option>
-            <option value="PRK04">PRK04: Temengor, Belum</option>
-            <option value="PRK05">PRK05: Teluk Intan, Hilir Perak</option>
-            <option value="PRK06">PRK06: Manjung, Lumut, Sitiawan, Pangkor</option>
-            <option value="PRK07">PRK07: Hulu Perak, Gerik</option>
-            <option value="PRK08">PRK08: Larut, Matang, Selama</option>
-          </optgroup>
-          <optgroup label="Perlis">
-            <option value="PLS01">PLS01: Seluruh Perlis</option>
-          </optgroup>
-          <optgroup label="Pulau Pinang">
-            <option value="PNG01">PNG01: Seberang Perai Utara, Kepala Batas</option>
-            <option value="PNG02">PNG02: Pulau Pinang, Seberang Perai Selatan</option>
-          </optgroup>
-          <optgroup label="Sabah">
-            <option value="SBH01">SBH01: Kota Kinabalu, Papar, Penampang</option>
-            <option value="SBH02">SBH02: Ranau, Kota Belud, Tuaran, Kota Marudu</option>
-            <option value="SBH03">SBH03: Kudat, Pitas, Pulau Banggi</option>
-            <option value="SBH04">SBH04: Sandakan, Kinabatangan, Beluran</option>
-            <option value="SBH05">SBH05: Tawau, Semporna, Lahad Datu</option>
-            <option value="SBH06">SBH06: Keningau, Tambunan, Nabawan</option>
-            <option value="SBH07">SBH07: Beaufort, Kuala Penyu, Sipitang</option>
-          </optgroup>
-          <optgroup label="Sarawak">
-            <option value="SWK01">SWK01: Limbang, Lawas, Sundar, Trusan</option>
-            <option value="SWK02">SWK02: Miri, Niah, Bekenu, Sibuti</option>
-            <option value="SWK03">SWK03: Marudi, Baram, Ulu Baram</option>
-            <option value="SWK04">SWK04: Bintulu, Tatau, Sebauh</option>
-            <option value="SWK05">SWK05: Kapit, Song, Kanowit</option>
-            <option value="SWK06">SWK06: Sibu, Dalat, Mukah, Oya</option>
-            <option value="SWK07">SWK07: Sarikei, Julau, Maradong</option>
-            <option value="SWK08">SWK08: Sri Aman, Lubok Antu, Betong</option>
-            <option value="SWK09">SWK09: Kuching, Samarahan, Simunjan, Serian</option>
-          </optgroup>
-          <optgroup label="Selangor">
-            <option value="SGR01">SGR01: Gombak, Petaling, Sepang, Hulu Langat</option>
-            <option value="SGR02">SGR02: Kuala Selangor, Sabak Bernam</option>
-            <option value="SGR03">SGR03: Klang, Shah Alam, Kuala Langat</option>
-            <option value="SGR04">SGR04: Hulu Selangor</option>
-          </optgroup>
-          <optgroup label="Terengganu">
-            <option value="TRG01">TRG01: Kuala Terengganu, Marang, Kuala Nerus</option>
-            <option value="TRG02">TRG02: Besut, Setiu</option>
-            <option value="TRG03">TRG03: Hulu Terengganu</option>
-            <option value="TRG04">TRG04: Dungun, Kemaman</option>
-          </optgroup>
+          <!-- Populated from BM.zones (shared JAKIM list) -->
         </select>
-        <p class="field-hint" id="zon-hint">Data waktu solat bersumber dari Jabatan Kemajuan Islam Malaysia (JAKIM), dikemaskini setiap hari.</p>
+        <p class="field-hint" id="zon-hint">Waktu solat bersumber daripada Jabatan Kemajuan Islam Malaysia (JAKIM).</p>
       </div>
     </div>
 
@@ -766,7 +681,7 @@ input[type="time"] {
   <div class="step-panel" id="step-3" role="group" aria-labelledby="title-3">
     <span class="step-eyebrow">Langkah 4 daripada 4</span>
     <h1 class="step-title" id="title-3" tabindex="-1">Tahap amalan</h1>
-    <p class="step-desc">Pilih sesuai dengan kebiasaan harian anda sekarang. Anda boleh tukar ini kemudian dalam Tetapan.</p>
+    <p class="step-desc">Pilih mengikut kebiasaan harian anda sekarang. Anda boleh menukarnya kemudian dalam Tetapan.</p>
 
     <div class="sel-grid" role="radiogroup" aria-labelledby="title-3">
       <button
@@ -834,16 +749,18 @@ input[type="time"] {
   'use strict';
 
   /* ── Constants ─────────────────────────────────────────────────────────── */
-  var SETTINGS_KEY = 'bmuslim.settings';
+  /* Same key + schema the app reads (see assets/app.js) */
+  var SETTINGS_KEY = 'bm-settings';
+  var STEP_KEY     = 'bm-onboarding-step';
   var TOTAL_STEPS  = 4;
 
   /* ── Defaults ───────────────────────────────────────────────────────────── */
   var DEFAULTS = {
-    lang:   'bm',
-    zon:    'WLY01',
-    tidur:  '23:00',
-    bangun: '05:30',
-    tahap:  'pemula'
+    lang:  'bm',
+    zone:  'WLY01',
+    sleep: '23:00',
+    wake:  '05:30',
+    level: 'pemula'
   };
 
   /* ── Load saved settings ────────────────────────────────────────────────── */
@@ -863,11 +780,24 @@ input[type="time"] {
 
   /* ── Save settings ──────────────────────────────────────────────────────── */
   function save() {
-    try { localStorage.setItem(SETTINGS_KEY, JSON.stringify(settings)); } catch (e) {}
+    try {
+      /* Merge over whatever the app has already stored (notif toggles etc.) */
+      var existing = {};
+      try { existing = JSON.parse(localStorage.getItem(SETTINGS_KEY)) || {}; } catch (e2) {}
+      localStorage.setItem(SETTINGS_KEY, JSON.stringify(Object.assign(existing, settings)));
+      localStorage.setItem(STEP_KEY, String(currentStep));
+    } catch (e) {}
   }
 
-  /* ── Step state ─────────────────────────────────────────────────────────── */
+  /* ── Step state (resumes where the user left off) ───────────────────────── */
   var currentStep = 0;
+  try {
+    var savedStep = parseInt(localStorage.getItem(STEP_KEY), 10);
+    if (savedStep >= 0 && savedStep < TOTAL_STEPS) { currentStep = savedStep; }
+  } catch (e) {}
+
+  var REDUCED = !!(window.matchMedia &&
+    window.matchMedia('(prefers-reduced-motion: reduce)').matches);
 
   /* ── Selection card logic ────────────────────────────────────────────────── */
   function setGroup(group, value) {
@@ -900,7 +830,7 @@ input[type="time"] {
     var val = sibs[next].getAttribute('data-value');
     setGroup(group, val);
     if (group === 'lang')  { settings.lang  = val; }
-    if (group === 'tahap') { settings.tahap = val; }
+    if (group === 'tahap') { settings.level = val; }
     save();
     sibs[next].focus();
   }
@@ -909,13 +839,13 @@ input[type="time"] {
   function collect(step) {
     if (step === 1) {
       var sel = document.getElementById('sel-zon');
-      if (sel) { settings.zon = sel.value; }
+      if (sel) { settings.zone = sel.value; }
     }
     if (step === 2) {
       var t = document.getElementById('input-tidur');
       var b = document.getElementById('input-bangun');
-      if (t && t.value) { settings.tidur  = t.value; }
-      if (b && b.value) { settings.bangun = b.value; }
+      if (t && t.value) { settings.sleep = t.value; }
+      if (b && b.value) { settings.wake  = b.value; }
     }
     save();
   }
@@ -928,22 +858,24 @@ input[type="time"] {
     }
     if (step === 1) {
       var sel = document.getElementById('sel-zon');
-      if (sel) { sel.value = settings.zon; }
+      if (sel) { sel.value = settings.zone; }
     }
     if (step === 2) {
       var t = document.getElementById('input-tidur');
       var b = document.getElementById('input-bangun');
-      if (t) { t.value = settings.tidur;  }
-      if (b) { b.value = settings.bangun; }
+      if (t) { t.value = settings.sleep; }
+      if (b) { b.value = settings.wake;  }
     }
     if (step === 3) {
-      setGroup('tahap', settings.tahap);
-      bindRadioGroup('tahap', 'tahap');
+      setGroup('tahap', settings.level);
+      bindRadioGroup('tahap', 'level');
     }
   }
 
   function bindRadioGroup(group, settingsKey) {
     document.querySelectorAll('[data-group="' + group + '"]').forEach(function (card) {
+      if (card.dataset.bound) { return; }
+      card.dataset.bound = '1';
       card.addEventListener('click', function () {
         var val = card.getAttribute('data-value');
         setGroup(group, val);
@@ -974,12 +906,13 @@ input[type="time"] {
     updateDots(n);
     restore(n);
 
-    /* Bind per-step live listeners */
+    /* Bind per-step live listeners (once) */
     if (n === 1) {
       var sel = document.getElementById('sel-zon');
-      if (sel) {
+      if (sel && !sel.dataset.bound) {
+        sel.dataset.bound = '1';
         sel.addEventListener('change', function () {
-          settings.zon = sel.value;
+          settings.zone = sel.value;
           save();
         });
       }
@@ -987,10 +920,11 @@ input[type="time"] {
     if (n === 2) {
       ['input-tidur', 'input-bangun'].forEach(function (id) {
         var el = document.getElementById(id);
-        if (el) {
+        if (el && !el.dataset.bound) {
+          el.dataset.bound = '1';
           el.addEventListener('change', function () {
-            if (id === 'input-tidur')  { settings.tidur  = el.value; }
-            if (id === 'input-bangun') { settings.bangun = el.value; }
+            if (id === 'input-tidur')  { settings.sleep = el.value; }
+            if (id === 'input-bangun') { settings.wake  = el.value; }
             save();
           });
         }
@@ -1010,7 +944,8 @@ input[type="time"] {
     if (currentStep < TOTAL_STEPS - 1) {
       currentStep++;
       showStep(currentStep);
-      window.scrollTo({ top: 0, behavior: 'smooth' });
+      save();
+      window.scrollTo({ top: 0, behavior: REDUCED ? 'auto' : 'smooth' });
     } else {
       settings.onboarded = true;
       save();
@@ -1023,7 +958,8 @@ input[type="time"] {
     if (currentStep > 0) {
       currentStep--;
       showStep(currentStep);
-      window.scrollTo({ top: 0, behavior: 'smooth' });
+      save();
+      window.scrollTo({ top: 0, behavior: REDUCED ? 'auto' : 'smooth' });
     }
   }
 
@@ -1046,7 +982,20 @@ input[type="time"] {
   }
 
   /* ── Init ────────────────────────────────────────────────────────────────── */
-  showStep(0);
+  function populateZones() {
+    var sel = document.getElementById('sel-zon');
+    if (!sel || !window.BM || sel.options.length) { return; }
+    sel.innerHTML = window.BM.zones.map(function (z) {
+      return '<option value="' + z.code + '">' + z.code + ': ' + z.area + '</option>';
+    }).join('');
+    sel.value = settings.zone;
+  }
+  if (document.readyState === 'loading') {
+    document.addEventListener('DOMContentLoaded', populateZones);
+  } else {
+    populateZones();
+  }
+  showStep(currentStep);
 
 }());
 </script>

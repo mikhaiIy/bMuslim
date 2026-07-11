@@ -227,6 +227,7 @@
       cursor: grab;
       -webkit-overflow-scrolling: touch;
       overscroll-behavior-x: contain;
+      touch-action: pan-x;
       /* Height = prayer lane + deed lane(s) + ticks area */
       height: 232px;
     }
@@ -393,6 +394,15 @@
       background: var(--track);
       border: 1.5px dashed rgba(var(--accent-rgb), 0.28);
       pointer-events: none;
+    }
+
+    /* Fardhu window on the base lane: quieter than deed windows */
+    .tl-window-prayer {
+      top: 10px;
+      height: 34px;
+      border: none;
+      background: rgba(var(--accent-rgb), 0.05);
+      border-radius: 10px;
     }
 
     /* Act markers */
@@ -909,6 +919,13 @@
       max-width: 640px;
     }
 
+    .tetapan-note {
+      margin-top: var(--sp-6);
+      font-size: var(--text-sm);
+      color: var(--muted);
+      line-height: 1.6;
+    }
+
     .tetapan-title {
       font-size: var(--text-2xl);
       font-weight: 800;
@@ -1000,6 +1017,14 @@
       .nav-pill {
         font-size: 11px;
         padding: 6px 10px;
+      }
+
+      /* Below 480px the row cannot hold everything: drop the wordmark
+         (the app is the whole screen) and tighten the actions cluster. */
+      @media (max-width: 479px) {
+        .topbar-wordmark { display: none; }
+        .topbar-actions  { gap: var(--sp-2); }
+        #progress-ring   { transform: scale(0.82); transform-origin: right center; }
       }
 
       .app-lower {
@@ -1157,14 +1182,14 @@
         <!-- Detail panel -->
         <aside class="detail-panel" aria-label="Butiran amalan">
           <div class="detail-panel-head">
-            <div id="detail-now-label" aria-live="polite" aria-atomic="true">Sekarang · 15:00</div>
+            <div id="detail-now-label">Sekarang · 15:00</div>
           </div>
 
           <!-- Deed selector (hidden when single deed, shown by JS) -->
           <div id="detail-selector" hidden></div>
 
           <!-- Deed detail content (injected by app.js) -->
-          <div id="detail-content" aria-live="polite" aria-atomic="false">
+          <div id="detail-content">
             <!-- Placeholder — JS overwrites -->
             <p class="detail-empty">Memuatkan amalan...</p>
           </div>
@@ -1233,24 +1258,7 @@
         <div class="setting-row">
           <label class="setting-label" for="setting-zone">Zon waktu solat</label>
           <select id="setting-zone" name="zone" autocomplete="off">
-            <option value="WLY01">WLY01: Kuala Lumpur &amp; Putrajaya</option>
-            <option value="SGR01">SGR01: Gombak, Hulu Langat, Hulu Selangor, Sepang</option>
-            <option value="SGR02">SGR02: Kuala Selangor, Sabak Bernam</option>
-            <option value="SGR03">SGR03: Klang, Shah Alam</option>
-            <option value="PHG01">PHG01: Pulau Tioman</option>
-            <option value="PHG02">PHG02: Kuantan, Pekan, Rompin, Muadzam Shah</option>
-            <option value="JHR01">JHR01: Pulau Aur, Pulau Pemanggil</option>
-            <option value="JHR02">JHR02: Johor Bahru, Kota Tinggi, Mersing</option>
-            <option value="KDH01">KDH01: Kota Setar, Kubang Pasu, Pokok Sena</option>
-            <option value="KLN01">KLN01: Kelantan</option>
-            <option value="MLK01">MLK01: Melaka</option>
-            <option value="NGS01">NGS01: Negeri Sembilan</option>
-            <option value="PNG01">PNG01: Pulau Pinang</option>
-            <option value="PRK01">PRK01: Perak Tengah</option>
-            <option value="PLS01">PLS01: Perlis</option>
-            <option value="SBH01">SBH01: Kota Kinabalu</option>
-            <option value="SWK01">SWK01: Kuching</option>
-            <option value="TRG01">TRG01: Terengganu</option>
+            <!-- Populated from BM.zones (shared JAKIM list) -->
           </select>
         </div>
       </div>
@@ -1380,6 +1388,10 @@
           </label>
         </div>
       </div>
+
+      <p class="tetapan-note">Pratonton reka bentuk. Garis masa memaparkan data hari
+        contoh (Khamis, 28 Jun 2026, zon WLY01); tetapan anda disimpan tetapi belum
+        mengubah data contoh ini.</p>
 
     </section>
 
