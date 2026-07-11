@@ -2,8 +2,10 @@ package com.bmuslim.app.ui.timeline
 
 import android.animation.ValueAnimator
 import android.graphics.Paint
-import androidx.compose.animation.Crossfade
+import androidx.activity.compose.BackHandler
 import androidx.compose.animation.animateColorAsState
+import androidx.compose.animation.core.Animatable
+import androidx.compose.animation.core.CubicBezierEasing
 import androidx.compose.animation.core.animateFloatAsState
 import androidx.compose.animation.core.tween
 import androidx.compose.foundation.BorderStroke
@@ -22,6 +24,7 @@ import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.navigationBarsPadding
+import androidx.compose.foundation.layout.offset
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.statusBarsPadding
@@ -29,21 +32,29 @@ import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.foundation.focusable
 import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableIntStateOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.saveable.listSaver
 import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.rememberUpdatedState
 import androidx.compose.runtime.setValue
+import androidx.compose.runtime.withFrameNanos
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.alpha
+import androidx.compose.ui.draw.clipToBounds
+import androidx.compose.ui.focus.FocusRequester
+import androidx.compose.ui.focus.focusRequester
 import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.geometry.Size
 import androidx.compose.ui.graphics.Brush
@@ -58,6 +69,7 @@ import androidx.compose.ui.input.pointer.pointerInput
 import androidx.compose.ui.semantics.ProgressBarRangeInfo
 import androidx.compose.ui.semantics.Role
 import androidx.compose.ui.semantics.contentDescription
+import androidx.compose.ui.semantics.clearAndSetSemantics
 import androidx.compose.ui.semantics.progressBarRangeInfo
 import androidx.compose.ui.semantics.role
 import androidx.compose.ui.semantics.semantics
@@ -67,14 +79,16 @@ import androidx.compose.ui.text.font.FontFamily
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.tooling.preview.Preview
+import androidx.compose.ui.platform.LocalView
+import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.bmuslim.app.ui.theme.BMuslimTheme
 import kotlin.math.PI
 import kotlin.math.cos
-import kotlin.math.min
 import kotlin.math.roundToInt
 import kotlin.math.sin
+import kotlinx.coroutines.launch
 
 private const val DayMinutes = 24 * 60
 private const val NowMinute = 15 * 60
@@ -120,6 +134,7 @@ private val paletteStops = listOf(
 fun TimelineScreen(
     modifier: Modifier = Modifier,
     initialMinute: Int = NowMinute,
+    initialPresentation: HomePresentation = HomePresentation.Glance,
 ) {
     val deeds = remember { sampleDeeds() }
     val dayStates = remember { sampleDayStates() }
@@ -127,6 +142,8 @@ fun TimelineScreen(
         stateSaver = listSaver(save = { it }, restore = { it }),
     ) { mutableStateOf(emptyList<String>()) }
     var selectedMinute by rememberSaveable { mutableIntStateOf(initialMinute) }
+    var presentation by rememberSaveable { mutableStateOf(initialPresentation) }
+    var pendingFocus by remember { mutableStateOf<HomePresentation?>(null) }
     val active = remember(deeds, selectedMinute) { activeDeedsAt(deeds, selectedMinute) }
     val prayer = remember(deeds, selectedMinute) { obligatoryPrayerContextAt(deeds, selectedMinute) }
     val next = remember(deeds, selectedMinute) { nextDeedAt(deeds, selectedMinute) }
@@ -134,6 +151,11 @@ fun TimelineScreen(
     val primary = active.firstOrNull() ?: next
     val palette = remember(selectedMinute) { paletteAt(selectedMinute) }
     val animationsEnabled = remember { ValueAnimator.areAnimatorsEnabled() }
+    val expansion = remember { Animatable(if (presentation == HomePresentation.Detail) 1f else 0f) }
+    val scope = rememberCoroutineScope()
+    val view = LocalView.current
+    val openFocus = remember { FocusRequester() }
+    val summaryFocus = remember { FocusRequester() }
     val duration = if (animationsEnabled) 180 else 0
     val top by animateColorAsState(palette.top, tween(duration), label = "sky top")
     val middle by animateColorAsState(palette.middle, tween(duration), label = "sky middle")
@@ -145,60 +167,184 @@ fun TimelineScreen(
             .background(Brush.verticalGradient(listOf(top, middle, horizon))),
     ) {
         val compact = maxHeight <= 700.dp
-        Column(Modifier.fillMaxSize()) {
+        val screenHeightDp = maxHeight.value
+        val scene = homeSceneGeometry(maxWidth.value, screenHeightDp, compact, expansion.value)
+        val progress = expansion.value
+        val detailSettled = presentation == HomePresentation.Detail && progress >= .999f
+        val glanceSettled = presentation == HomePresentation.Glance && progress <= .001f
+        LaunchedEffect(pendingFocus, detailSettled, glanceSettled) {
+            val destination = pendingFocus ?: return@LaunchedEffect
+            val settled = when (destination) {
+                HomePresentation.Detail -> detailSettled
+                HomePresentation.Glance -> glanceSettled
+            }
+            if (!settled) return@LaunchedEffect
+            withFrameNanos { }
+            when (destination) {
+                HomePresentation.Detail -> {
+                    summaryFocus.requestFocus()
+                    view.announceForAccessibility("Paparan amalan dibuka untuk ${formatMinute(selectedMinute)}")
+                }
+                HomePresentation.Glance -> {
+                    openFocus.requestFocus()
+                    view.announceForAccessibility("Paparan amalan ditutup")
+                }
+            }
+            pendingFocus = null
+        }
+        val openPresentation: () -> Unit = {
+            if (presentation != HomePresentation.Detail) {
+                presentation = HomePresentation.Detail
+                pendingFocus = HomePresentation.Detail
+                scope.launch {
+                    if (animationsEnabled) {
+                        expansion.animateTo(
+                            1f,
+                            tween(620, easing = CubicBezierEasing(.2f, 0f, 0f, 1f)),
+                        )
+                    } else {
+                        expansion.snapTo(1f)
+                    }
+                }
+            }
+            Unit
+        }
+        val closePresentation: () -> Unit = {
+            if (presentation != HomePresentation.Glance) {
+                presentation = HomePresentation.Glance
+                pendingFocus = HomePresentation.Glance
+                scope.launch {
+                    if (animationsEnabled) {
+                        expansion.animateTo(
+                            0f,
+                            tween(460, easing = CubicBezierEasing(.2f, 0f, 0f, 1f)),
+                        )
+                    } else {
+                        expansion.snapTo(0f)
+                    }
+                }
+            }
+            Unit
+        }
+        BackHandler(enabled = presentation == HomePresentation.Detail || progress > 0f) {
+            closePresentation()
+        }
+
+        Box(Modifier.fillMaxSize()) {
             AlmanacHeader(
                 selectedMinute = selectedMinute,
                 ink = palette.ink,
                 muted = palette.muted,
-                doneCount = completedIds.size,
-                total = deeds.size,
                 compact = compact,
+                modifier = Modifier.fillMaxWidth().height(scene.wheelTop.dp),
             )
             TimeInstrument(
                 deeds = deeds,
                 selectedMinute = selectedMinute,
                 palette = palette,
-                modifier = Modifier.fillMaxWidth().height(if (compact) 182.dp else 220.dp),
+                scene = scene,
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .height(scene.viewportHeight.dp)
+                    .align(Alignment.TopCenter)
+                    .padding(top = 0.dp)
+                    .offset(y = scene.wheelTop.dp)
+                    .clipToBounds()
+                    .testTag("timeline-wheel"),
                 onSelectedMinute = { selectedMinute = wrapMinute(it) },
                 onReturnToNow = { selectedMinute = NowMinute },
             )
-            if (compact) {
-                CompactContextStrip(
+
+            if (progress < .30f) {
+                val actionReveal = ((.30f - progress) / .30f).coerceIn(0f, 1f)
+                OpenDeedsAction(
                     selectedMinute = selectedMinute,
                     active = active,
-                    prayer = prayer,
-                    contextual = contextual,
-                    dayState = dayStates.first(),
-                )
-            } else {
-                MomentSummary(
-                    selectedMinute = selectedMinute,
-                    active = active,
-                    prayer = prayer,
-                    contextual = contextual,
-                    dayState = dayStates.first(),
-                )
-                ActiveDeedIndex(active = active, selectedMinute = selectedMinute)
-            }
-            Crossfade(
-                targetState = primary.id,
-                modifier = Modifier.weight(1f),
-                animationSpec = tween(if (animationsEnabled) 180 else 0),
-                label = "folio deed",
-            ) { deedId ->
-                val deed = deeds.first { it.id == deedId }
-                LivingLedger(
-                    deed = deed,
-                    isActive = deed in active,
-                    isDone = deed.id in completedIds,
-                    animationsEnabled = animationsEnabled,
-                    compact = compact,
-                    onToggle = {
-                        completedIds = if (deed.id in completedIds) completedIds - deed.id else completedIds + deed.id
-                    },
+                    next = next,
+                    settled = glanceSettled,
+                    onOpen = openPresentation,
+                    focusRequester = openFocus,
+                    modifier = Modifier
+                        .align(Alignment.TopCenter)
+                        .offset(y = (scene.clipBottom + 16f + (1f - actionReveal) * 8f).dp)
+                        .alpha(actionReveal)
                 )
             }
-            FolioNavigation()
+
+            if (progress > .30f) {
+                val contentTop = detailContentTop(screenHeightDp, scene)
+                val contentHeight = (screenHeightDp - contentTop).coerceAtLeast(0f)
+                Surface(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .height(contentHeight.dp)
+                        .align(Alignment.TopCenter)
+                        .offset(y = contentTop.dp)
+                        .alpha(((progress - .30f) / .28f).coerceIn(0f, 1f)),
+                    color = PaperBright,
+                    contentColor = PaperInk,
+                ) {
+                    Column(Modifier.fillMaxSize()) {
+                        if (revealFraction(RevealLayer.Summary, progress) > .05f) {
+                            val summaryModifier = Modifier
+                                .alpha(revealFraction(RevealLayer.Summary, progress))
+                                .focusRequester(summaryFocus)
+                                .focusable()
+                                .testTag("moment-summary")
+                            if (compact) {
+                                CompactContextStrip(
+                                    selectedMinute = selectedMinute,
+                                    active = active,
+                                    prayer = prayer,
+                                    contextual = contextual,
+                                    dayState = dayStates.first(),
+                                    modifier = summaryModifier,
+                                )
+                            } else {
+                                Column(summaryModifier) {
+                                    MomentSummary(
+                                        selectedMinute = selectedMinute,
+                                        active = active,
+                                        prayer = prayer,
+                                        contextual = contextual,
+                                        dayState = dayStates.first(),
+                                    )
+                                    ActiveDeedIndex(active = active, selectedMinute = selectedMinute)
+                                }
+                            }
+                        }
+                        if (revealFraction(RevealLayer.Ledger, progress) > .05f) {
+                            LivingLedger(
+                                deed = primary,
+                                isActive = primary in active,
+                                isDone = primary.id in completedIds,
+                                animationsEnabled = animationsEnabled,
+                                compact = compact,
+                                onToggle = {
+                                    completedIds = if (primary.id in completedIds) completedIds - primary.id else completedIds + primary.id
+                                },
+                                modifier = Modifier
+                                    .weight(1f)
+                                    .alpha(revealFraction(RevealLayer.Ledger, progress))
+                                    .testTag("deed-ledger"),
+                            )
+                        } else {
+                            Spacer(Modifier.weight(1f))
+                        }
+                        if (progress > .70f) {
+                            CloseDeedsButton(
+                                onClose = closePresentation,
+                                modifier = Modifier.alpha(((progress - .70f) / .18f).coerceIn(0f, 1f)),
+                            )
+                        }
+                        if (revealFraction(RevealLayer.Navigation, progress) > .05f) {
+                            FolioNavigation(
+                                modifier = Modifier.alpha(revealFraction(RevealLayer.Navigation, progress)),
+                            )
+                        }
+                    }
+                }
+            }
         }
     }
 }
@@ -208,50 +354,52 @@ private fun AlmanacHeader(
     selectedMinute: Int,
     ink: Color,
     muted: Color,
-    doneCount: Int,
-    total: Int,
     compact: Boolean,
+    modifier: Modifier = Modifier,
 ) {
-    Row(
-        modifier = Modifier
-            .fillMaxWidth()
-            .statusBarsPadding()
-            .padding(start = 20.dp, end = 20.dp, top = if (compact) 4.dp else 8.dp, bottom = 4.dp),
-        horizontalArrangement = Arrangement.SpaceBetween,
-        verticalAlignment = Alignment.Top,
-    ) {
-        Column {
-            Text("bMuslim", color = ink, fontWeight = FontWeight.ExtraBold, fontSize = 16.sp)
-            Text(
-                "Khamis, 2 Julai 2026",
-                color = muted,
-                fontWeight = FontWeight.Medium,
-                fontSize = 11.sp,
-            )
-            if (!compact) Text("17 Muharram 1448 H", color = muted, fontSize = 10.sp)
-        }
-        Row(verticalAlignment = Alignment.CenterVertically) {
+    if (compact) {
+        Row(
+            modifier = modifier
+                .statusBarsPadding()
+                .padding(horizontal = 16.dp, vertical = 5.dp),
+            horizontalArrangement = Arrangement.SpaceBetween,
+            verticalAlignment = Alignment.Top,
+        ) {
+            Column(Modifier.weight(1f)) {
+                Text("bMuslim", color = ink, fontFamily = FontFamily.Serif, fontWeight = FontWeight.Bold, fontSize = 17.sp, lineHeight = 19.sp)
+                Text("Khamis, 2 Julai 2026", color = muted, fontWeight = FontWeight.Medium, fontSize = 9.sp, lineHeight = 11.sp)
+                Text("17 Muharram 1448 H", color = muted, fontSize = 9.sp, lineHeight = 11.sp)
+            }
             Column(horizontalAlignment = Alignment.End) {
                 Text(
                     formatMinute(selectedMinute),
                     color = ink,
                     fontFamily = FontFamily.Monospace,
                     fontWeight = FontWeight.Medium,
-                    fontSize = 31.sp,
-                    letterSpacing = (-1.4).sp,
+                    fontSize = 28.sp,
+                    lineHeight = 31.sp,
+                    letterSpacing = (-1.2).sp,
                 )
-                Text(dayPart(selectedMinute), color = muted, fontSize = 10.sp, fontWeight = FontWeight.SemiBold)
+                Text(dayPart(selectedMinute), color = muted, fontSize = 9.sp, lineHeight = 11.sp, fontWeight = FontWeight.SemiBold)
             }
-            Spacer(Modifier.width(11.dp))
-            Column(horizontalAlignment = Alignment.CenterHorizontally) {
-                Box(
-                    Modifier.size(32.dp).border(1.dp, ink.copy(alpha = .45f), CircleShape),
-                    contentAlignment = Alignment.Center,
-                ) {
-                    Text(doneCount.toString(), color = ink, fontSize = 10.sp, fontWeight = FontWeight.Bold)
-                }
-                Text("$doneCount/$total", color = muted, fontSize = 9.sp)
-            }
+        }
+    } else {
+        Column(
+            modifier = modifier.statusBarsPadding().padding(horizontal = 20.dp, vertical = 5.dp),
+            horizontalAlignment = Alignment.CenterHorizontally,
+        ) {
+            Text("bMuslim", color = ink, fontFamily = FontFamily.Serif, fontWeight = FontWeight.Bold, fontSize = 23.sp, lineHeight = 25.sp)
+            Text("Khamis, 2 Julai 2026 · 17 Muharram 1448 H", color = muted, fontWeight = FontWeight.Medium, fontSize = 10.sp, lineHeight = 12.sp, maxLines = 1)
+            Text(
+                formatMinute(selectedMinute),
+                color = ink,
+                fontFamily = FontFamily.Monospace,
+                fontWeight = FontWeight.Medium,
+                fontSize = 38.sp,
+                lineHeight = 40.sp,
+                letterSpacing = (-1.4).sp,
+            )
+            Text(dayPart(selectedMinute), color = muted, fontSize = 10.sp, lineHeight = 12.sp, fontWeight = FontWeight.SemiBold)
         }
     }
 }
@@ -261,6 +409,7 @@ private fun TimeInstrument(
     deeds: List<TimelineDeed>,
     selectedMinute: Int,
     palette: SkyPalette,
+    scene: HomeSceneGeometry,
     modifier: Modifier,
     onSelectedMinute: (Int) -> Unit,
     onReturnToNow: () -> Unit,
@@ -296,10 +445,10 @@ private fun TimeInstrument(
                     )
                 },
         ) {
-            drawTimeInstrument(deeds, selectedMinute, palette)
+            drawTimeInstrument(deeds, selectedMinute, palette, scene)
         }
 
-        if (circularMinuteDistance(selectedMinute, NowMinute) > 4) {
+        if (scene.progress > .95f && circularMinuteDistance(selectedMinute, NowMinute) > 4) {
             Button(
                 onClick = onReturnToNow,
                 modifier = Modifier.align(Alignment.BottomEnd).padding(end = 14.dp, bottom = 5.dp).height(48.dp),
@@ -317,13 +466,14 @@ private fun DrawScope.drawTimeInstrument(
     deeds: List<TimelineDeed>,
     selectedMinute: Int,
     palette: SkyPalette,
+    scene: HomeSceneGeometry,
 ) {
-    val center = Offset(size.width / 2f, size.height * .93f)
-    val hourRadius = min(size.width * .285f, size.height * .62f)
-    val prayerRadius = min(size.width * .345f, size.height * .72f)
-    val deedBaseRadius = min(size.width * .39f, size.height * .80f)
+    val center = Offset(size.width / 2f, scene.centerY.dp.toPx())
+    val celestialRadius = scene.outerRadius.dp.toPx()
+    val hourRadius = celestialRadius * .64f
+    val prayerRadius = celestialRadius * .775f
+    val deedBaseRadius = celestialRadius * .88f
     val laneStep = 10.dp.toPx()
-    val celestialRadius = min(size.width * .445f, center.y - 15.dp.toPx())
 
     drawCircle(
         color = palette.rail.copy(alpha = .06f),
@@ -335,7 +485,7 @@ private fun DrawScope.drawTimeInstrument(
     // Layer 1: the neutral 24-hour rail.
     drawCircle(palette.rail.copy(alpha = .42f), hourRadius, center, style = Stroke(1.dp.toPx()))
     for (hour in 0 until 24) {
-        val angle = minuteAngle(hour * 60, selectedMinute)
+        val angle = timelineMinuteAngle(hour * 60, selectedMinute)
         val major = hour % 3 == 0
         val outer = polar(center, hourRadius, angle)
         val inner = polar(center, hourRadius - if (major) 10.dp.toPx() else 5.dp.toPx(), angle)
@@ -345,7 +495,8 @@ private fun DrawScope.drawTimeInstrument(
             outer,
             if (major) 1.3.dp.toPx() else .8.dp.toPx(),
         )
-        if (major && outer.x in 18f..(size.width - 18f) && outer.y in 5f..size.height) {
+        val hourLabelInset = 18.dp.toPx()
+        if (major && outer.x in hourLabelInset..(size.width - hourLabelInset) && outer.y in 5.dp.toPx()..size.height) {
             drawLabel(hour.toString().padStart(2, '0'), polar(center, hourRadius - 19.dp.toPx(), angle), palette.muted, 8.5f)
         }
     }
@@ -355,8 +506,9 @@ private fun DrawScope.drawTimeInstrument(
     val prayers = deeds.filter { it.ruling == Ruling.Fardh }
     val activePrayer = activeDeedsAt(prayers, selectedMinute).firstOrNull()
     val nextPrayer = obligatoryPrayerContextAt(deeds, selectedMinute)
+    val glance = scene.progress < .15f
     prayers.forEach { prayer ->
-        val angle = minuteAngle(prayer.startMinute, selectedMinute)
+        val angle = timelineMinuteAngle(prayer.startMinute, selectedMinute)
         val point = polar(center, prayerRadius, angle)
         val active = prayer.id == activePrayer?.id
         val next = !active && prayer.id == nextPrayer.id
@@ -364,9 +516,10 @@ private fun DrawScope.drawTimeInstrument(
         if (next) drawCircle(palette.ink.copy(alpha = .20f), 9.dp.toPx(), point, style = Stroke(1.dp.toPx()))
         drawCircle(if (active) Saffron else Paper, if (active) 6.dp.toPx() else 4.8.dp.toPx(), point)
         drawCircle(if (active) DeepPine else Pine, if (active) 4.dp.toPx() else 3.1.dp.toPx(), point)
-        if ((active || next) && point.x in 48f..(size.width - 48f) && point.y in 12f..size.height) {
+        val prayerLabelInset = 42.dp.toPx()
+        if ((glance || active || next) && point.x in prayerLabelInset..(size.width - prayerLabelInset) && point.y in 12.dp.toPx()..size.height) {
             val title = prayer.title.removePrefix("Solat ")
-            val label = if (active) title else "$title ${formatMinute(prayer.startMinute)}"
+            val label = if (glance) "$title ${formatMinute(prayer.startMinute)}" else if (active) title else "$title ${formatMinute(prayer.startMinute)}"
             drawLabel(label, polar(center, prayerRadius - 19.dp.toPx(), angle), if (active) Saffron else palette.ink, 9f, true)
         }
     }
@@ -386,7 +539,7 @@ private fun DrawScope.drawTimeInstrument(
             color = if (active) Saffron else palette.rail.copy(alpha = if (deed.ruling == Ruling.Muakkadah) .52f else .28f),
             width = if (active) 7.dp.toPx() else 4.dp.toPx(),
         )
-        val bead = polar(center, radius, minuteAngle(deed.actMinute, selectedMinute))
+        val bead = polar(center, radius, timelineMinuteAngle(deed.actMinute, selectedMinute))
         drawCircle(if (active) Saffron else palette.rail.copy(alpha = .7f), if (active) 4.dp.toPx() else 2.3.dp.toPx(), bead)
     }
     activeDeedsAt(contextualDeeds, selectedMinute).firstOrNull()?.let { deed ->
@@ -414,11 +567,29 @@ private fun DrawScope.drawTimeInstrument(
     drawCircle(Saffron, 4.dp.toPx(), pointerBottom)
 
     // Actual-now is independent of the selected-time pointer.
-    val nowAngle = minuteAngle(NowMinute, selectedMinute)
+    val nowAngle = timelineMinuteAngle(NowMinute, selectedMinute)
     val nowOuter = polar(center, hourRadius, nowAngle)
     val nowInner = polar(center, hourRadius - 9.dp.toPx(), nowAngle)
     drawLine(Paper, nowInner, nowOuter, 3.dp.toPx(), StrokeCap.Round)
     drawCircle(DeepPine, 2.2.dp.toPx(), nowOuter)
+
+    if (glance) drawKeystone(center, celestialRadius, palette)
+}
+
+private fun DrawScope.drawKeystone(center: Offset, radius: Float, palette: SkyPalette) {
+    val y = center.y + radius - 4.dp.toPx()
+    val half = 21.dp.toPx()
+    val depth = 13.dp.toPx()
+    val path = Path().apply {
+        moveTo(center.x - half, y)
+        lineTo(center.x - half * .72f, y + depth)
+        lineTo(center.x + half * .72f, y + depth)
+        lineTo(center.x + half, y)
+        close()
+    }
+    drawPath(path, palette.middle)
+    drawPath(path, Saffron.copy(alpha = .72f), style = Stroke(1.dp.toPx()))
+    drawLine(Saffron.copy(alpha = .8f), Offset(center.x, y + 2.dp.toPx()), Offset(center.x, y + 9.dp.toPx()), 1.dp.toPx())
 }
 
 private fun DrawScope.drawClockArc(
@@ -433,7 +604,7 @@ private fun DrawScope.drawClockArc(
     val duration = forwardMinuteDistance(startMinute, endMinute).coerceAtLeast(1)
     drawArc(
         color = color,
-        startAngle = minuteAngle(startMinute, selectedMinute),
+        startAngle = timelineMinuteAngle(startMinute, selectedMinute),
         sweepAngle = duration / 4f,
         useCenter = false,
         topLeft = Offset(center.x - radius, center.y - radius),
@@ -547,11 +718,12 @@ private fun CompactContextStrip(
     prayer: TimelineDeed,
     contextual: TimelineDeed,
     dayState: DayState,
+    modifier: Modifier = Modifier,
 ) {
     val contextualIsActive = contextual.isActiveAt(selectedMinute)
     Surface(color = PaperBright, contentColor = PaperInk) {
         Row(
-            modifier = Modifier
+            modifier = modifier
                 .fillMaxWidth()
                 .height(58.dp)
                 .semantics(mergeDescendants = true) {
@@ -798,8 +970,8 @@ private fun CompletionAction(
 private enum class NavGlyph { Today, Planner, Settings }
 
 @Composable
-private fun FolioNavigation() {
-    Surface(color = PaperBright, contentColor = PaperInk) {
+private fun FolioNavigation(modifier: Modifier = Modifier) {
+    Surface(modifier = modifier.testTag("bottom-navigation"), color = PaperBright, contentColor = PaperInk) {
         Row(
             modifier = Modifier.fillMaxWidth().navigationBarsPadding().height(62.dp).padding(horizontal = 18.dp),
             horizontalArrangement = Arrangement.SpaceAround,
@@ -809,6 +981,77 @@ private fun FolioNavigation() {
             NavItem(NavGlyph.Planner, "Perancang", active = false, enabled = false)
             NavItem(NavGlyph.Settings, "Tetapan", active = false, enabled = false)
         }
+    }
+}
+
+@Composable
+private fun OpenDeedsAction(
+    selectedMinute: Int,
+    active: List<TimelineDeed>,
+    next: TimelineDeed,
+    settled: Boolean,
+    onOpen: () -> Unit,
+    focusRequester: FocusRequester,
+    modifier: Modifier = Modifier,
+) {
+    if (settled) {
+        Button(
+            onClick = onOpen,
+            modifier = modifier
+                .height(48.dp)
+                .focusRequester(focusRequester)
+                .testTag("open-deeds")
+                .semantics {
+                    role = Role.Button
+                    contentDescription = openActionDescription(selectedMinute, active, next)
+                },
+            colors = ButtonDefaults.buttonColors(containerColor = Color.Transparent, contentColor = Saffron),
+            border = BorderStroke(1.dp, Saffron.copy(alpha = .65f)),
+            shape = RoundedCornerShape(4.dp),
+            contentPadding = PaddingValues(horizontal = 22.dp),
+        ) {
+            Text("Amalan pada ${formatMinute(selectedMinute)}", fontWeight = FontWeight.ExtraBold, fontSize = 13.sp)
+        }
+    } else {
+        Surface(
+            modifier = modifier.height(48.dp).clearAndSetSemantics { },
+            color = Color.Transparent,
+            contentColor = Saffron,
+            border = BorderStroke(1.dp, Saffron.copy(alpha = .65f)),
+            shape = RoundedCornerShape(4.dp),
+        ) {
+            Box(Modifier.padding(horizontal = 22.dp), contentAlignment = Alignment.Center) {
+                Text("Amalan pada ${formatMinute(selectedMinute)}", fontWeight = FontWeight.ExtraBold, fontSize = 13.sp)
+            }
+        }
+    }
+}
+
+@Composable
+private fun CloseDeedsButton(
+    onClose: () -> Unit,
+    modifier: Modifier = Modifier,
+) {
+    Button(
+        onClick = onClose,
+        modifier = modifier
+            .fillMaxWidth()
+            .height(48.dp)
+            .testTag("close-deeds")
+            .semantics {
+                role = Role.Button
+                contentDescription = "Tutup amalan dan kembali ke roda penuh"
+            },
+        colors = ButtonDefaults.buttonColors(containerColor = DeepPine, contentColor = Saffron),
+        shape = RoundedCornerShape(0.dp),
+        contentPadding = PaddingValues(horizontal = 20.dp),
+    ) {
+        Canvas(Modifier.size(16.dp)) {
+            drawLine(Saffron, Offset(size.width * .2f, size.height * .38f), Offset(size.width * .5f, size.height * .67f), 1.7.dp.toPx(), StrokeCap.Round)
+            drawLine(Saffron, Offset(size.width * .5f, size.height * .67f), Offset(size.width * .8f, size.height * .38f), 1.7.dp.toPx(), StrokeCap.Round)
+        }
+        Spacer(Modifier.width(9.dp))
+        Text("Tutup amalan", fontWeight = FontWeight.ExtraBold, fontSize = 12.sp)
     }
 }
 
@@ -909,6 +1152,15 @@ private fun wheelDescription(deeds: List<TimelineDeed>, minute: Int): String {
     return "Roda waktu 24 jam. Leret mendatar atau laras untuk memilih masa. $activeText. $prayerText."
 }
 
+private fun openActionDescription(
+    minute: Int,
+    active: List<TimelineDeed>,
+    next: TimelineDeed,
+): String {
+    val context = active.firstOrNull()?.title ?: "amalan berikut ${next.title}"
+    return "Buka amalan pada ${formatMinute(minute)}. $context."
+}
+
 private fun momentSummaryDescription(
     minute: Int,
     active: List<TimelineDeed>,
@@ -931,13 +1183,6 @@ private fun archetypeLabel(deed: TimelineDeed): String = when (deed.archetype) {
     RenderArchetype.Window -> "Boleh diamalkan sepanjang ruang masa ini"
     RenderArchetype.DaySpan -> "Amalan sepanjang hari"
     RenderArchetype.Anytime -> "Boleh dilakukan bila-bila masa"
-}
-
-private fun minuteAngle(minute: Int, selectedMinute: Int): Float {
-    var delta = minute - selectedMinute
-    if (delta > DayMinutes / 2) delta -= DayMinutes
-    if (delta < -DayMinutes / 2) delta += DayMinutes
-    return -90f + delta / 4f
 }
 
 private fun polar(center: Offset, radius: Float, degrees: Float): Offset {
@@ -992,7 +1237,7 @@ private fun TimelineScreenPreview360() {
 )
 @Composable
 private fun TimelineScreenPreviewCompact() {
-    BMuslimTheme { TimelineScreen() }
+    BMuslimTheme { TimelineScreen(initialPresentation = HomePresentation.Detail) }
 }
 
 @Preview(showBackground = true, widthDp = 390, heightDp = 844, name = "Before dawn 05:30")
@@ -1010,7 +1255,7 @@ private fun TimelineScreenPreview0620() {
 @Preview(showBackground = true, widthDp = 390, heightDp = 844, name = "Maghrib priority 19:45")
 @Composable
 private fun TimelineScreenPreview1945() {
-    BMuslimTheme { TimelineScreen(initialMinute = 19 * 60 + 45) }
+    BMuslimTheme { TimelineScreen(initialMinute = 19 * 60 + 45, initialPresentation = HomePresentation.Detail) }
 }
 
 @Preview(showBackground = true, widthDp = 390, heightDp = 844, name = "Night reading 22:00")
