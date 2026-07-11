@@ -1,0 +1,1392 @@
+<!doctype html>
+<html lang="ms">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <meta name="description" content="bMuslim - Garis masa amalan harian anda" />
+  <title>bMuslim</title>
+
+  <!-- Design tokens (includes Google Fonts import) -->
+  <link rel="stylesheet" href="assets/tokens.css" />
+
+  <!-- Theme anti-flash: runs synchronously before paint -->
+  <script src="assets/shared.js"></script>
+
+  <style>
+    /* ─── App shell layout ─────────────────────────────────────────────────────── */
+    html, body {
+      height: 100%;
+      overflow: hidden; /* app shell: no body scroll */
+    }
+
+    .app-shell {
+      display: flex;
+      flex-direction: column;
+      height: 100dvh;
+      overflow: hidden;
+      position: relative;
+    }
+
+    /* ─── Top bar ──────────────────────────────────────────────────────────────── */
+    #topbar {
+      flex: 0 0 auto;
+      height: 64px;
+      display: flex;
+      align-items: center;
+      padding: 0 var(--sp-5);
+      gap: var(--sp-3);
+      background: var(--bg);
+      border-bottom: 1px solid var(--line);
+      position: relative;
+      z-index: 10;
+      transition: background var(--dur-slow) var(--ease),
+                  border-color var(--dur-slow) var(--ease);
+    }
+
+    .topbar-wordmark {
+      font-size: var(--text-lg);
+      font-weight: 800;
+      letter-spacing: -0.03em;
+      color: var(--accent);
+      flex-shrink: 0;
+      user-select: none;
+    }
+
+    /* Pill-tab nav — centered */
+    .topbar-nav {
+      display: flex;
+      align-items: center;
+      gap: 4px;
+      flex: 1;
+      justify-content: center;
+    }
+
+    .nav-pill {
+      font-family: inherit;
+      font-size: var(--text-sm);
+      font-weight: 700;
+      padding: 7px 16px;
+      border-radius: var(--r-pill);
+      border: none;
+      background: transparent;
+      color: var(--muted);
+      cursor: pointer;
+      transition: background var(--dur-fast) var(--ease),
+                  color var(--dur-fast) var(--ease);
+      white-space: nowrap;
+    }
+
+    .nav-pill:hover {
+      background: rgba(var(--accent-rgb), 0.08);
+      color: var(--text);
+    }
+
+    .nav-pill.active {
+      background: rgba(var(--accent-rgb), 0.12);
+      color: var(--accent);
+    }
+
+    .topbar-actions {
+      display: flex;
+      align-items: center;
+      gap: var(--sp-2);
+      flex-shrink: 0;
+    }
+
+    #progress-ring {
+      width: 52px;
+      height: 52px;
+      flex-shrink: 0;
+    }
+
+    #theme-toggle {
+      width: 38px;
+      height: 38px;
+      border-radius: var(--r-pill);
+      border: 1px solid var(--line);
+      background: var(--surface);
+      color: var(--muted);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      cursor: pointer;
+      flex-shrink: 0;
+      transition: background var(--dur-fast) var(--ease),
+                  color var(--dur-fast) var(--ease),
+                  border-color var(--dur-fast) var(--ease);
+    }
+
+    #theme-toggle:hover {
+      color: var(--text);
+      border-color: rgba(var(--accent-rgb), 0.30);
+    }
+
+    #theme-toggle svg {
+      width: 19px;
+      height: 19px;
+    }
+
+    /* ─── View containers ──────────────────────────────────────────────────────── */
+    .app-view {
+      flex: 1 1 auto;
+      overflow-y: auto;
+      overflow-x: hidden;
+      -webkit-overflow-scrolling: touch;
+      overscroll-behavior: contain;
+    }
+
+    /* [hidden] must beat the per-view display rules below */
+    .app-view[hidden] { display: none !important; }
+
+    /* ─── View: Hari ini ───────────────────────────────────────────────────────── */
+    #view-hari-ini {
+      display: flex;
+      flex-direction: column;
+      min-height: 0;
+      height: 100%;
+      overflow: hidden;
+    }
+
+    /* Scrollable content inside hari-ini */
+    .hari-ini-body {
+      flex: 1 1 auto;
+      overflow-y: auto;
+      overflow-x: hidden;
+      -webkit-overflow-scrolling: touch;
+      overscroll-behavior: contain;
+    }
+
+    /* Header zone with dawn atmosphere */
+    .app-header {
+      position: relative;
+      padding: var(--sp-5) var(--sp-5) var(--sp-4);
+      overflow: hidden;
+    }
+
+    .app-header .dawn {
+      height: 200px;
+    }
+
+    .app-header-content {
+      position: relative;
+      z-index: 1;
+    }
+
+    .app-salam {
+      font-size: var(--text-sm);
+      font-weight: 600;
+      color: var(--muted);
+      margin-bottom: var(--sp-1);
+    }
+
+    .app-date-greg {
+      font-size: var(--text-2xl);
+      font-weight: 800;
+      letter-spacing: -0.03em;
+      color: var(--text);
+      line-height: 1.1;
+    }
+
+    .app-date-hijri {
+      font-size: var(--text-sm);
+      color: var(--muted);
+      margin-top: 4px;
+    }
+
+    /* Day banner */
+    .app-banner-wrap {
+      position: relative;
+      z-index: 1;
+      padding: 0 var(--sp-5) var(--sp-3);
+    }
+
+    /* ─── Timeline section ─────────────────────────────────────────────────────── */
+    .tl-section {
+      position: relative;
+      flex: 0 0 auto;
+    }
+
+    .tl-section-label {
+      padding: var(--sp-4) var(--sp-5) var(--sp-2);
+      font-size: var(--text-xs);
+      font-weight: 800;
+      letter-spacing: 0.14em;
+      text-transform: uppercase;
+      color: var(--faint);
+    }
+
+    /* Timeline scroll + track */
+    .tl-outer {
+      position: relative;
+    }
+
+    #tl-scroll {
+      overflow-x: auto;
+      overflow-y: hidden;
+      scrollbar-width: none;
+      cursor: grab;
+      -webkit-overflow-scrolling: touch;
+      overscroll-behavior-x: contain;
+      /* Height = prayer lane + deed lane(s) + ticks area */
+      height: 232px;
+    }
+
+    #tl-scroll::-webkit-scrollbar { display: none; }
+
+    #tl-track {
+      position: relative;
+      height: 100%;
+      /* width set by JS */
+    }
+
+    /* Axis line across full track */
+    .tl-axis {
+      position: absolute;
+      top: 22px;
+      left: 0;
+      right: 0;
+      height: 1px;
+      background: var(--line);
+      pointer-events: none;
+    }
+
+    /* Tick marks + labels */
+    .tl-ticks {
+      position: absolute;
+      top: 0;
+      left: 0;
+      right: 0;
+      height: 36px;
+      pointer-events: none;
+    }
+
+    .tl-tick {
+      position: absolute;
+      top: 17px;
+      width: 1px;
+      height: 6px;
+      background: var(--line);
+    }
+
+    .tl-tick-major {
+      height: 10px;
+      top: 12px;
+    }
+
+    .tl-tick-label {
+      position: absolute;
+      top: 24px;
+      transform: translateX(-50%);
+      font-size: 10px;
+      font-weight: 700;
+      color: var(--faint);
+      white-space: nowrap;
+      pointer-events: none;
+      font-variant-numeric: tabular-nums;
+    }
+
+    /* Lane containers */
+    .tl-lane {
+      position: absolute;
+      left: 0;
+      right: 0;
+    }
+
+    .tl-lane-prayer {
+      top: 40px;
+      height: 54px;
+    }
+
+    .tl-lane-deed {
+      top: 106px;
+      height: 56px;
+    }
+
+    /* Second deed lane (stacked) */
+    .tl-lane-deed:nth-of-type(3) {
+      top: 165px;
+    }
+
+    .tl-lane-label {
+      position: absolute;
+      left: var(--sp-5);
+      top: -18px;
+      font-size: 9.5px;
+      font-weight: 800;
+      letter-spacing: 0.12em;
+      text-transform: uppercase;
+      color: var(--faint);
+      white-space: nowrap;
+      pointer-events: none;
+    }
+
+    .tl-lane-label-deed {
+      /* deed lane label is positioned relative to its lane's top */
+    }
+
+    /* Prayer chips */
+    .tl-prayer {
+      position: absolute;
+      top: 0;
+      transform: translateX(-50%);
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 4px;
+    }
+
+    .tl-prayer-dot {
+      width: 38px;
+      height: 38px;
+      border-radius: 12px;
+      background: var(--accent);
+      color: var(--on-accent);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 10px;
+      font-weight: 800;
+      box-shadow: 0 5px 14px rgba(var(--accent-rgb), 0.32);
+      font-variant-numeric: tabular-nums;
+    }
+
+    .tl-prayer-name {
+      font-size: 10px;
+      font-weight: 700;
+      color: var(--muted);
+      white-space: nowrap;
+    }
+
+    /* Syuruk marker (smaller, axis-only) */
+    .tl-syuruk {
+      position: absolute;
+      top: 0;
+      transform: translateX(-50%);
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 4px;
+    }
+
+    .tl-syuruk::before {
+      content: '';
+      display: block;
+      width: 1px;
+      height: 28px;
+      background: rgba(var(--gold-rgb), 0.45);
+    }
+
+    .tl-syuruk-label {
+      font-size: 9px;
+      font-weight: 700;
+      color: var(--gold);
+      white-space: nowrap;
+      letter-spacing: 0.04em;
+    }
+
+    /* Window tracks (faint dashed) */
+    .tl-window {
+      position: absolute;
+      top: 4px;
+      height: 48px;
+      border-radius: 14px;
+      background: var(--track);
+      border: 1.5px dashed rgba(var(--accent-rgb), 0.28);
+      pointer-events: none;
+    }
+
+    /* Act markers */
+    .tl-act {
+      position: absolute;
+      top: 4px;
+      height: 48px;
+      padding: 0 12px;
+      border-radius: 13px;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      white-space: nowrap;
+      cursor: pointer;
+      transition: opacity var(--dur-fast) var(--ease),
+                  box-shadow var(--dur-fast) var(--ease);
+    }
+
+    .tl-act:hover {
+      opacity: 0.82;
+    }
+
+    .tl-act:focus-visible {
+      outline: 2px solid var(--accent);
+      outline-offset: 2px;
+    }
+
+    .tl-act-muakkadah {
+      background: rgba(var(--accent-rgb), 0.22);
+      border: 1.5px solid rgba(var(--accent-rgb), 0.48);
+    }
+
+    .tl-act-sunnah {
+      background: rgba(var(--accent-rgb), 0.12);
+      border: 1.5px solid rgba(var(--accent-rgb), 0.24);
+    }
+
+    .tl-act-fardh {
+      background: rgba(var(--accent-rgb), 0.30);
+      border: 1.5px solid rgba(var(--accent-rgb), 0.60);
+    }
+
+    .tl-act-icon {
+      width: 17px;
+      height: 17px;
+      color: var(--accent);
+      flex-shrink: 0;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+
+    .tl-act-icon svg {
+      width: 17px;
+      height: 17px;
+    }
+
+    .tl-act-title {
+      font-size: 12px;
+      font-weight: 700;
+      color: var(--text);
+    }
+
+    /* Needle — fixed at center of the scroll container */
+    .tl-needle-wrap {
+      position: absolute;
+      inset: 0;
+      pointer-events: none;
+      z-index: 6;
+    }
+
+    .tl-needle {
+      position: absolute;
+      top: 36px;
+      bottom: 8px;
+      left: 50%;
+      width: 0;
+      pointer-events: none;
+    }
+
+    .tl-needle::before {
+      content: '';
+      position: absolute;
+      top: 20px;
+      bottom: 0;
+      left: 0;
+      border-left: 2px dashed rgba(var(--gold-rgb), 0.90);
+    }
+
+    #needle-chip {
+      position: absolute;
+      top: 0;
+      left: 50%;
+      transform: translateX(-50%);
+      background: var(--gold);
+      color: #1c150a;
+      font-size: 11px;
+      font-weight: 800;
+      padding: 4px 10px;
+      border-radius: var(--r-pill);
+      box-shadow: var(--shadow-gold);
+      white-space: nowrap;
+      font-variant-numeric: tabular-nums;
+      pointer-events: none;
+      user-select: none;
+    }
+
+    /* Back to now pill */
+    #back-to-now {
+      position: absolute;
+      right: var(--sp-4);
+      bottom: var(--sp-3);
+      z-index: 7;
+      font-family: inherit;
+      font-size: 11px;
+      font-weight: 700;
+      color: var(--accent);
+      background: var(--surface);
+      border: 1px solid var(--line);
+      border-radius: var(--r-pill);
+      padding: 7px 13px;
+      box-shadow: var(--shadow-sm);
+      cursor: pointer;
+      transition: opacity var(--dur-fast) var(--ease),
+                  transform var(--dur-fast) var(--ease);
+    }
+
+    #back-to-now:hover {
+      opacity: 0.80;
+      transform: translateY(-1px);
+    }
+
+    /* ─── Two-column band below timeline ───────────────────────────────────────── */
+    .app-lower {
+      flex: 1 1 auto;
+      display: grid;
+      grid-template-columns: 1fr 280px;
+      gap: var(--sp-4);
+      padding: var(--sp-4) var(--sp-5);
+      min-height: 0;
+      overflow: hidden;
+    }
+
+    /* Detail panel */
+    .detail-panel {
+      display: flex;
+      flex-direction: column;
+      background: var(--surface);
+      border: 1px solid var(--line);
+      border-radius: var(--r-large);
+      box-shadow: var(--shadow-sm);
+      overflow: hidden;
+      min-height: 0;
+    }
+
+    .detail-panel-head {
+      padding: var(--sp-4) var(--sp-5) var(--sp-3);
+      border-bottom: 1px solid var(--line);
+      flex-shrink: 0;
+    }
+
+    #detail-now-label {
+      font-size: 11px;
+      font-weight: 800;
+      letter-spacing: 0.12em;
+      text-transform: uppercase;
+      color: var(--faint);
+    }
+
+    /* Deed selector (multiple deeds at needle) */
+    #detail-selector {
+      padding: var(--sp-2) var(--sp-5) 0;
+      flex-shrink: 0;
+    }
+
+    .detail-selector-label {
+      font-size: var(--text-xs);
+      font-weight: 700;
+      color: var(--muted);
+      display: block;
+      margin-bottom: var(--sp-2);
+    }
+
+    .detail-selector-pills {
+      display: flex;
+      flex-wrap: wrap;
+      gap: var(--sp-2);
+    }
+
+    .detail-pill {
+      font-family: inherit;
+      font-size: var(--text-xs);
+      font-weight: 700;
+      padding: 4px 12px;
+      border-radius: var(--r-pill);
+      border: 1.5px solid rgba(var(--accent-rgb), 0.25);
+      background: transparent;
+      color: var(--muted);
+      cursor: pointer;
+      transition: background var(--dur-fast) var(--ease),
+                  color var(--dur-fast) var(--ease),
+                  border-color var(--dur-fast) var(--ease);
+    }
+
+    .detail-pill.active {
+      background: rgba(var(--accent-rgb), 0.12);
+      color: var(--accent);
+      border-color: rgba(var(--accent-rgb), 0.40);
+    }
+
+    /* Detail content area */
+    #detail-content {
+      flex: 1 1 auto;
+      overflow-y: auto;
+      padding: var(--sp-4) var(--sp-5);
+      min-height: 0;
+    }
+
+    #detail-content::-webkit-scrollbar {
+      width: 4px;
+    }
+
+    #detail-content::-webkit-scrollbar-track {
+      background: transparent;
+    }
+
+    #detail-content::-webkit-scrollbar-thumb {
+      background: var(--line);
+      border-radius: 2px;
+    }
+
+    /* Empty state */
+    .detail-empty {
+      font-size: var(--text-sm);
+      color: var(--muted);
+      padding: var(--sp-6) 0;
+      max-width: none;
+    }
+
+    /* Deed detail */
+    .detail-deed {
+      display: flex;
+      flex-direction: column;
+      gap: var(--sp-3);
+    }
+
+    .detail-title-row {
+      display: flex;
+      align-items: flex-start;
+      gap: var(--sp-3);
+    }
+
+    .detail-deed-title {
+      font-size: var(--text-xl);
+      font-weight: 800;
+      letter-spacing: -0.02em;
+      color: var(--text);
+      line-height: 1.2;
+      flex: 1;
+    }
+
+    .detail-chips {
+      display: flex;
+      flex-wrap: wrap;
+      gap: var(--sp-2);
+    }
+
+    .detail-arabic-wrap {
+      text-align: center;
+    }
+
+    .detail-translit {
+      font-size: var(--text-sm);
+      color: var(--faint);
+      font-style: italic;
+      margin-top: var(--sp-2);
+      text-align: center;
+    }
+
+    .detail-section-label {
+      padding-top: var(--sp-1);
+    }
+
+    .detail-translation {
+      font-size: var(--text-base);
+      line-height: 1.7;
+      color: var(--text);
+      max-width: none;
+    }
+
+    .detail-description {
+      font-size: var(--text-base);
+      line-height: 1.7;
+      color: var(--muted);
+      max-width: none;
+    }
+
+    .detail-mark-btn {
+      margin-top: var(--sp-2);
+    }
+
+    /* ─── Anytime tray ─────────────────────────────────────────────────────────── */
+    .anytime-panel {
+      display: flex;
+      flex-direction: column;
+      min-height: 0;
+    }
+
+    .anytime-panel-head {
+      flex-shrink: 0;
+      padding-bottom: var(--sp-3);
+    }
+
+    .anytime-panel-title {
+      font-size: var(--text-xs);
+      font-weight: 800;
+      letter-spacing: 0.14em;
+      text-transform: uppercase;
+      color: var(--faint);
+    }
+
+    .anytime-panel-sub {
+      font-size: var(--text-xs);
+      color: var(--muted);
+      margin-top: 2px;
+    }
+
+    #anytime-tray {
+      display: flex;
+      flex-direction: column;
+      gap: var(--sp-2);
+      overflow-y: auto;
+      min-height: 0;
+      flex: 1 1 auto;
+    }
+
+    .anytime-card {
+      padding: var(--sp-3) var(--sp-4);
+    }
+
+    .anytime-card .checkbox-wrap {
+      align-items: center;
+      gap: var(--sp-3);
+    }
+
+    .anytime-body {
+      display: flex;
+      flex-direction: column;
+      gap: 2px;
+      flex: 1;
+    }
+
+    .anytime-icon-wrap {
+      display: none; /* icon shown via layout, not separate wrap on mobile */
+    }
+
+    .anytime-title {
+      font-size: var(--text-base);
+      font-weight: 700;
+      color: var(--text);
+    }
+
+    .anytime-desc {
+      font-size: var(--text-xs);
+      color: var(--muted);
+      line-height: 1.5;
+      max-width: none;
+    }
+
+    /* ─── View: Perancang ──────────────────────────────────────────────────────── */
+    #view-perancang {
+      padding: var(--sp-5);
+    }
+
+    .perancang-header {
+      margin-bottom: var(--sp-5);
+    }
+
+    .perancang-month {
+      font-size: var(--text-sm);
+      font-weight: 600;
+      color: var(--muted);
+    }
+
+    .perancang-title {
+      font-size: var(--text-2xl);
+      font-weight: 800;
+      letter-spacing: -0.03em;
+      margin-top: 2px;
+    }
+
+    .perancang-hijri {
+      font-size: var(--text-sm);
+      color: var(--muted);
+      margin-top: 3px;
+    }
+
+    /* Week strip */
+    #week-strip {
+      display: flex;
+      gap: var(--sp-2);
+      margin-bottom: var(--sp-5);
+    }
+
+    .week-cell {
+      flex: 1;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      padding: 10px var(--sp-2);
+      border-radius: 14px;
+      background: var(--surface);
+      border: 1px solid var(--line);
+      gap: 3px;
+      cursor: default;
+    }
+
+    .week-cell-active {
+      background: var(--accent);
+      border-color: var(--accent);
+    }
+
+    .week-cell-name {
+      font-size: 10px;
+      font-weight: 700;
+      color: var(--muted);
+    }
+
+    .week-cell-active .week-cell-name {
+      color: var(--on-accent);
+    }
+
+    .week-cell-num {
+      font-size: 15px;
+      font-weight: 800;
+      color: var(--text);
+    }
+
+    .week-cell-active .week-cell-num {
+      color: var(--on-accent);
+    }
+
+    .week-cell-fast {
+      width: 5px;
+      height: 5px;
+      border-radius: 50%;
+      background: var(--gold);
+    }
+
+    /* Suggestions */
+    .suggestions-label {
+      font-size: var(--text-xs);
+      font-weight: 800;
+      letter-spacing: 0.14em;
+      text-transform: uppercase;
+      color: var(--faint);
+      margin-bottom: var(--sp-3);
+    }
+
+    #suggestions-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: var(--sp-3);
+    }
+
+    .suggestion-card {
+      display: flex;
+      align-items: center;
+      gap: var(--sp-3);
+      padding: var(--sp-4);
+    }
+
+    .suggestion-body {
+      flex: 1;
+      min-width: 0;
+    }
+
+    .suggestion-title {
+      font-size: var(--text-base);
+      font-weight: 700;
+      color: var(--text);
+    }
+
+    .suggestion-desc {
+      font-size: var(--text-xs);
+      color: var(--muted);
+      margin-top: 2px;
+    }
+
+    .suggestion-add {
+      width: 32px;
+      height: 32px;
+      border-radius: var(--r-pill);
+      border: 1px solid var(--line);
+      background: transparent;
+      color: var(--accent);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      flex-shrink: 0;
+      cursor: pointer;
+      transition: background var(--dur-fast) var(--ease),
+                  border-color var(--dur-fast) var(--ease);
+    }
+
+    .suggestion-add:hover {
+      background: rgba(var(--accent-rgb), 0.08);
+      border-color: rgba(var(--accent-rgb), 0.30);
+    }
+
+    /* ─── View: Tetapan ────────────────────────────────────────────────────────── */
+    #view-tetapan {
+      padding: var(--sp-5);
+      max-width: 640px;
+    }
+
+    .tetapan-title {
+      font-size: var(--text-2xl);
+      font-weight: 800;
+      letter-spacing: -0.03em;
+      margin-bottom: var(--sp-6);
+    }
+
+    .setting-group {
+      margin-bottom: var(--sp-8);
+    }
+
+    .setting-group-title {
+      font-size: 11px;
+      font-weight: 800;
+      letter-spacing: 0.14em;
+      text-transform: uppercase;
+      color: var(--faint);
+      margin-bottom: var(--sp-4);
+    }
+
+    .setting-row {
+      display: flex;
+      flex-direction: column;
+      gap: var(--sp-1);
+      margin-bottom: var(--sp-4);
+    }
+
+    .setting-row:last-child {
+      margin-bottom: 0;
+    }
+
+    .setting-label {
+      font-size: var(--text-sm);
+      font-weight: 700;
+      color: var(--muted);
+      display: block;
+      margin-bottom: 0;
+    }
+
+    .setting-helper {
+      font-size: var(--text-xs);
+      color: var(--faint);
+      margin-top: 4px;
+      max-width: none;
+    }
+
+    /* Time inputs side by side */
+    .setting-time-row {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: var(--sp-3);
+    }
+
+    /* Notification row */
+    .notif-row {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: var(--sp-3) 0;
+      border-bottom: 1px solid var(--line);
+    }
+
+    .notif-row:first-child {
+      padding-top: 0;
+    }
+
+    .notif-row:last-child {
+      border-bottom: none;
+      padding-bottom: 0;
+    }
+
+    .notif-label {
+      font-size: var(--text-base);
+      font-weight: 600;
+      color: var(--text);
+    }
+
+    /* ─── Responsive: 360px collapse ──────────────────────────────────────────── */
+    @media (max-width: 640px) {
+      #topbar {
+        height: 56px;
+        padding: 0 var(--sp-4);
+      }
+
+      .topbar-wordmark {
+        font-size: var(--text-base);
+      }
+
+      .nav-pill {
+        font-size: 11px;
+        padding: 6px 10px;
+      }
+
+      .app-lower {
+        grid-template-columns: 1fr;
+        padding: var(--sp-3) var(--sp-4);
+        gap: var(--sp-3);
+        overflow-y: auto;
+        height: auto;
+      }
+
+      .detail-panel {
+        max-height: none;
+        overflow: visible;
+      }
+
+      #detail-content {
+        overflow: visible;
+        max-height: none;
+      }
+
+      .anytime-panel {
+        overflow: visible;
+      }
+
+      #anytime-tray {
+        overflow: visible;
+      }
+
+      #suggestions-grid {
+        grid-template-columns: 1fr;
+      }
+
+      #view-perancang,
+      #view-tetapan {
+        padding: var(--sp-4);
+      }
+
+      .setting-time-row {
+        grid-template-columns: 1fr;
+      }
+
+      .app-date-greg {
+        font-size: var(--text-xl);
+      }
+    }
+
+    @media (max-width: 900px) and (min-width: 641px) {
+      .app-lower {
+        grid-template-columns: 1fr 240px;
+      }
+    }
+  </style>
+</head>
+<body>
+  <!-- Grain overlay (fixed, z-index 1000, pointer-events none) -->
+  <div class="grain" aria-hidden="true"></div>
+
+  <div class="app-shell">
+
+    <!-- ─── Top bar ─────────────────────────────────────────────────────────── -->
+    <header id="topbar" role="banner">
+      <span class="topbar-wordmark" aria-label="bMuslim">bMuslim</span>
+
+      <nav class="topbar-nav" aria-label="Navigasi utama">
+        <button
+          class="nav-pill active"
+          data-view="hari-ini"
+          aria-current="page"
+          type="button"
+        >Hari ini</button>
+        <button
+          class="nav-pill"
+          data-view="perancang"
+          aria-current="false"
+          type="button"
+        >Perancang</button>
+        <button
+          class="nav-pill"
+          data-view="tetapan"
+          aria-current="false"
+          type="button"
+        >Tetapan</button>
+      </nav>
+
+      <div class="topbar-actions">
+        <!-- Progress ring — mounted by app.js via bmRing.mount() -->
+        <div id="progress-ring" class="progress-ring" aria-label="Kemajuan hari ini" role="img"></div>
+
+        <!-- Theme toggle — icon injected by app.js -->
+        <button id="theme-toggle" type="button" aria-label="Tukar tema"></button>
+      </div>
+    </header>
+
+    <!-- ═══════════════════════════════════════════════════════════════════════
+         View: Hari ini
+    ════════════════════════════════════════════════════════════════════════ -->
+    <main id="view-hari-ini" class="app-view" aria-label="Hari ini">
+
+      <!-- Header: salam + date + day banner -->
+      <div class="app-header dawn-bg">
+        <div class="dawn" aria-hidden="true"></div>
+        <div class="app-header-content">
+          <div class="app-salam">Assalamualaikum</div>
+          <div class="app-date-greg">Khamis, 28 Jun 2026</div>
+          <div class="app-date-hijri">12 Muharram 1448 H</div>
+        </div>
+      </div>
+
+      <!-- Day banner (fasting) -->
+      <div class="app-banner-wrap">
+        <div class="day-banner" role="status" aria-label="Puasa sunat Khamis">
+          <span class="day-banner-icon" aria-hidden="true">
+            <svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M20 14.5A8 8 0 1 1 9.5 4a6.2 6.2 0 0 0 10.5 10.5Z"/></svg>
+          </span>
+          <span>Puasa sunat Khamis</span>
+          <span class="day-banner-sub">&nbsp;hari ini</span>
+        </div>
+      </div>
+
+      <!-- Timeline section label -->
+      <div class="tl-section-label section-label" aria-hidden="true">Garis masa hari ini</div>
+
+      <!-- Timeline hero -->
+      <section class="tl-section" aria-label="Garis masa amalan">
+        <!-- Lane labels (appear above their lanes) -->
+        <div class="tl-outer">
+          <!-- Scroll container: user drags here -->
+          <div id="tl-scroll" role="region" aria-label="Garis masa boleh tatal" aria-describedby="tl-help">
+            <span id="tl-help" class="sr-only">Gunakan kekunci anak panah untuk navigasi. Kiri/kanan 15 minit, atas/bawah 1 jam.</span>
+
+            <!-- Track: width set by JS, all timeline content injected here -->
+            <div id="tl-track"></div>
+          </div>
+
+          <!-- Needle: fixed at center of scroll container, overlaid -->
+          <div class="tl-needle-wrap" aria-hidden="true">
+            <div class="tl-needle">
+              <span id="needle-chip">15:00</span>
+            </div>
+          </div>
+
+          <!-- Back to now -->
+          <button
+            id="back-to-now"
+            type="button"
+            hidden
+            aria-label="Kembali ke masa sekarang"
+          >Kembali ke sekarang</button>
+        </div>
+      </section>
+
+      <!-- Two-column lower band -->
+      <div class="app-lower">
+
+        <!-- Detail panel -->
+        <aside class="detail-panel" aria-label="Butiran amalan">
+          <div class="detail-panel-head">
+            <div id="detail-now-label" aria-live="polite" aria-atomic="true">Sekarang · 15:00</div>
+          </div>
+
+          <!-- Deed selector (hidden when single deed, shown by JS) -->
+          <div id="detail-selector" hidden></div>
+
+          <!-- Deed detail content (injected by app.js) -->
+          <div id="detail-content" aria-live="polite" aria-atomic="false">
+            <!-- Placeholder — JS overwrites -->
+            <p class="detail-empty">Memuatkan amalan...</p>
+          </div>
+        </aside>
+
+        <!-- Anytime tray -->
+        <aside class="anytime-panel" aria-label="Bila-bila masa">
+          <div class="anytime-panel-head">
+            <div class="anytime-panel-title">Bila-bila masa</div>
+            <div class="anytime-panel-sub">Amalan tanpa waktu tetap</div>
+          </div>
+          <!-- Cards injected by app.js -->
+          <div id="anytime-tray" aria-label="Amalan bila-bila masa"></div>
+        </aside>
+
+      </div>
+    </main>
+
+    <!-- ═══════════════════════════════════════════════════════════════════════
+         View: Perancang
+    ════════════════════════════════════════════════════════════════════════ -->
+    <section
+      id="view-perancang"
+      class="app-view"
+      aria-label="Perancang"
+      hidden
+    >
+      <div class="perancang-header">
+        <div class="perancang-month">Jun 2026</div>
+        <div class="perancang-title">Perancang</div>
+        <div class="perancang-hijri">Muharram 1448 H</div>
+      </div>
+
+      <!-- Week strip — cells injected by app.js -->
+      <div
+        id="week-strip"
+        role="list"
+        aria-label="Minggu ini"
+      ></div>
+
+      <div class="suggestions-label section-label">Cadangan mengikut sunnah</div>
+
+      <!-- Suggestion cards — injected by app.js -->
+      <div
+        id="suggestions-grid"
+        role="list"
+        aria-label="Cadangan amalan"
+      ></div>
+    </section>
+
+    <!-- ═══════════════════════════════════════════════════════════════════════
+         View: Tetapan
+    ════════════════════════════════════════════════════════════════════════ -->
+    <section
+      id="view-tetapan"
+      class="app-view"
+      aria-label="Tetapan"
+      hidden
+    >
+      <h1 class="tetapan-title">Tetapan</h1>
+
+      <!-- Group 1: Waktu solat -->
+      <div class="setting-group">
+        <div class="setting-group-title">Waktu solat</div>
+
+        <div class="setting-row">
+          <label class="setting-label" for="setting-zone">Zon waktu solat</label>
+          <select id="setting-zone" name="zone" autocomplete="off">
+            <option value="WLY01">WLY01: Kuala Lumpur &amp; Putrajaya</option>
+            <option value="SGR01">SGR01: Gombak, Hulu Langat, Hulu Selangor, Sepang</option>
+            <option value="SGR02">SGR02: Kuala Selangor, Sabak Bernam</option>
+            <option value="SGR03">SGR03: Klang, Shah Alam</option>
+            <option value="PHG01">PHG01: Pulau Tioman</option>
+            <option value="PHG02">PHG02: Kuantan, Pekan, Rompin, Muadzam Shah</option>
+            <option value="JHR01">JHR01: Pulau Aur, Pulau Pemanggil</option>
+            <option value="JHR02">JHR02: Johor Bahru, Kota Tinggi, Mersing</option>
+            <option value="KDH01">KDH01: Kota Setar, Kubang Pasu, Pokok Sena</option>
+            <option value="KLN01">KLN01: Kelantan</option>
+            <option value="MLK01">MLK01: Melaka</option>
+            <option value="NGS01">NGS01: Negeri Sembilan</option>
+            <option value="PNG01">PNG01: Pulau Pinang</option>
+            <option value="PRK01">PRK01: Perak Tengah</option>
+            <option value="PLS01">PLS01: Perlis</option>
+            <option value="SBH01">SBH01: Kota Kinabalu</option>
+            <option value="SWK01">SWK01: Kuching</option>
+            <option value="TRG01">TRG01: Terengganu</option>
+          </select>
+        </div>
+      </div>
+
+      <!-- Group 2: Waktu peribadi -->
+      <div class="setting-group">
+        <div class="setting-group-title">Jadual peribadi</div>
+
+        <div class="setting-time-row">
+          <div class="setting-row">
+            <label class="setting-label" for="setting-sleep">Waktu tidur</label>
+            <input
+              type="time"
+              id="setting-sleep"
+              name="sleep"
+              value="23:00"
+              autocomplete="off"
+            />
+          </div>
+
+          <div class="setting-row">
+            <label class="setting-label" for="setting-wake">Waktu bangun</label>
+            <input
+              type="time"
+              id="setting-wake"
+              name="wake"
+              value="05:30"
+              autocomplete="off"
+            />
+            <span class="setting-helper">Menentukan tetingkap Tahajud dan Al-Mulk</span>
+          </div>
+        </div>
+      </div>
+
+      <!-- Group 3: Tahap -->
+      <div class="setting-group">
+        <div class="setting-group-title">Tahap amalan</div>
+
+        <div class="setting-row">
+          <label class="setting-label" id="level-label">Tahap</label>
+          <div class="segmented" role="group" aria-labelledby="level-label">
+            <button
+              class="segmented-btn setting-level-btn active"
+              data-value="pemula"
+              type="button"
+              aria-pressed="true"
+            >Pemula</button>
+            <button
+              class="segmented-btn setting-level-btn"
+              data-value="lanjutan"
+              type="button"
+              aria-pressed="false"
+            >Lanjutan</button>
+          </div>
+        </div>
+      </div>
+
+      <!-- Group 4: Bahasa -->
+      <div class="setting-group">
+        <div class="setting-group-title">Bahasa</div>
+
+        <div class="setting-row">
+          <label class="setting-label" id="lang-label">Bahasa paparan</label>
+          <div class="segmented" role="group" aria-labelledby="lang-label">
+            <button
+              class="segmented-btn setting-lang-btn active"
+              data-value="bm"
+              type="button"
+              aria-pressed="true"
+            >BM</button>
+            <button
+              class="segmented-btn setting-lang-btn"
+              data-value="en"
+              type="button"
+              aria-pressed="false"
+            >EN</button>
+          </div>
+        </div>
+      </div>
+
+      <!-- Group 5: Notifikasi -->
+      <div class="setting-group">
+        <div class="setting-group-title">Notifikasi</div>
+
+        <div class="notif-row">
+          <span class="notif-label">Waktu solat</span>
+          <label class="toggle-switch" aria-label="Notifikasi waktu solat">
+            <input type="checkbox" id="notif-prayer" checked />
+            <span class="toggle-track"></span>
+            <span class="toggle-thumb"></span>
+          </label>
+        </div>
+
+        <div class="notif-row">
+          <span class="notif-label">Zikir pagi</span>
+          <label class="toggle-switch" aria-label="Notifikasi zikir pagi">
+            <input type="checkbox" id="notif-zikir-pagi" checked />
+            <span class="toggle-track"></span>
+            <span class="toggle-thumb"></span>
+          </label>
+        </div>
+
+        <div class="notif-row">
+          <span class="notif-label">Zikir petang</span>
+          <label class="toggle-switch" aria-label="Notifikasi zikir petang">
+            <input type="checkbox" id="notif-zikir-petang" checked />
+            <span class="toggle-track"></span>
+            <span class="toggle-thumb"></span>
+          </label>
+        </div>
+
+        <div class="notif-row">
+          <span class="notif-label">Al-Mulk</span>
+          <label class="toggle-switch" aria-label="Notifikasi Al-Mulk">
+            <input type="checkbox" id="notif-al-mulk" checked />
+            <span class="toggle-track"></span>
+            <span class="toggle-thumb"></span>
+          </label>
+        </div>
+
+        <div class="notif-row">
+          <span class="notif-label">Ringkasan harian</span>
+          <label class="toggle-switch" aria-label="Notifikasi ringkasan harian">
+            <input type="checkbox" id="notif-summary" />
+            <span class="toggle-track"></span>
+            <span class="toggle-thumb"></span>
+          </label>
+        </div>
+      </div>
+
+    </section>
+
+  </div><!-- .app-shell -->
+
+  <!-- Data + engine (at end of body, after all DOM is ready) -->
+  <script src="assets/data.js"></script>
+  <script src="assets/app.js"></script>
+</body>
+</html>

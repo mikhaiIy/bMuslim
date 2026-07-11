@@ -1,0 +1,1054 @@
+<!doctype html>
+<html lang="ms">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>bMuslim: Persediaan</title>
+<link rel="preconnect" href="https://fonts.googleapis.com" />
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+<link rel="stylesheet" href="assets/tokens.css" />
+<!--
+  shared.js loaded in <head>, no defer/async: applies theme before paint to
+  prevent FOUC. bmTheme.init() fires synchronously inside the IIFE.
+-->
+<script src="assets/shared.js"></script>
+<style>
+/* ── Page shell ─────────────────────────────────────────────────────────────── */
+html, body {
+  height: 100%;
+}
+
+body {
+  min-height: 100dvh;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: 80px var(--sp-4) 72px;
+  position: relative;
+  overflow-x: hidden;
+}
+
+/* ── Dawn atmosphere ────────────────────────────────────────────────────────── */
+.page-dawn {
+  position: fixed;
+  inset: 0;
+  z-index: 0;
+  pointer-events: none;
+  background:
+    radial-gradient(120% 70% at 10% 0%,   var(--dawn1), transparent 52%),
+    radial-gradient(100% 60% at 92% 8%,   var(--dawn2), transparent 52%),
+    radial-gradient(80%  55% at 50% 100%, var(--dawn1), transparent 58%);
+}
+
+/* ── Wordmark ───────────────────────────────────────────────────────────────── */
+.wordmark {
+  position: fixed;
+  top: var(--sp-5);
+  left: 50%;
+  transform: translateX(-50%);
+  font-size: var(--text-sm);
+  font-weight: 800;
+  letter-spacing: -0.01em;
+  color: var(--text);
+  z-index: 10;
+  white-space: nowrap;
+  opacity: 0.65;
+  user-select: none;
+}
+
+/* ── Theme toggle (top-right corner) ───────────────────────────────────────── */
+.theme-btn {
+  position: fixed;
+  top: var(--sp-4);
+  right: var(--sp-5);
+  z-index: 10;
+  width: 38px;
+  height: 38px;
+  border-radius: var(--r-pill);
+  border: 1px solid var(--line);
+  background: var(--surface);
+  color: var(--text);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  box-shadow: var(--shadow-sm);
+  transition:
+    background var(--dur-fast) var(--ease),
+    border-color var(--dur-fast) var(--ease);
+}
+
+.theme-btn:hover {
+  border-color: rgba(var(--accent-rgb), 0.35);
+  background: rgba(var(--accent-rgb), 0.06);
+}
+
+.theme-btn:focus-visible {
+  outline: 2px solid var(--accent);
+  outline-offset: 2px;
+  border-radius: var(--r-pill);
+}
+
+.theme-btn svg {
+  display: none;
+}
+
+[data-theme="light"] .theme-btn .icon-moon,
+[data-theme="dark"]  .theme-btn .icon-sun  {
+  display: block;
+}
+
+/* ── Card ───────────────────────────────────────────────────────────────────── */
+.ob-card {
+  position: relative;
+  z-index: 2;
+  width: 100%;
+  max-width: 520px;
+  background: var(--surface);
+  border: 1px solid var(--line);
+  border-radius: var(--r-large);
+  box-shadow: var(--shadow-lg);
+  padding: var(--sp-8) var(--sp-8) var(--sp-6);
+}
+
+@media (max-width: 560px) {
+  .ob-card {
+    padding: var(--sp-6) var(--sp-5) var(--sp-5);
+    border-radius: var(--r-card);
+  }
+
+  body {
+    padding-left: var(--sp-3);
+    padding-right: var(--sp-3);
+  }
+}
+
+@media (max-width: 360px) {
+  .ob-card {
+    padding: var(--sp-5) var(--sp-4) var(--sp-4);
+  }
+}
+
+/* ── Step dots ──────────────────────────────────────────────────────────────── */
+.step-dots {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+  margin-bottom: var(--sp-6);
+}
+
+.step-dot {
+  width: 7px;
+  height: 7px;
+  border-radius: var(--r-pill);
+  background: var(--track);
+  border: 1.5px solid var(--faint);
+  transition:
+    width var(--dur-base) var(--ease-out),
+    background var(--dur-base) var(--ease),
+    border-color var(--dur-base) var(--ease);
+}
+
+.step-dot.active {
+  width: 22px;
+  background: var(--accent);
+  border-color: var(--accent);
+}
+
+.step-dot.done {
+  background: rgba(var(--accent-rgb), 0.32);
+  border-color: rgba(var(--accent-rgb), 0.45);
+}
+
+/* ── Step panels ────────────────────────────────────────────────────────────── */
+.step-panel {
+  display: none;
+}
+
+.step-panel.active {
+  display: block;
+}
+
+/* ── Step header ────────────────────────────────────────────────────────────── */
+.step-eyebrow {
+  font-size: var(--text-xs);
+  font-weight: 800;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  color: var(--faint);
+  display: block;
+  margin-bottom: var(--sp-2);
+}
+
+.step-title {
+  font-size: var(--text-2xl);
+  font-weight: 800;
+  letter-spacing: -0.025em;
+  line-height: 1.2;
+  color: var(--text);
+  margin-bottom: var(--sp-2);
+}
+
+.step-desc {
+  font-size: var(--text-sm);
+  color: var(--muted);
+  line-height: 1.65;
+  margin-bottom: var(--sp-6);
+  max-width: 42ch;
+}
+
+/* ── Selection card grid (Bahasa + Tahap) ────────────────────────────────────*/
+.sel-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: var(--sp-3);
+  margin-bottom: var(--sp-6);
+}
+
+@media (max-width: 360px) {
+  .sel-grid {
+    grid-template-columns: 1fr;
+  }
+}
+
+.sel-card {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: var(--sp-2);
+  padding: var(--sp-4);
+  border-radius: var(--r-card);
+  border: 1.5px solid var(--line);
+  background: var(--bg);
+  cursor: pointer;
+  transition:
+    border-color var(--dur-fast) var(--ease),
+    background   var(--dur-fast) var(--ease),
+    box-shadow   var(--dur-fast) var(--ease);
+  text-align: left;
+  font-family: inherit;
+  color: var(--text);
+  outline: none;
+}
+
+.sel-card:hover {
+  border-color: rgba(var(--accent-rgb), 0.38);
+  background: rgba(var(--accent-rgb), 0.04);
+}
+
+.sel-card.selected {
+  border-color: var(--accent);
+  background: rgba(var(--accent-rgb), 0.07);
+  box-shadow: 0 0 0 1px var(--accent);
+}
+
+.sel-card:focus-visible {
+  outline: 2px solid var(--accent);
+  outline-offset: 2px;
+  border-radius: var(--r-card);
+}
+
+/* Selected tick badge */
+.sel-tick {
+  position: absolute;
+  top: var(--sp-3);
+  right: var(--sp-3);
+  width: 20px;
+  height: 20px;
+  border-radius: var(--r-pill);
+  border: 1.5px solid var(--line);
+  background: var(--surface);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition:
+    border-color var(--dur-fast) var(--ease),
+    background   var(--dur-fast) var(--ease);
+  flex-shrink: 0;
+}
+
+.sel-card.selected .sel-tick {
+  border-color: var(--accent);
+  background: var(--accent);
+}
+
+.sel-tick svg {
+  display: none;
+}
+
+.sel-card.selected .sel-tick svg {
+  display: block;
+}
+
+.sel-card-icon {
+  width: 36px;
+  height: 36px;
+  border-radius: 11px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: rgba(var(--accent-rgb), 0.12);
+  color: var(--accent);
+  font-size: 15px;
+  font-weight: 800;
+  flex-shrink: 0;
+  letter-spacing: -0.02em;
+  transition: background var(--dur-fast) var(--ease);
+}
+
+.sel-card.selected .sel-card-icon {
+  background: rgba(var(--accent-rgb), 0.20);
+}
+
+.sel-card-icon.gold {
+  background: rgba(var(--gold-rgb), 0.15);
+  color: var(--gold);
+}
+
+.sel-card.selected .sel-card-icon.gold {
+  background: rgba(var(--gold-rgb), 0.25);
+}
+
+.sel-card-name {
+  font-size: var(--text-base);
+  font-weight: 700;
+  color: var(--text);
+  line-height: 1.2;
+  padding-right: 22px;
+}
+
+.sel-card-sub {
+  font-size: 11.5px;
+  color: var(--muted);
+  font-weight: 500;
+  line-height: 1.5;
+}
+
+/* ── Field wrapper ──────────────────────────────────────────────────────────── */
+.field {
+  display: flex;
+  flex-direction: column;
+  gap: var(--sp-1);
+  margin-bottom: var(--sp-5);
+}
+
+.field:last-of-type {
+  margin-bottom: 0;
+}
+
+.field label {
+  font-size: var(--text-sm);
+  font-weight: 700;
+  color: var(--muted);
+  margin-bottom: 0;
+}
+
+.field-hint {
+  font-size: 11.5px;
+  color: var(--faint);
+  line-height: 1.55;
+  margin-top: var(--sp-1);
+}
+
+/* ── Zone select ────────────────────────────────────────────────────────────── */
+.zon-wrap {
+  margin-bottom: var(--sp-6);
+}
+
+/* dark arrow for selects inside this page */
+[data-theme="dark"] select {
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='16' height='16' viewBox='0 0 24 24' fill='none' stroke='%236F7F76' stroke-width='1.8'%3E%3Cpath d='M6 9l6 6 6-6'/%3E%3C/svg%3E");
+}
+
+/* ── Time inputs row ────────────────────────────────────────────────────────── */
+.time-row {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: var(--sp-4);
+  margin-bottom: var(--sp-4);
+}
+
+@media (max-width: 360px) {
+  .time-row {
+    grid-template-columns: 1fr;
+  }
+}
+
+input[type="time"] {
+  color-scheme: light;
+}
+
+[data-theme="dark"] input[type="time"] {
+  color-scheme: dark;
+}
+
+/* ── Helper note (step 3) ───────────────────────────────────────────────────── */
+.helper-note {
+  display: flex;
+  align-items: flex-start;
+  gap: var(--sp-3);
+  background: rgba(var(--accent-rgb), 0.07);
+  border: 1px solid rgba(var(--accent-rgb), 0.18);
+  border-radius: var(--r-card);
+  padding: var(--sp-3) var(--sp-4);
+  margin-bottom: var(--sp-6);
+}
+
+.helper-note-icon {
+  flex-shrink: 0;
+  margin-top: 1px;
+  color: var(--accent);
+}
+
+.helper-note-text {
+  font-size: 11.5px;
+  color: var(--muted);
+  line-height: 1.6;
+}
+
+/* ── Navigation row ─────────────────────────────────────────────────────────── */
+.nav-row {
+  display: flex;
+  align-items: center;
+  gap: var(--sp-3);
+  padding-top: var(--sp-2);
+}
+
+.btn-back-ob {
+  flex-shrink: 0;
+  width: 44px;
+  height: 44px;
+  border-radius: var(--r-pill);
+  border: 1px solid var(--line);
+  background: var(--surface);
+  color: var(--muted);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  transition:
+    border-color var(--dur-fast) var(--ease),
+    background   var(--dur-fast) var(--ease),
+    color        var(--dur-fast) var(--ease),
+    opacity      var(--dur-fast) var(--ease);
+}
+
+.btn-back-ob:hover {
+  border-color: rgba(var(--accent-rgb), 0.38);
+  background: rgba(var(--accent-rgb), 0.05);
+  color: var(--text);
+}
+
+.btn-back-ob:focus-visible {
+  outline: 2px solid var(--accent);
+  outline-offset: 2px;
+  border-radius: var(--r-pill);
+}
+
+.btn-back-ob[hidden] {
+  visibility: hidden;
+  pointer-events: none;
+}
+
+.btn-next-ob {
+  flex: 1;
+  font-family: inherit;
+  font-size: var(--text-sm);
+  font-weight: 700;
+  color: var(--on-accent);
+  background: var(--accent);
+  border: none;
+  border-radius: var(--r-pill);
+  padding: 13px var(--sp-6);
+  cursor: pointer;
+  box-shadow: var(--shadow-accent);
+  transition:
+    opacity    var(--dur-fast) var(--ease),
+    box-shadow var(--dur-fast) var(--ease);
+}
+
+.btn-next-ob:hover {
+  opacity: 0.88;
+  box-shadow: 0 10px 28px rgba(var(--accent-rgb), 0.36);
+}
+
+.btn-next-ob:active {
+  opacity: 0.78;
+}
+
+.btn-next-ob:focus-visible {
+  outline: 2px solid var(--accent);
+  outline-offset: 3px;
+  border-radius: var(--r-pill);
+}
+
+/* ── Skip link ──────────────────────────────────────────────────────────────── */
+.skip-link {
+  position: relative;
+  z-index: 2;
+  margin-top: var(--sp-5);
+  font-size: var(--text-xs);
+  font-weight: 600;
+  color: var(--faint);
+  text-decoration: none;
+  transition: color var(--dur-fast) var(--ease);
+}
+
+.skip-link:hover {
+  color: var(--muted);
+  opacity: 1;
+}
+
+.skip-link:focus-visible {
+  outline: 2px solid var(--accent);
+  outline-offset: 3px;
+  border-radius: 4px;
+  color: var(--accent);
+}
+
+/* ── Reduced-motion overrides ───────────────────────────────────────────────── */
+@media (prefers-reduced-motion: reduce) {
+  .step-dot,
+  .sel-card,
+  .sel-tick,
+  .btn-back-ob,
+  .btn-next-ob {
+    transition: none;
+  }
+}
+</style>
+</head>
+<body>
+
+<!-- Dawn atmosphere -->
+<div class="page-dawn" aria-hidden="true"></div>
+
+<!-- Film grain (from tokens.css .grain class, fixed z-index 1000) -->
+<div class="grain" aria-hidden="true"></div>
+
+<!-- Wordmark -->
+<div class="wordmark" aria-hidden="true">bMuslim</div>
+
+<!-- Theme toggle -->
+<button class="theme-btn" id="theme-btn" aria-label="Tukar tema paparan" type="button">
+  <!-- Moon: shown in light mode -->
+  <svg class="icon-moon" viewBox="0 0 24 24" width="17" height="17" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+    <path d="M20 14.5A8 8 0 1 1 9.5 4a6.2 6.2 0 0 0 10.5 10.5Z"/>
+  </svg>
+  <!-- Sun: shown in dark mode -->
+  <svg class="icon-sun" viewBox="0 0 24 24" width="17" height="17" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+    <circle cx="12" cy="12" r="4"/>
+    <path d="M12 2v2M12 20v2M4.9 4.9l1.4 1.4M17.7 17.7l1.4 1.4M2 12h2M20 12h2M4.9 19.1l1.4-1.4M17.7 6.3l1.4-1.4"/>
+  </svg>
+</button>
+
+<!-- ── Main card ───────────────────────────────────────────────────────────── -->
+<main class="ob-card" role="main" aria-label="Persediaan awal bMuslim">
+
+  <!-- Step progress dots -->
+  <div class="step-dots" role="group" aria-label="Kemajuan persediaan">
+    <div class="step-dot" id="dot-0" aria-hidden="true"></div>
+    <div class="step-dot" id="dot-1" aria-hidden="true"></div>
+    <div class="step-dot" id="dot-2" aria-hidden="true"></div>
+    <div class="step-dot" id="dot-3" aria-hidden="true"></div>
+  </div>
+
+  <!-- ── Step 1: Bahasa ────────────────────────────────────────────────────── -->
+  <div class="step-panel" id="step-0" role="group" aria-labelledby="title-0">
+    <span class="step-eyebrow">Langkah 1 daripada 4</span>
+    <h1 class="step-title" id="title-0" tabindex="-1">Pilih bahasa</h1>
+    <p class="step-desc">Pilih bahasa paparan yang anda selesa untuk aplikasi ini.</p>
+
+    <div class="sel-grid" role="radiogroup" aria-labelledby="title-0">
+      <button
+        class="sel-card"
+        id="lang-bm"
+        role="radio"
+        aria-checked="false"
+        data-group="lang"
+        data-value="bm"
+        type="button"
+        tabindex="0"
+      >
+        <span class="sel-tick" aria-hidden="true">
+          <svg viewBox="0 0 24 24" width="11" height="11" fill="none" stroke="white" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M5 12l4 4 10-10"/></svg>
+        </span>
+        <div class="sel-card-icon" aria-hidden="true">BM</div>
+        <span class="sel-card-name">Bahasa Melayu</span>
+        <span class="sel-card-sub">Antara muka dalam Bahasa Malaysia</span>
+      </button>
+
+      <button
+        class="sel-card"
+        id="lang-en"
+        role="radio"
+        aria-checked="false"
+        data-group="lang"
+        data-value="en"
+        type="button"
+        tabindex="-1"
+      >
+        <span class="sel-tick" aria-hidden="true">
+          <svg viewBox="0 0 24 24" width="11" height="11" fill="none" stroke="white" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M5 12l4 4 10-10"/></svg>
+        </span>
+        <div class="sel-card-icon" aria-hidden="true">EN</div>
+        <span class="sel-card-name">English</span>
+        <span class="sel-card-sub">Interface in English</span>
+      </button>
+    </div>
+
+    <div class="nav-row">
+      <button class="btn-back-ob" id="back-0" type="button" aria-label="Kembali" hidden>
+        <svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M15 5l-7 7 7 7"/></svg>
+      </button>
+      <button class="btn-next-ob" id="next-0" type="button">Seterusnya</button>
+    </div>
+  </div>
+
+  <!-- ── Step 2: Zon waktu solat ──────────────────────────────────────────── -->
+  <div class="step-panel" id="step-1" role="group" aria-labelledby="title-1">
+    <span class="step-eyebrow">Langkah 2 daripada 4</span>
+    <h1 class="step-title" id="title-1" tabindex="-1">Zon waktu solat</h1>
+    <p class="step-desc">Pilih zon JAKIM yang menepati negeri atau kawasan anda untuk mendapatkan waktu solat yang tepat.</p>
+
+    <div class="zon-wrap">
+      <div class="field">
+        <label for="sel-zon">Zon (JAKIM)</label>
+        <select id="sel-zon" aria-describedby="zon-hint">
+          <optgroup label="Wilayah Persekutuan">
+            <option value="WLY01">WLY01: Kuala Lumpur, Putrajaya</option>
+            <option value="WLY02">WLY02: Labuan</option>
+          </optgroup>
+          <optgroup label="Johor">
+            <option value="JHR01">JHR01: Pulau Aur, Pulau Pemanggil</option>
+            <option value="JHR02">JHR02: Johor Bahru, Kota Tinggi, Mersing</option>
+            <option value="JHR03">JHR03: Kluang, Pontian</option>
+            <option value="JHR04">JHR04: Batu Pahat, Muar, Segamat, Gemas</option>
+          </optgroup>
+          <optgroup label="Kedah">
+            <option value="KDH01">KDH01: Kota Setar, Kubang Pasu, Pokok Sena</option>
+            <option value="KDH02">KDH02: Kuala Muda, Yan, Sik</option>
+            <option value="KDH03">KDH03: Pendang, Baling</option>
+            <option value="KDH04">KDH04: Bandar Baharu, Kulim</option>
+            <option value="KDH05">KDH05: Langkawi</option>
+            <option value="KDH06">KDH06: Padang Terap</option>
+            <option value="KDH07">KDH07: Gunung Jerai</option>
+          </optgroup>
+          <optgroup label="Kelantan">
+            <option value="KTN01">KTN01: Kota Bharu, Bachok, Pasir Puteh, Tumpat</option>
+            <option value="KTN03">KTN03: Gua Musang, Kuala Krai, Jeli</option>
+          </optgroup>
+          <optgroup label="Melaka">
+            <option value="MLK01">MLK01: Seluruh Melaka</option>
+          </optgroup>
+          <optgroup label="Negeri Sembilan">
+            <option value="NGS01">NGS01: Jempol, Tampin</option>
+            <option value="NGS02">NGS02: Jelebu, Kuala Pilah, Rembau</option>
+            <option value="NGS03">NGS03: Port Dickson, Seremban</option>
+          </optgroup>
+          <optgroup label="Pahang">
+            <option value="PHG01">PHG01: Pulau Tioman</option>
+            <option value="PHG02">PHG02: Pekan, Rompin, Muadzam Shah</option>
+            <option value="PHG03">PHG03: Maran, Chenor, Temerloh, Bera</option>
+            <option value="PHG04">PHG04: Bentong, Raub, Jerantut</option>
+            <option value="PHG05">PHG05: Kuantan, Lipis, Gua Musang</option>
+          </optgroup>
+          <optgroup label="Perak">
+            <option value="PRK01">PRK01: Tapah, Slim River, Tanjung Malim</option>
+            <option value="PRK02">PRK02: Kuala Kangsar, S. Perak, Ipoh</option>
+            <option value="PRK03">PRK03: Lenggong, Pengkalan Hulu, Grik</option>
+            <option value="PRK04">PRK04: Temengor, Belum</option>
+            <option value="PRK05">PRK05: Teluk Intan, Hilir Perak</option>
+            <option value="PRK06">PRK06: Manjung, Lumut, Sitiawan, Pangkor</option>
+            <option value="PRK07">PRK07: Hulu Perak, Gerik</option>
+            <option value="PRK08">PRK08: Larut, Matang, Selama</option>
+          </optgroup>
+          <optgroup label="Perlis">
+            <option value="PLS01">PLS01: Seluruh Perlis</option>
+          </optgroup>
+          <optgroup label="Pulau Pinang">
+            <option value="PNG01">PNG01: Seberang Perai Utara, Kepala Batas</option>
+            <option value="PNG02">PNG02: Pulau Pinang, Seberang Perai Selatan</option>
+          </optgroup>
+          <optgroup label="Sabah">
+            <option value="SBH01">SBH01: Kota Kinabalu, Papar, Penampang</option>
+            <option value="SBH02">SBH02: Ranau, Kota Belud, Tuaran, Kota Marudu</option>
+            <option value="SBH03">SBH03: Kudat, Pitas, Pulau Banggi</option>
+            <option value="SBH04">SBH04: Sandakan, Kinabatangan, Beluran</option>
+            <option value="SBH05">SBH05: Tawau, Semporna, Lahad Datu</option>
+            <option value="SBH06">SBH06: Keningau, Tambunan, Nabawan</option>
+            <option value="SBH07">SBH07: Beaufort, Kuala Penyu, Sipitang</option>
+          </optgroup>
+          <optgroup label="Sarawak">
+            <option value="SWK01">SWK01: Limbang, Lawas, Sundar, Trusan</option>
+            <option value="SWK02">SWK02: Miri, Niah, Bekenu, Sibuti</option>
+            <option value="SWK03">SWK03: Marudi, Baram, Ulu Baram</option>
+            <option value="SWK04">SWK04: Bintulu, Tatau, Sebauh</option>
+            <option value="SWK05">SWK05: Kapit, Song, Kanowit</option>
+            <option value="SWK06">SWK06: Sibu, Dalat, Mukah, Oya</option>
+            <option value="SWK07">SWK07: Sarikei, Julau, Maradong</option>
+            <option value="SWK08">SWK08: Sri Aman, Lubok Antu, Betong</option>
+            <option value="SWK09">SWK09: Kuching, Samarahan, Simunjan, Serian</option>
+          </optgroup>
+          <optgroup label="Selangor">
+            <option value="SGR01">SGR01: Gombak, Petaling, Sepang, Hulu Langat</option>
+            <option value="SGR02">SGR02: Kuala Selangor, Sabak Bernam</option>
+            <option value="SGR03">SGR03: Klang, Shah Alam, Kuala Langat</option>
+            <option value="SGR04">SGR04: Hulu Selangor</option>
+          </optgroup>
+          <optgroup label="Terengganu">
+            <option value="TRG01">TRG01: Kuala Terengganu, Marang, Kuala Nerus</option>
+            <option value="TRG02">TRG02: Besut, Setiu</option>
+            <option value="TRG03">TRG03: Hulu Terengganu</option>
+            <option value="TRG04">TRG04: Dungun, Kemaman</option>
+          </optgroup>
+        </select>
+        <p class="field-hint" id="zon-hint">Data waktu solat bersumber dari Jabatan Kemajuan Islam Malaysia (JAKIM), dikemaskini setiap hari.</p>
+      </div>
+    </div>
+
+    <div class="nav-row">
+      <button class="btn-back-ob" id="back-1" type="button" aria-label="Kembali ke langkah sebelumnya">
+        <svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M15 5l-7 7 7 7"/></svg>
+      </button>
+      <button class="btn-next-ob" id="next-1" type="button">Seterusnya</button>
+    </div>
+  </div>
+
+  <!-- ── Step 3: Waktu tidur dan bangun ────────────────────────────────────── -->
+  <div class="step-panel" id="step-2" role="group" aria-labelledby="title-2">
+    <span class="step-eyebrow">Langkah 3 daripada 4</span>
+    <h1 class="step-title" id="title-2" tabindex="-1">Waktu rehat anda</h1>
+    <p class="step-desc">Ini membantu kami menjadualkan amalan malam dan subuh mengikut rutin harian anda.</p>
+
+    <div class="time-row">
+      <div class="field">
+        <label for="input-tidur">Waktu tidur</label>
+        <input
+          type="time"
+          id="input-tidur"
+          value="23:00"
+          aria-describedby="waktu-hint"
+        />
+      </div>
+      <div class="field">
+        <label for="input-bangun">Waktu bangun</label>
+        <input
+          type="time"
+          id="input-bangun"
+          value="05:30"
+          aria-describedby="waktu-hint"
+        />
+      </div>
+    </div>
+
+    <div class="helper-note" id="waktu-hint">
+      <span class="helper-note-icon" aria-hidden="true">
+        <svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="9"/><path d="M12 7v5l3 3"/></svg>
+      </span>
+      <span class="helper-note-text">
+        Digunakan untuk mengira tetingkap Tahajud (sepertiga malam terakhir) dan menentukan masa membaca Surah Al-Mulk sebelum tidur.
+      </span>
+    </div>
+
+    <div class="nav-row">
+      <button class="btn-back-ob" id="back-2" type="button" aria-label="Kembali ke langkah sebelumnya">
+        <svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M15 5l-7 7 7 7"/></svg>
+      </button>
+      <button class="btn-next-ob" id="next-2" type="button">Seterusnya</button>
+    </div>
+  </div>
+
+  <!-- ── Step 4: Tahap amalan ──────────────────────────────────────────────── -->
+  <div class="step-panel" id="step-3" role="group" aria-labelledby="title-3">
+    <span class="step-eyebrow">Langkah 4 daripada 4</span>
+    <h1 class="step-title" id="title-3" tabindex="-1">Tahap amalan</h1>
+    <p class="step-desc">Pilih sesuai dengan kebiasaan harian anda sekarang. Anda boleh tukar ini kemudian dalam Tetapan.</p>
+
+    <div class="sel-grid" role="radiogroup" aria-labelledby="title-3">
+      <button
+        class="sel-card"
+        id="tahap-pemula"
+        role="radio"
+        aria-checked="false"
+        data-group="tahap"
+        data-value="pemula"
+        type="button"
+        tabindex="0"
+      >
+        <span class="sel-tick" aria-hidden="true">
+          <svg viewBox="0 0 24 24" width="11" height="11" fill="none" stroke="white" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M5 12l4 4 10-10"/></svg>
+        </span>
+        <div class="sel-card-icon" aria-hidden="true">
+          <svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+            <path d="M12 22V12"/>
+            <path d="M5 3h14s1 5-3 9-9 3-9 3S5 8 5 3z"/>
+          </svg>
+        </div>
+        <span class="sel-card-name">Pemula</span>
+        <span class="sel-card-sub">Amalan asas harian: solat fardhu, zikir pagi dan petang</span>
+      </button>
+
+      <button
+        class="sel-card"
+        id="tahap-lanjutan"
+        role="radio"
+        aria-checked="false"
+        data-group="tahap"
+        data-value="lanjutan"
+        type="button"
+        tabindex="-1"
+      >
+        <span class="sel-tick" aria-hidden="true">
+          <svg viewBox="0 0 24 24" width="11" height="11" fill="none" stroke="white" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M5 12l4 4 10-10"/></svg>
+        </span>
+        <div class="sel-card-icon gold" aria-hidden="true">
+          <svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+            <circle cx="12" cy="12" r="4"/>
+            <path d="M12 2v2M12 20v2M4.9 4.9l1.4 1.4M17.7 17.7l1.4 1.4M2 12h2M20 12h2M4.9 19.1l1.4-1.4M17.7 6.3l1.4-1.4"/>
+          </svg>
+        </div>
+        <span class="sel-card-name">Lanjutan</span>
+        <span class="sel-card-sub">Tambah Dhuha, Tahajud, puasa sunat dan lain-lain</span>
+      </button>
+    </div>
+
+    <div class="nav-row">
+      <button class="btn-back-ob" id="back-3" type="button" aria-label="Kembali ke langkah sebelumnya">
+        <svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M15 5l-7 7 7 7"/></svg>
+      </button>
+      <button class="btn-next-ob" id="next-3" type="button">Mula</button>
+    </div>
+  </div>
+
+</main>
+
+<!-- Quiet skip link -->
+<a class="skip-link" href="app.html" aria-label="Langkau persediaan dan gunakan tetapan lalai">Langkau</a>
+
+<script>
+(function () {
+  'use strict';
+
+  /* ── Constants ─────────────────────────────────────────────────────────── */
+  var SETTINGS_KEY = 'bmuslim.settings';
+  var TOTAL_STEPS  = 4;
+
+  /* ── Defaults ───────────────────────────────────────────────────────────── */
+  var DEFAULTS = {
+    lang:   'bm',
+    zon:    'WLY01',
+    tidur:  '23:00',
+    bangun: '05:30',
+    tahap:  'pemula'
+  };
+
+  /* ── Load saved settings ────────────────────────────────────────────────── */
+  var settings = Object.assign({}, DEFAULTS);
+
+  try {
+    var raw = localStorage.getItem(SETTINGS_KEY);
+    if (raw) {
+      var parsed = JSON.parse(raw);
+      if (parsed && typeof parsed === 'object') {
+        Object.keys(DEFAULTS).forEach(function (k) {
+          if (k in parsed && parsed[k]) { settings[k] = parsed[k]; }
+        });
+      }
+    }
+  } catch (e) {}
+
+  /* ── Save settings ──────────────────────────────────────────────────────── */
+  function save() {
+    try { localStorage.setItem(SETTINGS_KEY, JSON.stringify(settings)); } catch (e) {}
+  }
+
+  /* ── Step state ─────────────────────────────────────────────────────────── */
+  var currentStep = 0;
+
+  /* ── Selection card logic ────────────────────────────────────────────────── */
+  function setGroup(group, value) {
+    var cards = document.querySelectorAll('[data-group="' + group + '"]');
+    cards.forEach(function (card) {
+      var isMe = card.getAttribute('data-value') === value;
+      card.classList.toggle('selected', isMe);
+      card.setAttribute('aria-checked', isMe ? 'true' : 'false');
+      card.setAttribute('tabindex', isMe ? '0' : '-1');
+    });
+  }
+
+  /* Arrow-key roving-tabindex for radiogroups */
+  function handleRadioKey(e) {
+    var card  = e.currentTarget;
+    var group = card.getAttribute('data-group');
+    var sibs  = Array.from(document.querySelectorAll('[data-group="' + group + '"]'));
+    var idx   = sibs.indexOf(card);
+    var next  = -1;
+
+    if (e.key === 'ArrowRight' || e.key === 'ArrowDown') {
+      next = (idx + 1) % sibs.length;
+    } else if (e.key === 'ArrowLeft' || e.key === 'ArrowUp') {
+      next = (idx - 1 + sibs.length) % sibs.length;
+    } else {
+      return;
+    }
+
+    e.preventDefault();
+    var val = sibs[next].getAttribute('data-value');
+    setGroup(group, val);
+    if (group === 'lang')  { settings.lang  = val; }
+    if (group === 'tahap') { settings.tahap = val; }
+    save();
+    sibs[next].focus();
+  }
+
+  /* ── Collect values from current step before navigating ──────────────────── */
+  function collect(step) {
+    if (step === 1) {
+      var sel = document.getElementById('sel-zon');
+      if (sel) { settings.zon = sel.value; }
+    }
+    if (step === 2) {
+      var t = document.getElementById('input-tidur');
+      var b = document.getElementById('input-bangun');
+      if (t && t.value) { settings.tidur  = t.value; }
+      if (b && b.value) { settings.bangun = b.value; }
+    }
+    save();
+  }
+
+  /* ── Restore values into current step's inputs ───────────────────────────── */
+  function restore(step) {
+    if (step === 0) {
+      setGroup('lang',  settings.lang);
+      bindRadioGroup('lang',  'lang');
+    }
+    if (step === 1) {
+      var sel = document.getElementById('sel-zon');
+      if (sel) { sel.value = settings.zon; }
+    }
+    if (step === 2) {
+      var t = document.getElementById('input-tidur');
+      var b = document.getElementById('input-bangun');
+      if (t) { t.value = settings.tidur;  }
+      if (b) { b.value = settings.bangun; }
+    }
+    if (step === 3) {
+      setGroup('tahap', settings.tahap);
+      bindRadioGroup('tahap', 'tahap');
+    }
+  }
+
+  function bindRadioGroup(group, settingsKey) {
+    document.querySelectorAll('[data-group="' + group + '"]').forEach(function (card) {
+      card.addEventListener('click', function () {
+        var val = card.getAttribute('data-value');
+        setGroup(group, val);
+        settings[settingsKey] = val;
+        save();
+      });
+      card.addEventListener('keydown', handleRadioKey);
+    });
+  }
+
+  /* ── Update dots ─────────────────────────────────────────────────────────── */
+  function updateDots(step) {
+    for (var i = 0; i < TOTAL_STEPS; i++) {
+      var dot = document.getElementById('dot-' + i);
+      if (!dot) { continue; }
+      dot.classList.toggle('active', i === step);
+      dot.classList.toggle('done',   i < step);
+    }
+  }
+
+  /* ── Show a step ─────────────────────────────────────────────────────────── */
+  function showStep(n) {
+    var panels = document.querySelectorAll('.step-panel');
+    panels.forEach(function (p, i) {
+      p.classList.toggle('active', i === n);
+    });
+
+    updateDots(n);
+    restore(n);
+
+    /* Bind per-step live listeners */
+    if (n === 1) {
+      var sel = document.getElementById('sel-zon');
+      if (sel) {
+        sel.addEventListener('change', function () {
+          settings.zon = sel.value;
+          save();
+        });
+      }
+    }
+    if (n === 2) {
+      ['input-tidur', 'input-bangun'].forEach(function (id) {
+        var el = document.getElementById(id);
+        if (el) {
+          el.addEventListener('change', function () {
+            if (id === 'input-tidur')  { settings.tidur  = el.value; }
+            if (id === 'input-bangun') { settings.bangun = el.value; }
+            save();
+          });
+        }
+      });
+    }
+
+    /* Focus the heading for screen readers */
+    var title = document.getElementById('title-' + n);
+    if (title) {
+      setTimeout(function () { title.focus({ preventScroll: true }); }, 60);
+    }
+  }
+
+  /* ── Navigation ──────────────────────────────────────────────────────────── */
+  function goNext() {
+    collect(currentStep);
+    if (currentStep < TOTAL_STEPS - 1) {
+      currentStep++;
+      showStep(currentStep);
+      window.scrollTo({ top: 0, behavior: 'smooth' });
+    } else {
+      settings.onboarded = true;
+      save();
+      window.location.href = 'app.html';
+    }
+  }
+
+  function goBack() {
+    collect(currentStep);
+    if (currentStep > 0) {
+      currentStep--;
+      showStep(currentStep);
+      window.scrollTo({ top: 0, behavior: 'smooth' });
+    }
+  }
+
+  /* ── Wire navigation buttons ─────────────────────────────────────────────── */
+  for (var s = 0; s < TOTAL_STEPS; s++) {
+    (function (i) {
+      var nb = document.getElementById('next-' + i);
+      var bb = document.getElementById('back-' + i);
+      if (nb) { nb.addEventListener('click', goNext); }
+      if (bb) { bb.addEventListener('click', goBack); }
+    }(s));
+  }
+
+  /* ── Theme toggle ────────────────────────────────────────────────────────── */
+  var themeBtn = document.getElementById('theme-btn');
+  if (themeBtn) {
+    themeBtn.addEventListener('click', function () {
+      window.bmTheme.toggle();
+    });
+  }
+
+  /* ── Init ────────────────────────────────────────────────────────────────── */
+  showStep(0);
+
+}());
+</script>
+</body>
+</html>
