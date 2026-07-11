@@ -1,35 +1,57 @@
-# Orchestrator, design, execution, and judging workflow
+# Research, orchestration, design, execution, and judging workflow
 
 This document describes the reusable multi-agent workflow used to design and implement the
 bMuslim two-view home experience. It is intended to be sufficient context for starting a clean
 session without relying on the original conversation.
 
-The workflow deliberately separates **design discovery** from **implementation**. Each phase has
-its own feedback loop, artifacts, score, and stopping gate. A concept does not enter production
-because it looks attractive, and working code does not pass merely because it compiles.
+The workflow deliberately separates **research**, **design discovery**, and **implementation**.
+Each phase has its own feedback loop, artifacts, score, and stopping gate. Inspiration does not
+become direction until it is synthesized into useful principles, a concept does not enter
+production because it looks attractive, and working code does not pass merely because it compiles.
 
 ## Agent setup
 
 | Role | Preferred model | Responsibility | May edit app code? |
 | --- | --- | --- | --- |
 | Creative orchestrator | GPT-5.6 SOL, xhigh/max | Owns user intent, product direction, constraints, priorities, and final decisions | No during design; only directs execution |
+| Research scouts | GPT-5.6 Terra, medium (fresh agents each wave) | Search distinct evidence lanes and return cited, design-relevant findings | No |
+| Research synthesizer | GPT-5.6 SOL, high (separate agent) | Compares scout findings, extracts principles, finds gaps, and directs the next wave | No |
+| Research judge | GPT-5.6 SOL, high (fresh independent agent) | Evaluates research quality after every two waves and decides whether it can enter design | No |
 | Design renderer | Built-in image-generation model | Produces separate, readable visual states from the orchestrator's concepts | No |
-| Creative design judge | Claude Code CLI, Fable-5 high | Critiques concepts, scores them, and supplies constructive alternatives | No |
+| Creative design judge | GPT-5.6 SOL, high (separate agent) | Critiques concepts, scores them, and supplies constructive alternatives | No |
 | Native executor | GPT-5.6 Terra, medium | Implements the locked direction in Android/Compose and verifies it | Yes |
-| Implementation judge | Claude Code CLI, Fable-5 high | Audits actual code and evidence; reports defects and bounded improvements | No |
-| Meta-judge | The same SOL orchestrator | Rates Fable's judgment, resolves disagreements, and decides the next bounded iteration | No |
+| Implementation judge | GPT-5.6 SOL, high (same independent judge) | Audits actual code and evidence; reports defects and bounded improvements | No |
+| Meta-judge | The original SOL xhigh/max orchestrator | Rates the judge's work, resolves disagreements, and decides the next bounded iteration | No |
 
-The Fable judge is independent. It should not be asked to defend the orchestrator's concept or
-reward effort. SOL remains accountable for the final decision: Fable advises and challenges;
-SOL accepts, modifies, or rejects that advice with reasons.
+The SOL-high judge must be a different agent from the SOL-xhigh/max orchestrator. It should not be
+asked to defend the orchestrator's concept or reward effort. The orchestrator remains accountable
+for the final decision: the independent judge advises and challenges; the orchestrator accepts,
+modifies, or rejects that advice with reasons.
 
 Do not run multiple agents against the same writable implementation files. Design work and
 judging can run independently, but only the executor should modify app code during an execution
-round.
+round. With four total concurrency slots, run at most three scouts beside the root orchestrator;
+finish the scout wave before starting the SOL-high synthesis or judgment turn.
 
 ## Workflow at a glance
 
 ```text
+RESEARCH LOOP
+
+User story + observed defects
+   ↓
+2–3 fresh Terra-medium research scouts on separate evidence lanes
+   ↓
+SOL-high synthesis: principles, contradictions, gaps, next-wave questions
+   ↓
+2–3 new clean-context scouts using the synthesis
+   ↓
+Independent SOL-high research judgment after two waves
+   ↓
+SOL-xhigh/max orchestrator accepts, narrows, or repeats
+   └──────────── repeat in two-wave cycles until RESEARCH PASS
+
+
 DESIGN LOOP
 
 User story
@@ -38,7 +60,7 @@ SOL creative direction
    ↓
 Image-generation states
    ↓
-Fable creative judgment + directions
+Independent SOL-high creative judgment + directions
    ↓
 SOL rates the judgment and chooses corrections
    └──────────── repeat until DESIGN LOCK
@@ -52,15 +74,17 @@ SOL implementation brief
    ↓
 Terra implementation + tests + evidence
    ↓
-Fable code/product judgment + directions
+Independent SOL-high code/product judgment + directions
    ↓
 SOL rates the judgment and issues bounded corrections
    └──────────── repeat until IMPLEMENTATION PASS
 ```
 
-Never merge the loops into a vague cycle. Design-loop feedback changes the proposed experience.
-Execution-loop feedback changes the implementation of the already locked experience. If
-implementation reveals a fundamental concept failure, explicitly reopen the design loop.
+Never merge the loops into a vague cycle. Research-loop feedback changes what the team knows and
+which principles are credible. Design-loop feedback changes the proposed experience.
+Execution-loop feedback changes the implementation of the already locked experience. If design
+reveals a missing knowledge question, reopen research explicitly. If implementation reveals a
+fundamental concept failure, explicitly reopen the design loop.
 
 ## Phase 0: preserve the starting point
 
@@ -85,6 +109,140 @@ git switch -c feature/<feature-name>
 Do not use destructive cleanup commands on a dirty worktree. A clean feature commit means the
 feature's patch is isolated; it does not mean deleting unrelated local work.
 
+## Phase R: two-wave human-taste research loop
+
+The purpose of research is not to collect fashionable screenshots. It is to improve the agents'
+ability to notice what a careful human designer notices: occlusion during motion, interrupted
+reading, awkward clipping, ambiguous gesture ownership, poor rhythm, mechanical easing, weak
+shape relationships, lost focus, and moments that stop feeling calm under interaction.
+
+### R1. The orchestrator defines independent evidence lanes
+
+Start each cycle with two or three bounded research lanes. For the bMuslim refinement, use:
+
+1. **Motion and continuity:** high-quality mobile motion systems, spatial continuity, choreography,
+   easing, interruption, clipping, progressive disclosure, and transition-state legibility.
+2. **Radial information and occlusion:** clocks, dials, scrubbers, circular timelines, label
+   collision/placement, edge clipping, adaptive annotations, and strategies for keeping selected
+   information readable while geometry moves.
+3. **Human taste and calm craft:** expert workflows for critique, animation polish, zen or calming
+   interfaces, contemplative products, typography/rhythm, microinteraction restraint, and methods
+   that help AI design agents produce less generic work.
+
+Broaden beyond Android when a transferable principle is credible. Good sources may include native
+platform guidance, conference talks, tutorial videos, case studies, practitioner essays, research
+papers, respected open-source code, design-system motion specifications, and well-documented AI
+design workflows. Do not limit discovery to “mobile app AI prompts.”
+
+### R2. Fresh Terra-medium scouts search the web
+
+Each scout owns one lane and starts with a clean context. Scouts must search rather than rely on
+memory. They return compact evidence, not a link dump.
+
+#### Research-scout command
+
+```text
+You are a focused design-research scout. Search the live web for the assigned evidence lane. Use
+credible original sources where possible: official platform/design guidance, talks or tutorials
+from experienced practitioners, case studies, papers, maintained repositories, and specific
+workflows with visible outcomes. Community posts are useful only when the author demonstrates a
+concrete method or artifact.
+
+For every useful source, provide its title, author/organization, URL, source type, publication or
+update date when available, the exact relevant idea, and why it transfers to this Android product.
+For videos, summarize the relevant segment and provide timestamps when evidence allows. For code
+or skills, identify the exact file/pattern instead of merely naming the repository.
+
+Extract no more than ten strong findings. For each, translate the evidence into a testable design
+heuristic and name its misuse risk. Explicitly cover transition states, not only static endpoints.
+End with contradictions, unanswered questions, and three recommendations for the next research
+wave. Do not edit project files and do not propose final UI screens.
+```
+
+The root agent saves each response under `docs/research/<feature>/cycle-N/wave-N/`. Every factual
+or borrowed claim must retain a direct source URL so later agents can verify it.
+
+### R3. SOL-high synthesizes wave one
+
+After the first scout wave finishes, start a separate SOL-high synthesis agent. Give it all scout
+reports, the current source code/visual evidence, and the actual user story.
+
+#### Research-synthesizer command
+
+```text
+You are the senior design-research synthesizer. Read every scout report and inspect the current
+product evidence. Do not reward source volume. Evaluate source authority, specificity, transfer
+risk, contradictions, and relevance to the observed product defects.
+
+Cluster the evidence into principles a designer or engineer can act on. Separate sourced facts,
+cross-source inference, and your own hypothesis. Convert the strongest findings into an interaction
+audit checklist and measurable design questions. Identify shallow claims, missing transition
+states, and places where website techniques do not transfer safely to native mobile.
+
+Produce a focused brief for a second wave of fresh scouts. The next wave should verify disputed
+ideas, go deeper on the highest-value gaps, and look for implementation-level examples. Do not
+select a final design and do not edit files.
+```
+
+### R4. Fresh scouts run a synthesis-informed second wave
+
+Do not reuse the first-wave agent contexts. Start new Terra-medium agents and supply only the
+user story, current evidence, first-wave synthesis, and their new narrow question. Suitable second
+wave tasks include:
+
+- verifying collision and occlusion strategies in production radial interfaces;
+- finding frame-by-frame examples of text surviving translation, crop, and scale changes;
+- studying calm motion that remains clear under interruption and reduced motion;
+- locating code-level Compose or native examples for coordinate-aware label placement;
+- testing whether AI “taste” workflows actually include critique rubrics, visual comparison,
+  constraint checking, and iteration rather than prompt decoration.
+
+The same citation and testable-heuristic requirements apply.
+
+### R5. An independent SOL-high judge evaluates every two waves
+
+After wave two, start a fresh SOL-high judge that was neither a scout nor the synthesizer. Give it
+the latest reports, the synthesis, selected earlier evidence, the user story, and observed defects.
+
+#### Research-judge command
+
+```text
+You are an independent research-quality judge and constructive design critic. Audit this two-wave
+research cycle against the user's real product problem. You did not produce the research and must
+not defend it.
+
+Score source quality, evidence diversity, depth, contradiction handling, transfer to native mobile,
+attention to in-between animation states, human-craft usefulness, calm-product relevance, and
+conversion into testable design principles. Check important claims against their cited sources
+when possible. Identify unsupported trend language, cargo-cult techniques, duplicated findings,
+and advice that would make the interface busier rather than calmer.
+
+For every weakness, give a precise direction: another source class, a narrower question, a missing
+counterexample, or a stronger acceptance test. Return a score out of 100, P0/P1/P2 research gaps,
+and RESEARCH PASS or ANOTHER TWO-WAVE CYCLE. Passing requires credible principles that can constrain
+the image-led design phase, not merely an impressive bibliography. Do not edit files or design the
+final screen.
+```
+
+The SOL-xhigh/max orchestrator meta-rates this judgment, marks major recommendations ACCEPT,
+MODIFY, or REJECT, and either starts another two-wave research cycle or publishes a research lock.
+
+### R6. Research stopping gate
+
+Pass research into design only when:
+
+- important claims have direct, inspectable sources;
+- multiple evidence types are represented instead of one visual trend ecosystem;
+- findings address static endpoints and in-between animation states;
+- conflicts and platform-transfer risks are explicit;
+- insights have become testable heuristics, audit questions, and anti-patterns;
+- the active product defects have plausible, evidence-backed design approaches;
+- the independent judge has no accepted P0/P1 research gap;
+- the orchestrator publishes a bounded **research lock** for the design agents.
+
+The research lock should say what is known, what remains a hypothesis, which patterns are banned,
+and exactly which questions image generation must explore. Research does not authorize app edits.
+
 ## Phase A: design loop
 
 ### A1. SOL creates the design round
@@ -99,6 +257,12 @@ directions. Each direction should define:
 - accessibility and reduced-motion behavior;
 - compact-screen behavior;
 - risks that the judge should challenge.
+
+For refinement work, each direction also needs an **interaction-state matrix**. Audit every
+important element at rest, while scrubbing, at early/middle/late transition, after interruption,
+at the destination, during reverse, on compact height, at increased font scale, and under reduced
+motion. Record visibility, overlap, clip ownership, contrast, semantic state, and input ownership.
+Human-feeling craft is often the quality of these in-between states rather than the endpoint image.
 
 Three strong alternatives are usually enough. Variants that only change color or decoration do
 not count as different directions.
@@ -143,18 +307,13 @@ If the generator repeatedly fails to demonstrate a precise geometric transition,
 an evidence limitation. Do not keep generating cosmetically different images forever; move the
 question into deterministic native geometry and tests.
 
-### A3. Fable judges creatively
+### A3. The independent SOL-high agent judges creatively
 
-Run Claude Code from the repository root and give it exact artifact paths. Read-only tools keep
-the judge independent:
+Create a fresh GPT-5.6 SOL high agent for the judge role. It must not be the orchestrator agent and
+must remain read-only. Give it exact artifact paths and enough conversation context to understand
+the user story, while preserving its independence from the orchestrator's preferences.
 
-```bash
-claude -p \
-  --model fable \
-  --effort high \
-  --tools Read \
-  "$(cat /path/to/design-judge-prompt.txt)"
-```
+Suggested agent task name: `sol_high_creative_judge`.
 
 The judge prompt must ask for both criticism and direction:
 
@@ -174,20 +333,21 @@ design round needed. Give numeric scores and an explicit PASS, ITERATE, or REJEC
 edit files and do not judge only the written brief when visual evidence exists.
 ```
 
-Save Fable's complete response in `docs/`; do not rely on terminal history.
+Save the judge's complete response in `docs/`; do not rely on transient agent messages.
 
-### A4. SOL meta-judges Fable
+### A4. The SOL-xhigh/max orchestrator meta-judges the reviewer
 
-SOL now evaluates the quality of Fable's review rather than blindly following it.
+The orchestrator now evaluates the quality of the independent review rather than blindly following
+it. The orchestrator and judge must remain separate agent identities throughout the loop.
 
 #### SOL meta-judge command
 
 ```text
 Act as the accountable design orchestrator and meta-judge. Read the original user story, all
-concept evidence, and Fable's independent judgment. Rate Fable's review out of 40 for evidence
+concept evidence, and the SOL-high agent's independent judgment. Rate the review out of 40 for evidence
 use, user-intent fidelity, creative value, technical feasibility, and prioritization.
 
-For every important Fable recommendation, mark ACCEPT, MODIFY, or REJECT and explain why. Resolve
+For every important judge recommendation, mark ACCEPT, MODIFY, or REJECT and explain why. Resolve
 contradictions, distinguish generator failure from concept failure, and prevent optional polish
 from displacing the core interaction. Then issue one bounded next-round brief or declare DESIGN
 LOCKED. A lock must name the winning direction, borrowed elements, rejected ideas, protected
@@ -205,7 +365,7 @@ design when:
 - entry, transition, destination, and reverse are defined;
 - the same core instrument is visibly and technically continuous;
 - accessibility, reduced motion, and compact layouts have explicit behavior;
-- Fable has no unresolved P0 issue;
+- the independent judge has no unresolved P0 issue;
 - SOL has rated the judgment and written a decisive design lock.
 
 The result of Phase A is a **locked execution brief**, not production code.
@@ -225,6 +385,11 @@ The brief should translate the design lock into:
 - stable test tags and pure geometry functions;
 - previews or device states;
 - build, test, lint, and evidence requirements.
+
+It must include an element-by-state contract for any moving or clipped text. A label should have a
+defined anchor, safe region, collision response, fade or relocation rule, semantic lifetime, and
+compact fallback. No important text may become accidentally half-visible; intentional clipping
+must read as a deliberate aperture treatment and never destroy the selected time or action context.
 
 The brief should be bounded enough that Terra can execute without redesigning the feature.
 
@@ -247,12 +412,13 @@ git diff --check. Report exactly what changed, evidence produced, and any missin
 proof. Do not silently broaden the feature or modify unrelated files.
 ```
 
-Only Terra writes implementation files during this phase. SOL and Fable remain read-only.
+Only Terra writes implementation files during this phase. Both SOL agents remain read-only.
 
-### B3. Fable judges the actual implementation
+### B3. The independent SOL-high agent judges the actual implementation
 
-Use Fable high again, but point it at the code, tests, build evidence, and available captures—not
-only the execution brief.
+Reuse the same independent SOL-high judge role, but start a fresh judging turn and point it at the
+code, tests, build evidence, and available captures—not only the execution brief. It must not edit
+the implementation.
 
 ```text
 You are an independent implementation judge, adversarial product reviewer, and constructive
@@ -276,7 +442,7 @@ Save every implementation judgment as a new round document.
 
 ```text
 Act as the accountable orchestrator and implementation meta-judge. Read the locked design, actual
-diff, test/build evidence, and Fable's implementation review. Rate Fable's judgment out of 40 for
+diff, test/build evidence, and the SOL-high agent's implementation review. Rate the judgment out of 40 for
 evidence, severity calibration, user-story fidelity, creative usefulness, and feasibility.
 
 Mark each P0/P1 recommendation ACCEPT, MODIFY, or REJECT with concrete reasoning. Correct factual
@@ -285,7 +451,7 @@ design lock. Optional P2 polish must not restart the loop unless it exposes a co
 Declare IMPLEMENTATION PASS only when no accepted P0/P1 remains and verification is current.
 ```
 
-Terra performs the bounded corrections, regenerates evidence, and returns the work to Fable. The
+Terra performs the bounded corrections, regenerates evidence, and returns the work to the judge. The
 D → E → F → D loop repeats until it passes.
 
 ### B5. Implementation stopping gate
@@ -298,7 +464,7 @@ Pass the implementation when:
 - accessibility semantics, focus, reduced motion, and system Back are coherent;
 - compact behavior has credible code/test evidence;
 - tests, assembly, lint, and `git diff --check` pass;
-- SOL has rated Fable's final review and explicitly accepted the result.
+- the orchestrator has rated the independent judge's final review and explicitly accepted the result.
 
 Device captures may remain optional evidence when no emulator/device exists. Record that honestly.
 
@@ -315,8 +481,8 @@ Use consistent labels across both loops:
 
 Recommended gates:
 
-- Fable design score: use as comparative evidence, not an automatic winner.
-- Fable implementation pass: no unresolved P0/P1, normally at least 80/100.
+- Independent design-judge score: use as comparative evidence, not an automatic winner.
+- Independent implementation-judge pass: no unresolved P0/P1, normally at least 80/100.
 - SOL meta-rating: evaluate the judge out of 40; 30+ indicates a useful, well-calibrated review.
 
 Numbers support decisions; they do not replace explicit reasoning.
@@ -328,11 +494,17 @@ Keep these artifacts in the repository so the workflow survives a context reset:
 ```text
 docs/
   session-handoff-<feature>.md
+  research/<feature>/
+    cycle-1-wave-1-<lane>.md
+    cycle-1-wave-1-synthesis.md
+    cycle-1-wave-2-<lane>.md
+    cycle-1-judge.md
+    research-lock.md
   <feature>-execution-brief.md
-  <feature>-fable-design-round-1.md
-  <feature>-fable-design-round-2.md
-  <feature>-fable-implementation-round-1.md
-  <feature>-fable-implementation-round-2.md
+  <feature>-judge-design-round-1.md
+  <feature>-judge-design-round-2.md
+  <feature>-judge-implementation-round-1.md
+  <feature>-judge-implementation-round-2.md
 
 design/<feature>/
   direction-a/
@@ -362,7 +534,7 @@ git diff --cached --check
 ```
 
 Stage only the feature's files, inspect the staged diff, and create a focused feature commit. The
-final report should give the branch, baseline and feature commit hashes, final Fable and SOL
+final report should give the branch, baseline and feature commit hashes, final judge and orchestrator
 scores, verification results, APK path, important artifacts, and any evidence that remains
 unavailable.
 
@@ -379,8 +551,8 @@ The workflow produced the **Meridian–Aperture hybrid**:
 
 Recorded outcomes:
 
-- Fable design review: 83/100;
-- Fable implementation review: 85/100, no P0/P1;
+- independent design review: 83/100;
+- independent implementation review: 85/100, no P0/P1;
 - SOL final meta-rating: 35/40;
 - 13 unit tests, APK assembly, lint, and `git diff --check` passed.
 
