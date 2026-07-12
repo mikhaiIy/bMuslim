@@ -139,6 +139,19 @@ design workflows. Do not limit discovery to “mobile app AI prompts.”
 Each scout owns one lane and starts with a clean context. Scouts must search rather than rely on
 memory. They return compact evidence, not a link dump.
 
+### Search-provider resilience
+
+The research method must not depend on one quota-limited provider. Prefer Firecrawl when full-page
+extraction is available, but stop before exhausting shared credits. If its quota or billing gate is
+reached, continue with the built-in web search/open tools and direct primary-source pages. Preserve
+the same URL, authorship, date, source-quality, claim-verification, and citation requirements.
+
+Do not repeat already successful searches through a second provider merely to produce more links.
+Save raw provider output outside committed research artifacts, synthesize only sources actually
+used, and record provider failures as evidence limitations rather than weakening the gate. For
+technical questions, use official documentation, upstream source code, standards, or papers;
+provider convenience never changes the source hierarchy.
+
 #### Research-scout command
 
 ```text
