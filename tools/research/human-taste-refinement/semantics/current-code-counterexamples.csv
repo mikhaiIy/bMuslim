@@ -1,0 +1,14 @@
+kind,input,current,required,reason
+range_wrap,1439,0,1435,0..1439 is rounded to 5 minutes; 1439/1440 becomes 1440 then wraps to 0
+range_wrap,1440,0,1435,0..1439 is rounded to 5 minutes; 1439/1440 becomes 1440 then wraps to 0
+premature_summary_focus,0.36,summary composed + focusable,summary inaccessible/not focusable until settled detail,revealFraction(Summary)=0.058824 > .05
+premature_summary_focus,0.5,summary composed + focusable,summary inaccessible/not focusable until settled detail,revealFraction(Summary)=0.470588 > .05
+premature_summary_focus,0.75,summary composed + focusable,summary inaccessible/not focusable until settled detail,revealFraction(Summary)=1.000000 > .05
+premature_summary_focus,0.9,summary composed + focusable,summary inaccessible/not focusable until settled detail,revealFraction(Summary)=1.000000 > .05
+duplicate_fardhu_speech,359,activeText:subuh|prayerText:subuh,time|fardhu:subuh|context|day,wheelDescription repeats active fardhu in activeText and prayerText
+duplicate_fardhu_speech,801,activeText:zohor|prayerText:zohor,time|fardhu:zohor|context|day,wheelDescription repeats active fardhu in activeText and prayerText
+duplicate_fardhu_speech,1005,activeText:asar|prayerText:asar,time|fardhu:asar|context|day,wheelDescription repeats active fardhu in activeText and prayerText
+duplicate_fardhu_speech,1169,activeText:maghrib|prayerText:maghrib,time|fardhu:maghrib|context|day,wheelDescription repeats active fardhu in activeText and prayerText
+duplicate_fardhu_speech,1242,activeText:isyak|prayerText:isyak,time|fardhu:isyak|context|day,wheelDescription repeats active fardhu in activeText and prayerText
+semantic_clock,all states,AlmanacHeader Text(formatMinute) emits Text semantics,zero semantic clocks; Canvas range node is sole canonical adjustable time owner,visual header clock is not cleared or marked invisible/redundant
+alpha_visibility_policy,detail content during transition,Surface/summary/ledger/close/navigation exposure is controlled partly by alpha,semantic exposure controlled structurally by settled state,positive alpha is not a semantic hiding contract

@@ -1,0 +1,215 @@
+{
+  "outputDir": "/home/mikhaily/dev/bi/bMuslim/tools/research/human-taste-refinement/geometry/output",
+  "rows": {
+    "dual": 997920,
+    "clock": 16128
+  },
+  "dual": {
+    "A": {
+      "rows": 332640,
+      "overlapRows": 131040,
+      "primaryReadableFailures": 0,
+      "primaryDirect": 218484,
+      "primaryFallback": 53676,
+      "secondarySafeOrFallbackFailures": 0,
+      "baselineFailures": 0,
+      "secondaryDirect": 49440,
+      "secondaryFallback": 81600,
+      "ownerCandidateCounts": {
+        "full-width-fallback": 53676,
+        "none": 60480,
+        "right": 218484
+      },
+      "secondaryCandidateCounts": {
+        "detail-disclosure": 81600,
+        "none": 201600,
+        "stable-rail": 10884,
+        "stack-below": 38556
+      },
+      "overlapByScale": {
+        "1": {
+          "rows": 32760,
+          "primaryFallback": 0,
+          "secondaryDirect": 32760,
+          "secondaryFallback": 0
+        },
+        "2": {
+          "rows": 32760,
+          "primaryFallback": 32760,
+          "secondaryDirect": 0,
+          "secondaryFallback": 32760
+        },
+        "1.3": {
+          "rows": 32760,
+          "primaryFallback": 0,
+          "secondaryDirect": 13608,
+          "secondaryFallback": 19152
+        },
+        "1.6": {
+          "rows": 32760,
+          "primaryFallback": 5796,
+          "secondaryDirect": 3072,
+          "secondaryFallback": 29688
+        }
+      }
+    },
+    "B": {
+      "rows": 332640,
+      "overlapRows": 131040,
+      "primaryReadableFailures": 0,
+      "primaryDirect": 218484,
+      "primaryFallback": 53676,
+      "secondarySafeOrFallbackFailures": 0,
+      "baselineFailures": 0,
+      "secondaryDirect": 49440,
+      "secondaryFallback": 81600,
+      "ownerCandidateCounts": {
+        "full-width-fallback": 53676,
+        "none": 60480,
+        "right": 218484
+      },
+      "secondaryCandidateCounts": {
+        "detail-disclosure": 81600,
+        "none": 201600,
+        "stable-rail": 49440
+      },
+      "overlapByScale": {
+        "1": {
+          "rows": 32760,
+          "primaryFallback": 0,
+          "secondaryDirect": 32760,
+          "secondaryFallback": 0
+        },
+        "2": {
+          "rows": 32760,
+          "primaryFallback": 32760,
+          "secondaryDirect": 0,
+          "secondaryFallback": 32760
+        },
+        "1.3": {
+          "rows": 32760,
+          "primaryFallback": 0,
+          "secondaryDirect": 13608,
+          "secondaryFallback": 19152
+        },
+        "1.6": {
+          "rows": 32760,
+          "primaryFallback": 5796,
+          "secondaryDirect": 3072,
+          "secondaryFallback": 29688
+        }
+      }
+    },
+    "C": {
+      "rows": 332640,
+      "overlapRows": 131040,
+      "primaryReadableFailures": 0,
+      "primaryDirect": 218484,
+      "primaryFallback": 53676,
+      "secondarySafeOrFallbackFailures": 0,
+      "baselineFailures": 0,
+      "secondaryDirect": 70962,
+      "secondaryFallback": 60078,
+      "ownerCandidateCounts": {
+        "full-width-fallback": 53676,
+        "none": 60480,
+        "right": 218484
+      },
+      "secondaryCandidateCounts": {
+        "compact-cue": 46242,
+        "detail-disclosure": 60078,
+        "none": 201600,
+        "stable-rail": 5442,
+        "stack-below": 19278
+      },
+      "overlapByScale": {
+        "1": {
+          "rows": 32760,
+          "primaryFallback": 0,
+          "secondaryDirect": 32760,
+          "secondaryFallback": 0
+        },
+        "2": {
+          "rows": 32760,
+          "primaryFallback": 32760,
+          "secondaryDirect": 0,
+          "secondaryFallback": 32760
+        },
+        "1.3": {
+          "rows": 32760,
+          "primaryFallback": 0,
+          "secondaryDirect": 23184,
+          "secondaryFallback": 9576
+        },
+        "1.6": {
+          "rows": 32760,
+          "primaryFallback": 5796,
+          "secondaryDirect": 15018,
+          "secondaryFallback": 17742
+        }
+      }
+    }
+  },
+  "clock": {
+    "overlay": {
+      "rows": 8064,
+      "unsafe": 160,
+      "unsafeByConfiguration": {
+        "360x640/inset36/scale2": {
+          "rows": 144,
+          "firstProgress": 0.6,
+          "lastProgress": 1
+        },
+        "390x844/inset36/scale2": {
+          "rows": 16,
+          "firstProgress": 1,
+          "lastProgress": 1
+        }
+      },
+      "visibleCountFailures": 0,
+      "baselineFailures": 0,
+      "gapRows": 0,
+      "declaredGapProgress": null
+    },
+    "fade": {
+      "rows": 8064,
+      "unsafe": 480,
+      "unsafeByConfiguration": {
+        "360x640/inset36/scale2": {
+          "rows": 144,
+          "firstProgress": 0.6,
+          "lastProgress": 1
+        },
+        "390x844/inset0/scale2": {
+          "rows": 32,
+          "firstProgress": 0.35,
+          "lastProgress": 0.4
+        },
+        "390x844/inset24/scale2": {
+          "rows": 112,
+          "firstProgress": 0.1,
+          "lastProgress": 0.4
+        },
+        "390x844/inset36/scale1.6": {
+          "rows": 32,
+          "firstProgress": 0.35,
+          "lastProgress": 0.4
+        },
+        "390x844/inset36/scale2": {
+          "rows": 160,
+          "firstProgress": 0,
+          "lastProgress": 1
+        }
+      },
+      "visibleCountFailures": 0,
+      "baselineFailures": 0,
+      "gapRows": 1152,
+      "declaredGapProgress": [
+        0.45,
+        0.55
+      ]
+    }
+  },
+  "directionFailures": 0,
+  "boundaryFailures": 0
+}

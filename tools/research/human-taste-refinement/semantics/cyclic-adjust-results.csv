@@ -1,0 +1,5 @@
+current,direction,result,expected,pass
+0,-1,1435,1435,True
+1435,1,0,0,True
+600,-1,595,595,True
+600,1,605,605,True

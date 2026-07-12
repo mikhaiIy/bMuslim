@@ -1,0 +1,26 @@
+{
+  "contract_cases": 23400,
+  "contract_passes": 23400,
+  "contract_failures": 0,
+  "overlap_minute_rows": 75,
+  "unique_minutes": 75,
+  "interaction_states": 26,
+  "motions": [
+    "normal",
+    "zero",
+    "app_reduced"
+  ],
+  "layouts": [
+    "regular_normal_type",
+    "regular_high_type",
+    "compact_normal_type",
+    "compact_high_type"
+  ],
+  "range_cases": 7,
+  "range_failures": 0,
+  "cyclic_cases": 4,
+  "cyclic_failures": 0,
+  "current_code_counterexamples": 13,
+  "status": "CONTRACT_PASS",
+  "application_validation": "NOT_PERFORMED"
+}

@@ -1,0 +1,1361 @@
+{
+  "generatedAt": "2026-07-12T00:40:10.916Z",
+  "evidenceClass": "HOST_PROXY_NOT_ANDROID_TEXTMEASURER_PROOF",
+  "blocker": {
+    "resolvedDependency": "androidx.compose.ui:ui-text-android:1.7.6",
+    "reason": "Android AAR paragraph/font resolver requires Android runtime; no adb, emulator, configured AVD, or cached Robolectric runtime was available."
+  },
+  "versions": {
+    "node": "v25.8.0",
+    "imageMagick": "Version: ImageMagick 7.1.2-24 Q16-HDRI x86_64 3c45ab0bf:20260525 https://imagemagick.org",
+    "fontconfig": "fontconfig version 2.17.1",
+    "sansFont": "/usr/share/fonts/liberation/LiberationSans-Regular.ttf",
+    "sansBoldFont": "/usr/share/fonts/liberation/LiberationSans-Bold.ttf",
+    "monoFont": "/usr/share/fonts/TTF/JetBrainsMonoNerdFontMono-Regular.ttf"
+  },
+  "matrix": {
+    "widths": [
+      {
+        "width": 360,
+        "height": 640,
+        "compact": true
+      },
+      {
+        "width": 390,
+        "height": 844,
+        "compact": false
+      }
+    ],
+    "insets": [
+      0,
+      24,
+      36
+    ],
+    "scales": [
+      1,
+      1.3,
+      1.6,
+      2
+    ],
+    "progress": [
+      0,
+      0.05,
+      0.1,
+      0.15,
+      0.2,
+      0.25,
+      0.3,
+      0.35,
+      0.4,
+      0.45,
+      0.5,
+      0.55,
+      0.6,
+      0.65,
+      0.7,
+      0.75,
+      0.8,
+      0.85,
+      0.9,
+      0.95,
+      1
+    ],
+    "directions": [
+      "forward",
+      "reverse"
+    ],
+    "interactions": [
+      "touch",
+      "settled"
+    ],
+    "duals": [
+      "A",
+      "B",
+      "C"
+    ],
+    "clocks": [
+      "00:00",
+      "11:11",
+      "19:45",
+      "23:59"
+    ],
+    "clockStrategies": [
+      "overlay",
+      "fade"
+    ],
+    "minuteRanges": [
+      {
+        "id": "subuh-zikir",
+        "start": 349,
+        "end": 389
+      },
+      {
+        "id": "zohor-dhuha",
+        "start": 791,
+        "end": 811
+      },
+      {
+        "id": "asar-zikir",
+        "start": 995,
+        "end": 1035
+      },
+      {
+        "id": "maghrib-zikir",
+        "start": 1159,
+        "end": 1179
+      },
+      {
+        "id": "isyak-almulk",
+        "start": 1232,
+        "end": 1272
+      }
+    ],
+    "minuteSamples": 165
+  },
+  "rows": {
+    "dual": 997920,
+    "clock": 16128
+  },
+  "ownership": {
+    "contract": "active fardhu first, independent of progress/direction/dual hypothesis",
+    "boundaryChecks": [
+      {
+        "minute": 358,
+        "expected": "none",
+        "actual": "none"
+      },
+      {
+        "minute": 359,
+        "expected": "fardhu",
+        "actual": "fardhu"
+      },
+      {
+        "minute": 379,
+        "expected": "fardhu",
+        "actual": "fardhu"
+      },
+      {
+        "minute": 380,
+        "expected": "context",
+        "actual": "context"
+      },
+      {
+        "minute": 800,
+        "expected": "context",
+        "actual": "context"
+      },
+      {
+        "minute": 801,
+        "expected": "fardhu",
+        "actual": "fardhu"
+      },
+      {
+        "minute": 802,
+        "expected": "fardhu",
+        "actual": "fardhu"
+      },
+      {
+        "minute": 1004,
+        "expected": "none",
+        "actual": "none"
+      },
+      {
+        "minute": 1005,
+        "expected": "fardhu",
+        "actual": "fardhu"
+      },
+      {
+        "minute": 1025,
+        "expected": "fardhu",
+        "actual": "fardhu"
+      },
+      {
+        "minute": 1026,
+        "expected": "context",
+        "actual": "context"
+      },
+      {
+        "minute": 1168,
+        "expected": "context",
+        "actual": "context"
+      },
+      {
+        "minute": 1169,
+        "expected": "fardhu",
+        "actual": "fardhu"
+      },
+      {
+        "minute": 1170,
+        "expected": "fardhu",
+        "actual": "fardhu"
+      },
+      {
+        "minute": 1241,
+        "expected": "none",
+        "actual": "none"
+      },
+      {
+        "minute": 1242,
+        "expected": "fardhu",
+        "actual": "fardhu"
+      },
+      {
+        "minute": 1262,
+        "expected": "fardhu",
+        "actual": "fardhu"
+      },
+      {
+        "minute": 1263,
+        "expected": "context",
+        "actual": "context"
+      }
+    ],
+    "boundaryFailures": 0
+  },
+  "dual": {
+    "A": {
+      "rows": 332640,
+      "overlapRows": 131040,
+      "primaryReadableFailures": 0,
+      "primaryDirect": 218484,
+      "primaryFallback": 53676,
+      "secondarySafeOrFallbackFailures": 0,
+      "baselineFailures": 0,
+      "secondaryDirect": 49440,
+      "secondaryFallback": 81600,
+      "ownerCandidateCounts": {
+        "full-width-fallback": 53676,
+        "none": 60480,
+        "right": 218484
+      },
+      "secondaryCandidateCounts": {
+        "detail-disclosure": 81600,
+        "none": 201600,
+        "stable-rail": 10884,
+        "stack-below": 38556
+      },
+      "overlapByScale": {
+        "1": {
+          "rows": 32760,
+          "primaryFallback": 0,
+          "secondaryDirect": 32760,
+          "secondaryFallback": 0
+        },
+        "2": {
+          "rows": 32760,
+          "primaryFallback": 32760,
+          "secondaryDirect": 0,
+          "secondaryFallback": 32760
+        },
+        "1.3": {
+          "rows": 32760,
+          "primaryFallback": 0,
+          "secondaryDirect": 13608,
+          "secondaryFallback": 19152
+        },
+        "1.6": {
+          "rows": 32760,
+          "primaryFallback": 5796,
+          "secondaryDirect": 3072,
+          "secondaryFallback": 29688
+        }
+      }
+    },
+    "B": {
+      "rows": 332640,
+      "overlapRows": 131040,
+      "primaryReadableFailures": 0,
+      "primaryDirect": 218484,
+      "primaryFallback": 53676,
+      "secondarySafeOrFallbackFailures": 0,
+      "baselineFailures": 0,
+      "secondaryDirect": 49440,
+      "secondaryFallback": 81600,
+      "ownerCandidateCounts": {
+        "full-width-fallback": 53676,
+        "none": 60480,
+        "right": 218484
+      },
+      "secondaryCandidateCounts": {
+        "detail-disclosure": 81600,
+        "none": 201600,
+        "stable-rail": 49440
+      },
+      "overlapByScale": {
+        "1": {
+          "rows": 32760,
+          "primaryFallback": 0,
+          "secondaryDirect": 32760,
+          "secondaryFallback": 0
+        },
+        "2": {
+          "rows": 32760,
+          "primaryFallback": 32760,
+          "secondaryDirect": 0,
+          "secondaryFallback": 32760
+        },
+        "1.3": {
+          "rows": 32760,
+          "primaryFallback": 0,
+          "secondaryDirect": 13608,
+          "secondaryFallback": 19152
+        },
+        "1.6": {
+          "rows": 32760,
+          "primaryFallback": 5796,
+          "secondaryDirect": 3072,
+          "secondaryFallback": 29688
+        }
+      }
+    },
+    "C": {
+      "rows": 332640,
+      "overlapRows": 131040,
+      "primaryReadableFailures": 0,
+      "primaryDirect": 218484,
+      "primaryFallback": 53676,
+      "secondarySafeOrFallbackFailures": 0,
+      "baselineFailures": 0,
+      "secondaryDirect": 70962,
+      "secondaryFallback": 60078,
+      "ownerCandidateCounts": {
+        "full-width-fallback": 53676,
+        "none": 60480,
+        "right": 218484
+      },
+      "secondaryCandidateCounts": {
+        "compact-cue": 46242,
+        "detail-disclosure": 60078,
+        "none": 201600,
+        "stable-rail": 5442,
+        "stack-below": 19278
+      },
+      "overlapByScale": {
+        "1": {
+          "rows": 32760,
+          "primaryFallback": 0,
+          "secondaryDirect": 32760,
+          "secondaryFallback": 0
+        },
+        "2": {
+          "rows": 32760,
+          "primaryFallback": 32760,
+          "secondaryDirect": 0,
+          "secondaryFallback": 32760
+        },
+        "1.3": {
+          "rows": 32760,
+          "primaryFallback": 0,
+          "secondaryDirect": 23184,
+          "secondaryFallback": 9576
+        },
+        "1.6": {
+          "rows": 32760,
+          "primaryFallback": 5796,
+          "secondaryDirect": 15018,
+          "secondaryFallback": 17742
+        }
+      }
+    }
+  },
+  "clock": {
+    "overlay": {
+      "rows": 8064,
+      "unsafe": 160,
+      "unsafeByConfiguration": {
+        "360x640/inset36/scale2": {
+          "rows": 144,
+          "firstProgress": 0.6,
+          "lastProgress": 1
+        },
+        "390x844/inset36/scale2": {
+          "rows": 16,
+          "firstProgress": 1,
+          "lastProgress": 1
+        }
+      },
+      "visibleCountFailures": 0,
+      "baselineFailures": 0,
+      "gapRows": 0,
+      "declaredGapProgress": null
+    },
+    "fade": {
+      "rows": 8064,
+      "unsafe": 480,
+      "unsafeByConfiguration": {
+        "360x640/inset36/scale2": {
+          "rows": 144,
+          "firstProgress": 0.6,
+          "lastProgress": 1
+        },
+        "390x844/inset0/scale2": {
+          "rows": 32,
+          "firstProgress": 0.35,
+          "lastProgress": 0.4
+        },
+        "390x844/inset24/scale2": {
+          "rows": 112,
+          "firstProgress": 0.1,
+          "lastProgress": 0.4
+        },
+        "390x844/inset36/scale1.6": {
+          "rows": 32,
+          "firstProgress": 0.35,
+          "lastProgress": 0.4
+        },
+        "390x844/inset36/scale2": {
+          "rows": 160,
+          "firstProgress": 0,
+          "lastProgress": 1
+        }
+      },
+      "visibleCountFailures": 0,
+      "baselineFailures": 0,
+      "gapRows": 1152,
+      "declaredGapProgress": [
+        0.45,
+        0.55
+      ]
+    }
+  },
+  "directionFailures": 0,
+  "firstCounterexamples": [
+    {
+      "type": "clock-gate",
+      "row": {
+        "width": 360,
+        "height": 640,
+        "inset": 36,
+        "scale": 2,
+        "progress": 0.6,
+        "direction": "forward",
+        "text": "00:00",
+        "strategy": "overlay",
+        "visibleCount": 1,
+        "safeVisible": false,
+        "gap": false,
+        "gapWidth": 0,
+        "role": "overlay",
+        "bounds": {
+          "left": 175,
+          "top": 41,
+          "right": 344,
+          "bottom": 117
+        },
+        "safe": {
+          "left": 16,
+          "top": 41,
+          "right": 344,
+          "bottom": 116.21599999999998
+        },
+        "baselineSafe": true
+      }
+    },
+    {
+      "type": "clock-gate",
+      "row": {
+        "width": 360,
+        "height": 640,
+        "inset": 36,
+        "scale": 2,
+        "progress": 0.6,
+        "direction": "forward",
+        "text": "00:00",
+        "strategy": "fade",
+        "visibleCount": 1,
+        "safeVisible": false,
+        "gap": false,
+        "gapWidth": 0.1,
+        "role": "destination",
+        "bounds": {
+          "left": 175,
+          "top": 41,
+          "right": 344,
+          "bottom": 117
+        },
+        "safe": {
+          "left": 16,
+          "top": 41,
+          "right": 344,
+          "bottom": 116.21599999999998
+        },
+        "baselineSafe": true
+      }
+    },
+    {
+      "type": "clock-gate",
+      "row": {
+        "width": 360,
+        "height": 640,
+        "inset": 36,
+        "scale": 2,
+        "progress": 0.6,
+        "direction": "forward",
+        "text": "11:11",
+        "strategy": "overlay",
+        "visibleCount": 1,
+        "safeVisible": false,
+        "gap": false,
+        "gapWidth": 0,
+        "role": "overlay",
+        "bounds": {
+          "left": 175,
+          "top": 41,
+          "right": 344,
+          "bottom": 117
+        },
+        "safe": {
+          "left": 16,
+          "top": 41,
+          "right": 344,
+          "bottom": 116.21599999999998
+        },
+        "baselineSafe": true
+      }
+    },
+    {
+      "type": "clock-gate",
+      "row": {
+        "width": 360,
+        "height": 640,
+        "inset": 36,
+        "scale": 2,
+        "progress": 0.6,
+        "direction": "forward",
+        "text": "11:11",
+        "strategy": "fade",
+        "visibleCount": 1,
+        "safeVisible": false,
+        "gap": false,
+        "gapWidth": 0.1,
+        "role": "destination",
+        "bounds": {
+          "left": 175,
+          "top": 41,
+          "right": 344,
+          "bottom": 117
+        },
+        "safe": {
+          "left": 16,
+          "top": 41,
+          "right": 344,
+          "bottom": 116.21599999999998
+        },
+        "baselineSafe": true
+      }
+    },
+    {
+      "type": "clock-gate",
+      "row": {
+        "width": 360,
+        "height": 640,
+        "inset": 36,
+        "scale": 2,
+        "progress": 0.6,
+        "direction": "forward",
+        "text": "19:45",
+        "strategy": "overlay",
+        "visibleCount": 1,
+        "safeVisible": false,
+        "gap": false,
+        "gapWidth": 0,
+        "role": "overlay",
+        "bounds": {
+          "left": 175,
+          "top": 41,
+          "right": 344,
+          "bottom": 117
+        },
+        "safe": {
+          "left": 16,
+          "top": 41,
+          "right": 344,
+          "bottom": 116.21599999999998
+        },
+        "baselineSafe": true
+      }
+    },
+    {
+      "type": "clock-gate",
+      "row": {
+        "width": 360,
+        "height": 640,
+        "inset": 36,
+        "scale": 2,
+        "progress": 0.6,
+        "direction": "forward",
+        "text": "19:45",
+        "strategy": "fade",
+        "visibleCount": 1,
+        "safeVisible": false,
+        "gap": false,
+        "gapWidth": 0.1,
+        "role": "destination",
+        "bounds": {
+          "left": 175,
+          "top": 41,
+          "right": 344,
+          "bottom": 117
+        },
+        "safe": {
+          "left": 16,
+          "top": 41,
+          "right": 344,
+          "bottom": 116.21599999999998
+        },
+        "baselineSafe": true
+      }
+    },
+    {
+      "type": "clock-gate",
+      "row": {
+        "width": 360,
+        "height": 640,
+        "inset": 36,
+        "scale": 2,
+        "progress": 0.6,
+        "direction": "forward",
+        "text": "23:59",
+        "strategy": "overlay",
+        "visibleCount": 1,
+        "safeVisible": false,
+        "gap": false,
+        "gapWidth": 0,
+        "role": "overlay",
+        "bounds": {
+          "left": 175,
+          "top": 41,
+          "right": 344,
+          "bottom": 117
+        },
+        "safe": {
+          "left": 16,
+          "top": 41,
+          "right": 344,
+          "bottom": 116.21599999999998
+        },
+        "baselineSafe": true
+      }
+    },
+    {
+      "type": "clock-gate",
+      "row": {
+        "width": 360,
+        "height": 640,
+        "inset": 36,
+        "scale": 2,
+        "progress": 0.6,
+        "direction": "forward",
+        "text": "23:59",
+        "strategy": "fade",
+        "visibleCount": 1,
+        "safeVisible": false,
+        "gap": false,
+        "gapWidth": 0.1,
+        "role": "destination",
+        "bounds": {
+          "left": 175,
+          "top": 41,
+          "right": 344,
+          "bottom": 117
+        },
+        "safe": {
+          "left": 16,
+          "top": 41,
+          "right": 344,
+          "bottom": 116.21599999999998
+        },
+        "baselineSafe": true
+      }
+    },
+    {
+      "type": "clock-gate",
+      "row": {
+        "width": 360,
+        "height": 640,
+        "inset": 36,
+        "scale": 2,
+        "progress": 0.6,
+        "direction": "reverse",
+        "text": "00:00",
+        "strategy": "overlay",
+        "visibleCount": 1,
+        "safeVisible": false,
+        "gap": false,
+        "gapWidth": 0,
+        "role": "overlay",
+        "bounds": {
+          "left": 175,
+          "top": 41,
+          "right": 344,
+          "bottom": 117
+        },
+        "safe": {
+          "left": 16,
+          "top": 41,
+          "right": 344,
+          "bottom": 116.21599999999998
+        },
+        "baselineSafe": true
+      }
+    },
+    {
+      "type": "clock-gate",
+      "row": {
+        "width": 360,
+        "height": 640,
+        "inset": 36,
+        "scale": 2,
+        "progress": 0.6,
+        "direction": "reverse",
+        "text": "00:00",
+        "strategy": "fade",
+        "visibleCount": 1,
+        "safeVisible": false,
+        "gap": false,
+        "gapWidth": 0.1,
+        "role": "destination",
+        "bounds": {
+          "left": 175,
+          "top": 41,
+          "right": 344,
+          "bottom": 117
+        },
+        "safe": {
+          "left": 16,
+          "top": 41,
+          "right": 344,
+          "bottom": 116.21599999999998
+        },
+        "baselineSafe": true
+      }
+    },
+    {
+      "type": "clock-gate",
+      "row": {
+        "width": 360,
+        "height": 640,
+        "inset": 36,
+        "scale": 2,
+        "progress": 0.6,
+        "direction": "reverse",
+        "text": "11:11",
+        "strategy": "overlay",
+        "visibleCount": 1,
+        "safeVisible": false,
+        "gap": false,
+        "gapWidth": 0,
+        "role": "overlay",
+        "bounds": {
+          "left": 175,
+          "top": 41,
+          "right": 344,
+          "bottom": 117
+        },
+        "safe": {
+          "left": 16,
+          "top": 41,
+          "right": 344,
+          "bottom": 116.21599999999998
+        },
+        "baselineSafe": true
+      }
+    },
+    {
+      "type": "clock-gate",
+      "row": {
+        "width": 360,
+        "height": 640,
+        "inset": 36,
+        "scale": 2,
+        "progress": 0.6,
+        "direction": "reverse",
+        "text": "11:11",
+        "strategy": "fade",
+        "visibleCount": 1,
+        "safeVisible": false,
+        "gap": false,
+        "gapWidth": 0.1,
+        "role": "destination",
+        "bounds": {
+          "left": 175,
+          "top": 41,
+          "right": 344,
+          "bottom": 117
+        },
+        "safe": {
+          "left": 16,
+          "top": 41,
+          "right": 344,
+          "bottom": 116.21599999999998
+        },
+        "baselineSafe": true
+      }
+    },
+    {
+      "type": "clock-gate",
+      "row": {
+        "width": 360,
+        "height": 640,
+        "inset": 36,
+        "scale": 2,
+        "progress": 0.6,
+        "direction": "reverse",
+        "text": "19:45",
+        "strategy": "overlay",
+        "visibleCount": 1,
+        "safeVisible": false,
+        "gap": false,
+        "gapWidth": 0,
+        "role": "overlay",
+        "bounds": {
+          "left": 175,
+          "top": 41,
+          "right": 344,
+          "bottom": 117
+        },
+        "safe": {
+          "left": 16,
+          "top": 41,
+          "right": 344,
+          "bottom": 116.21599999999998
+        },
+        "baselineSafe": true
+      }
+    },
+    {
+      "type": "clock-gate",
+      "row": {
+        "width": 360,
+        "height": 640,
+        "inset": 36,
+        "scale": 2,
+        "progress": 0.6,
+        "direction": "reverse",
+        "text": "19:45",
+        "strategy": "fade",
+        "visibleCount": 1,
+        "safeVisible": false,
+        "gap": false,
+        "gapWidth": 0.1,
+        "role": "destination",
+        "bounds": {
+          "left": 175,
+          "top": 41,
+          "right": 344,
+          "bottom": 117
+        },
+        "safe": {
+          "left": 16,
+          "top": 41,
+          "right": 344,
+          "bottom": 116.21599999999998
+        },
+        "baselineSafe": true
+      }
+    },
+    {
+      "type": "clock-gate",
+      "row": {
+        "width": 360,
+        "height": 640,
+        "inset": 36,
+        "scale": 2,
+        "progress": 0.6,
+        "direction": "reverse",
+        "text": "23:59",
+        "strategy": "overlay",
+        "visibleCount": 1,
+        "safeVisible": false,
+        "gap": false,
+        "gapWidth": 0,
+        "role": "overlay",
+        "bounds": {
+          "left": 175,
+          "top": 41,
+          "right": 344,
+          "bottom": 117
+        },
+        "safe": {
+          "left": 16,
+          "top": 41,
+          "right": 344,
+          "bottom": 116.21599999999998
+        },
+        "baselineSafe": true
+      }
+    },
+    {
+      "type": "clock-gate",
+      "row": {
+        "width": 360,
+        "height": 640,
+        "inset": 36,
+        "scale": 2,
+        "progress": 0.6,
+        "direction": "reverse",
+        "text": "23:59",
+        "strategy": "fade",
+        "visibleCount": 1,
+        "safeVisible": false,
+        "gap": false,
+        "gapWidth": 0.1,
+        "role": "destination",
+        "bounds": {
+          "left": 175,
+          "top": 41,
+          "right": 344,
+          "bottom": 117
+        },
+        "safe": {
+          "left": 16,
+          "top": 41,
+          "right": 344,
+          "bottom": 116.21599999999998
+        },
+        "baselineSafe": true
+      }
+    },
+    {
+      "type": "clock-gate",
+      "row": {
+        "width": 360,
+        "height": 640,
+        "inset": 36,
+        "scale": 2,
+        "progress": 0.6,
+        "direction": "forward",
+        "text": "00:00",
+        "strategy": "overlay",
+        "visibleCount": 1,
+        "safeVisible": false,
+        "gap": false,
+        "gapWidth": 0,
+        "role": "overlay",
+        "bounds": {
+          "left": 175,
+          "top": 41,
+          "right": 344,
+          "bottom": 117
+        },
+        "safe": {
+          "left": 16,
+          "top": 41,
+          "right": 344,
+          "bottom": 116.21599999999998
+        },
+        "baselineSafe": true
+      }
+    },
+    {
+      "type": "clock-gate",
+      "row": {
+        "width": 360,
+        "height": 640,
+        "inset": 36,
+        "scale": 2,
+        "progress": 0.6,
+        "direction": "forward",
+        "text": "00:00",
+        "strategy": "fade",
+        "visibleCount": 1,
+        "safeVisible": false,
+        "gap": false,
+        "gapWidth": 0.1,
+        "role": "destination",
+        "bounds": {
+          "left": 175,
+          "top": 41,
+          "right": 344,
+          "bottom": 117
+        },
+        "safe": {
+          "left": 16,
+          "top": 41,
+          "right": 344,
+          "bottom": 116.21599999999998
+        },
+        "baselineSafe": true
+      }
+    },
+    {
+      "type": "clock-gate",
+      "row": {
+        "width": 360,
+        "height": 640,
+        "inset": 36,
+        "scale": 2,
+        "progress": 0.6,
+        "direction": "forward",
+        "text": "11:11",
+        "strategy": "overlay",
+        "visibleCount": 1,
+        "safeVisible": false,
+        "gap": false,
+        "gapWidth": 0,
+        "role": "overlay",
+        "bounds": {
+          "left": 175,
+          "top": 41,
+          "right": 344,
+          "bottom": 117
+        },
+        "safe": {
+          "left": 16,
+          "top": 41,
+          "right": 344,
+          "bottom": 116.21599999999998
+        },
+        "baselineSafe": true
+      }
+    },
+    {
+      "type": "clock-gate",
+      "row": {
+        "width": 360,
+        "height": 640,
+        "inset": 36,
+        "scale": 2,
+        "progress": 0.6,
+        "direction": "forward",
+        "text": "11:11",
+        "strategy": "fade",
+        "visibleCount": 1,
+        "safeVisible": false,
+        "gap": false,
+        "gapWidth": 0.1,
+        "role": "destination",
+        "bounds": {
+          "left": 175,
+          "top": 41,
+          "right": 344,
+          "bottom": 117
+        },
+        "safe": {
+          "left": 16,
+          "top": 41,
+          "right": 344,
+          "bottom": 116.21599999999998
+        },
+        "baselineSafe": true
+      }
+    },
+    {
+      "type": "clock-gate",
+      "row": {
+        "width": 360,
+        "height": 640,
+        "inset": 36,
+        "scale": 2,
+        "progress": 0.6,
+        "direction": "forward",
+        "text": "19:45",
+        "strategy": "overlay",
+        "visibleCount": 1,
+        "safeVisible": false,
+        "gap": false,
+        "gapWidth": 0,
+        "role": "overlay",
+        "bounds": {
+          "left": 175,
+          "top": 41,
+          "right": 344,
+          "bottom": 117
+        },
+        "safe": {
+          "left": 16,
+          "top": 41,
+          "right": 344,
+          "bottom": 116.21599999999998
+        },
+        "baselineSafe": true
+      }
+    },
+    {
+      "type": "clock-gate",
+      "row": {
+        "width": 360,
+        "height": 640,
+        "inset": 36,
+        "scale": 2,
+        "progress": 0.6,
+        "direction": "forward",
+        "text": "19:45",
+        "strategy": "fade",
+        "visibleCount": 1,
+        "safeVisible": false,
+        "gap": false,
+        "gapWidth": 0.1,
+        "role": "destination",
+        "bounds": {
+          "left": 175,
+          "top": 41,
+          "right": 344,
+          "bottom": 117
+        },
+        "safe": {
+          "left": 16,
+          "top": 41,
+          "right": 344,
+          "bottom": 116.21599999999998
+        },
+        "baselineSafe": true
+      }
+    },
+    {
+      "type": "clock-gate",
+      "row": {
+        "width": 360,
+        "height": 640,
+        "inset": 36,
+        "scale": 2,
+        "progress": 0.6,
+        "direction": "forward",
+        "text": "23:59",
+        "strategy": "overlay",
+        "visibleCount": 1,
+        "safeVisible": false,
+        "gap": false,
+        "gapWidth": 0,
+        "role": "overlay",
+        "bounds": {
+          "left": 175,
+          "top": 41,
+          "right": 344,
+          "bottom": 117
+        },
+        "safe": {
+          "left": 16,
+          "top": 41,
+          "right": 344,
+          "bottom": 116.21599999999998
+        },
+        "baselineSafe": true
+      }
+    },
+    {
+      "type": "clock-gate",
+      "row": {
+        "width": 360,
+        "height": 640,
+        "inset": 36,
+        "scale": 2,
+        "progress": 0.6,
+        "direction": "forward",
+        "text": "23:59",
+        "strategy": "fade",
+        "visibleCount": 1,
+        "safeVisible": false,
+        "gap": false,
+        "gapWidth": 0.1,
+        "role": "destination",
+        "bounds": {
+          "left": 175,
+          "top": 41,
+          "right": 344,
+          "bottom": 117
+        },
+        "safe": {
+          "left": 16,
+          "top": 41,
+          "right": 344,
+          "bottom": 116.21599999999998
+        },
+        "baselineSafe": true
+      }
+    },
+    {
+      "type": "clock-gate",
+      "row": {
+        "width": 360,
+        "height": 640,
+        "inset": 36,
+        "scale": 2,
+        "progress": 0.6,
+        "direction": "reverse",
+        "text": "00:00",
+        "strategy": "overlay",
+        "visibleCount": 1,
+        "safeVisible": false,
+        "gap": false,
+        "gapWidth": 0,
+        "role": "overlay",
+        "bounds": {
+          "left": 175,
+          "top": 41,
+          "right": 344,
+          "bottom": 117
+        },
+        "safe": {
+          "left": 16,
+          "top": 41,
+          "right": 344,
+          "bottom": 116.21599999999998
+        },
+        "baselineSafe": true
+      }
+    },
+    {
+      "type": "clock-gate",
+      "row": {
+        "width": 360,
+        "height": 640,
+        "inset": 36,
+        "scale": 2,
+        "progress": 0.6,
+        "direction": "reverse",
+        "text": "00:00",
+        "strategy": "fade",
+        "visibleCount": 1,
+        "safeVisible": false,
+        "gap": false,
+        "gapWidth": 0.1,
+        "role": "destination",
+        "bounds": {
+          "left": 175,
+          "top": 41,
+          "right": 344,
+          "bottom": 117
+        },
+        "safe": {
+          "left": 16,
+          "top": 41,
+          "right": 344,
+          "bottom": 116.21599999999998
+        },
+        "baselineSafe": true
+      }
+    },
+    {
+      "type": "clock-gate",
+      "row": {
+        "width": 360,
+        "height": 640,
+        "inset": 36,
+        "scale": 2,
+        "progress": 0.6,
+        "direction": "reverse",
+        "text": "11:11",
+        "strategy": "overlay",
+        "visibleCount": 1,
+        "safeVisible": false,
+        "gap": false,
+        "gapWidth": 0,
+        "role": "overlay",
+        "bounds": {
+          "left": 175,
+          "top": 41,
+          "right": 344,
+          "bottom": 117
+        },
+        "safe": {
+          "left": 16,
+          "top": 41,
+          "right": 344,
+          "bottom": 116.21599999999998
+        },
+        "baselineSafe": true
+      }
+    },
+    {
+      "type": "clock-gate",
+      "row": {
+        "width": 360,
+        "height": 640,
+        "inset": 36,
+        "scale": 2,
+        "progress": 0.6,
+        "direction": "reverse",
+        "text": "11:11",
+        "strategy": "fade",
+        "visibleCount": 1,
+        "safeVisible": false,
+        "gap": false,
+        "gapWidth": 0.1,
+        "role": "destination",
+        "bounds": {
+          "left": 175,
+          "top": 41,
+          "right": 344,
+          "bottom": 117
+        },
+        "safe": {
+          "left": 16,
+          "top": 41,
+          "right": 344,
+          "bottom": 116.21599999999998
+        },
+        "baselineSafe": true
+      }
+    },
+    {
+      "type": "clock-gate",
+      "row": {
+        "width": 360,
+        "height": 640,
+        "inset": 36,
+        "scale": 2,
+        "progress": 0.6,
+        "direction": "reverse",
+        "text": "19:45",
+        "strategy": "overlay",
+        "visibleCount": 1,
+        "safeVisible": false,
+        "gap": false,
+        "gapWidth": 0,
+        "role": "overlay",
+        "bounds": {
+          "left": 175,
+          "top": 41,
+          "right": 344,
+          "bottom": 117
+        },
+        "safe": {
+          "left": 16,
+          "top": 41,
+          "right": 344,
+          "bottom": 116.21599999999998
+        },
+        "baselineSafe": true
+      }
+    },
+    {
+      "type": "clock-gate",
+      "row": {
+        "width": 360,
+        "height": 640,
+        "inset": 36,
+        "scale": 2,
+        "progress": 0.6,
+        "direction": "reverse",
+        "text": "19:45",
+        "strategy": "fade",
+        "visibleCount": 1,
+        "safeVisible": false,
+        "gap": false,
+        "gapWidth": 0.1,
+        "role": "destination",
+        "bounds": {
+          "left": 175,
+          "top": 41,
+          "right": 344,
+          "bottom": 117
+        },
+        "safe": {
+          "left": 16,
+          "top": 41,
+          "right": 344,
+          "bottom": 116.21599999999998
+        },
+        "baselineSafe": true
+      }
+    }
+  ],
+  "limitations": [
+    "ImageMagick/fontconfig metrics are not Compose TextLayoutResult metrics.",
+    "Scale 2.0 is linear host scaling and does not reproduce Android 14 nonlinear font scaling.",
+    "Header metadata is assumed reflowed/reserved before clock strategy; this harness proves only the allocated clock rectangle.",
+    "Secondary detail-disclosure fallback proves recoverability in the state model, not visual discoverability.",
+    "Leader routing, contrast, touch occlusion, TalkBack, and perceived calmness require later runtime/manual evidence."
+  ]
+}

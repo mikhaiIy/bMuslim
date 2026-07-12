@@ -1,0 +1,8 @@
+requested,absolute_result,valid_0_1435,multiple_of_5
+-1,0,True,True
+0,0,True,True
+2,0,True,True
+3,5,True,True
+1435,1435,True,True
+1439,1435,True,True
+1440,1435,True,True
