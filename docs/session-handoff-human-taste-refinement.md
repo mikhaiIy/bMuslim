@@ -184,8 +184,31 @@ The v1 baseline had 13 passing unit tests, successful APK assembly and lint, and
 failure. A real device/emulator capture was unavailable in the previous phase, so motion and
 360×640 at 1.3× font scale remain valuable evidence rather than assumed passes.
 
+## Completed phase state (2026-07-12)
+
+This refinement phase is complete on `feature/human-taste-refinement`.
+
+- Research passed at 89/100 and is locked in
+  `docs/research/human-taste-refinement/research-lock.md`.
+- Image-led design passed at 91/100; the selected evidence is under
+  `design/human-taste-refinement/round-2/`.
+- Native implementation passed the final independent audit at 94/100 with no P0/P1 or hard gate;
+  judgments are under `docs/implementation/human-taste-refinement/`.
+- Final verification: 29 unit tests, debug APK assembly, Android lint, and `git diff --check` pass.
+- Device-only screenshots, TalkBack/Switch Access, animator-zero focus transfer, OEM font/inset
+  behavior, and hardware gesture interruption remain explicitly conditional because no emulator or
+  device is configured.
+
+The production implementation now uses measured Compose text, a complete negative-space cutout for
+the selected readout, a stable touch/settle leader, a measured header-owned clock, four font-scale
+composition classes, an all-five-prayer maximum-type key, endpoint-only semantics, and a single
+outer scroll composition for compact maximum-type detail.
+
+Firecrawl quota exhaustion is non-blocking: the canonical workflow already falls back to ordinary
+web search and direct primary sources. A later infrastructure task may compare Firecrawl-like
+search/scrape providers, but should not reopen this finished product phase.
+
 ## Immediate next action after context reset
 
-Do not redesign or edit Compose immediately. Start Phase R, wave one: inspect current native
-evidence, read the web-search skill, launch the three independent research lanes, save their cited
-reports, and synthesize only after all three return.
+Do not restart research or redesign this phase. Read the final implementation judgment, confirm the
+feature commit is present, and continue with device validation or a newly requested feature.

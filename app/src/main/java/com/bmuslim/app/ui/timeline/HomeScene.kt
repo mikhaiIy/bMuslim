@@ -1,8 +1,53 @@
 package com.bmuslim.app.ui.timeline
 
+import kotlin.math.roundToInt
+
 enum class HomePresentation { Glance, Detail }
 
 enum class RevealLayer { Wheel, Summary, Ledger, Navigation }
+
+enum class FontComposition { Regular, Comfortable, Large, Maximum }
+
+enum class PrayerDisplayPolicy { ContextualRadial, ReducedRadial, AllRadial, FiveNameKey }
+
+enum class WheelPrimitiveLayer {
+    BroadRail,
+    HourRail,
+    PrayerRail,
+    ContextualArc,
+    CelestialRail,
+    ActualNow,
+    Keystone,
+    Pointer,
+    Leader,
+    Readout,
+}
+
+enum class SemanticOwner { Wheel, Detail, None }
+
+enum class DetailScrollPolicy { WeightedLedger, SingleOuterScroll }
+
+data class PresentationHandoff(
+    val wheelAlpha: Float,
+    val detailAlpha: Float,
+    val wheelVisible: Boolean,
+    val detailVisible: Boolean,
+    val semanticOwner: SemanticOwner,
+    val detailInteractive: Boolean,
+)
+
+data class MaximumDetailScrollBudget(
+    val viewportHeight: Float,
+    val intrinsicContentHeight: Float,
+    val sectionCount: Int,
+    val weightedChildCount: Int,
+    val policy: DetailScrollPolicy,
+) {
+    val requiresScroll: Boolean get() = intrinsicContentHeight > viewportHeight
+    val allSectionsScrollReachable: Boolean
+        get() = viewportHeight > 0f && sectionCount > 0 && weightedChildCount == 0 &&
+            policy == DetailScrollPolicy.SingleOuterScroll
+}
 
 data class HomeSceneGeometry(
     val progress: Float,
@@ -17,24 +62,82 @@ data class HomeSceneGeometry(
         get() = ((centerY + outerRadius - viewportHeight) / (outerRadius * 2f)).coerceIn(0f, 1f)
 }
 
+data class SceneRect(
+    val left: Float,
+    val top: Float,
+    val right: Float,
+    val bottom: Float,
+) {
+    val width: Float get() = right - left
+    val height: Float get() = bottom - top
+
+    fun overlaps(other: SceneRect): Boolean =
+        left < other.right && right > other.left && top < other.bottom && bottom > other.top
+}
+
+data class HeaderSafeGeometry(
+    val clock: SceneRect,
+    val apertureTop: Float,
+    val clearance: Float,
+) {
+    val isSeparated: Boolean get() = clock.bottom + clearance <= apertureTop
+}
+
+data class ReadoutBayGeometry(
+    val bounds: SceneRect,
+    val leaderStartX: Float,
+    val leaderBendX: Float,
+    val leaderEndX: Float,
+    val leaderY: Float,
+    val external: Boolean,
+)
+
+data class WheelReadout(
+    val primary: String,
+    val secondary: String?,
+    val prayerId: String?,
+    val contextualId: String?,
+)
+
 fun homeSceneGeometry(
     widthDp: Float,
     heightDp: Float,
     compact: Boolean,
     progress: Float,
+    maximumType: Boolean = false,
+    measuredHeaderHeightDp: Float = 0f,
 ): HomeSceneGeometry {
     val p = progress.coerceIn(0f, 1f)
     val glanceClearance = 14f
-    val detailViewport = if (compact) 182f else 220f
-    val detailTop = if (compact) 112f else 120f
-    val detailCenter = detailViewport * .93f
-    val detailOuter = minOf(widthDp * .445f, detailCenter - 15f)
+    val wheelDetailViewport = when {
+        maximumType -> 176f
+        compact -> 182f
+        else -> 220f
+    }
+    val maximumPrayerKeyBand = if (maximumType) 60f else 0f
+    val detailViewport = wheelDetailViewport + maximumPrayerKeyBand
+    // The aperture always remains below a dedicated header corridor.  This is deliberately
+    // allocated here rather than relying on paint order to protect the clock.
+    val designedDetailTop = when {
+        maximumType -> 144f
+        compact -> 112f
+        else -> 136f
+    }
+    val detailTop = maxOf(designedDetailTop, measuredHeaderHeightDp + 8f)
+    val wheelDetailCenter = wheelDetailViewport * .93f
+    val detailCenter = wheelDetailCenter + maximumPrayerKeyBand
+    val detailOuter = minOf(widthDp * .445f, wheelDetailCenter - 15f)
     // The wheel does not scale during presentation changes; only its center and aperture move.
     val glanceOuter = detailOuter
-    val glanceViewport = glanceOuter * 2f + glanceClearance * 2f
-    val glanceGlobalCenter = heightDp * if (compact) .47f else .48f
-    val glanceCenter = glanceOuter + glanceClearance
-    val glanceTop = glanceGlobalCenter - glanceCenter
+    val externalReadoutBand = if (maximumType) 84f else 0f
+    val glanceViewport = glanceOuter * 2f + glanceClearance * 2f + externalReadoutBand
+    val glanceGlobalCenter = heightDp * when {
+        maximumType && compact -> .60f
+        compact -> .47f
+        else -> .48f
+    }
+    val glanceCenter = glanceOuter + glanceClearance + externalReadoutBand
+    val glanceTop = maxOf(glanceGlobalCenter - glanceCenter, measuredHeaderHeightDp + 8f)
     return HomeSceneGeometry(
         progress = p,
         wheelTop = lerpFloat(glanceTop, detailTop, p),
@@ -42,6 +145,172 @@ fun homeSceneGeometry(
         centerY = lerpFloat(glanceCenter, detailCenter, p),
         outerRadius = detailOuter,
     )
+}
+
+fun headerSafeGeometry(scene: HomeSceneGeometry, measuredClock: SceneRect): HeaderSafeGeometry {
+    val clock = measuredClock
+    return HeaderSafeGeometry(clock = clock, apertureTop = scene.wheelTop, clearance = 8f)
+}
+
+fun requiredHeaderHeight(
+    safeInsetTop: Float,
+    measuredContentHeight: Float,
+    verticalPadding: Float = 5f,
+): Float = safeInsetTop + measuredContentHeight + verticalPadding * 2f
+
+fun fontComposition(fontScale: Float): FontComposition = when {
+    fontScale >= 1.8f -> FontComposition.Maximum
+    fontScale >= 1.5f -> FontComposition.Large
+    fontScale >= 1.25f -> FontComposition.Comfortable
+    else -> FontComposition.Regular
+}
+
+fun detailScrollPolicy(composition: FontComposition): DetailScrollPolicy =
+    if (composition == FontComposition.Maximum) {
+        DetailScrollPolicy.SingleOuterScroll
+    } else {
+        DetailScrollPolicy.WeightedLedger
+    }
+
+fun maximumDetailScrollBudget(
+    screenHeightDp: Float,
+    geometry: HomeSceneGeometry,
+    intrinsicSectionHeights: List<Float>,
+): MaximumDetailScrollBudget = MaximumDetailScrollBudget(
+    viewportHeight = (screenHeightDp - geometry.clipBottom).coerceAtLeast(0f),
+    intrinsicContentHeight = intrinsicSectionHeights.sum(),
+    sectionCount = intrinsicSectionHeights.size,
+    weightedChildCount = 0,
+    policy = DetailScrollPolicy.SingleOuterScroll,
+)
+
+fun prayerDisplayPolicy(
+    composition: FontComposition,
+    progress: Float,
+): PrayerDisplayPolicy = when {
+    composition == FontComposition.Maximum && progress >= .5f -> PrayerDisplayPolicy.FiveNameKey
+    composition == FontComposition.Maximum -> PrayerDisplayPolicy.AllRadial
+    composition == FontComposition.Large -> PrayerDisplayPolicy.ReducedRadial
+    else -> PrayerDisplayPolicy.ContextualRadial
+}
+
+fun prayerLabelVisible(
+    policy: PrayerDisplayPolicy,
+    isGlance: Boolean,
+    isActive: Boolean,
+    isNext: Boolean,
+): Boolean = when (policy) {
+    PrayerDisplayPolicy.ContextualRadial -> isGlance || isActive || isNext
+    PrayerDisplayPolicy.ReducedRadial -> isActive || isNext
+    PrayerDisplayPolicy.AllRadial -> true
+    PrayerDisplayPolicy.FiveNameKey -> false
+}
+
+fun prayerKeyTitles(prayers: List<TimelineDeed>): List<String> = prayers
+    .filter { it.ruling == Ruling.Fardh }
+    .sortedBy { it.startMinute }
+    .map { it.title.removePrefix("Solat ") }
+
+fun readoutBayGeometry(
+    widthDp: Float,
+    scene: HomeSceneGeometry,
+    measuredWidthDp: Float,
+    measuredHeightDp: Float,
+    external: Boolean,
+): ReadoutBayGeometry {
+    val pointerY = scene.centerY - scene.outerRadius * .88f - 13f
+    val left = if (external) 16f else widthDp / 2f + 30f
+    val right = minOf(widthDp - 16f, left + measuredWidthDp)
+    val top = if (external) 8f else pointerY + 10f
+    val bottom = top + measuredHeightDp
+    return ReadoutBayGeometry(
+        bounds = SceneRect(left, top, right, bottom),
+        leaderStartX = widthDp / 2f + 7f,
+        leaderBendX = if (external) widthDp / 2f + 18f else left - 8f,
+        leaderEndX = if (external) widthDp / 2f + 30f else left + 1f,
+        leaderY = if (external) bottom + 5f else top + 7f,
+        external = external,
+    )
+}
+
+fun wheelReadoutAt(
+    deeds: List<TimelineDeed>,
+    minute: Int,
+    directManipulation: Boolean,
+): WheelReadout? {
+    val active = activeDeedsAt(deeds, minute)
+    val prayer = active.firstOrNull { it.ruling == Ruling.Fardh }
+    val contextual = active.firstOrNull { it.ruling != Ruling.Fardh }
+    if (prayer == null && contextual == null) return null
+
+    return if (prayer != null) {
+        WheelReadout(
+            primary = "Waktu ${prayer.title.removePrefix("Solat ")} · ${formatTimelineMinute(minute)}",
+            secondary = contextual?.let {
+                if (directManipulation) it.title else "Amalan berkaitan · ${it.title}"
+            },
+            prayerId = prayer.id,
+            contextualId = contextual?.id,
+        )
+    } else {
+        WheelReadout(
+            primary = contextual!!.title,
+            secondary = null,
+            prayerId = null,
+            contextualId = contextual.id,
+        )
+    }
+}
+
+fun presentationHandoff(
+    progress: Float,
+    settledPresentation: HomePresentation?,
+): PresentationHandoff {
+    val p = progress.coerceIn(0f, 1f)
+    val wheelAlpha = (1f - ((p - .24f) / .18f)).coerceIn(0f, 1f)
+    val detailAlpha = ((p - .30f) / .20f).coerceIn(0f, 1f)
+    val owner = when (settledPresentation) {
+        HomePresentation.Glance -> SemanticOwner.Wheel
+        HomePresentation.Detail -> SemanticOwner.Detail
+        null -> SemanticOwner.None
+    }
+    return PresentationHandoff(
+        wheelAlpha = wheelAlpha,
+        detailAlpha = detailAlpha,
+        wheelVisible = wheelAlpha > .001f,
+        detailVisible = detailAlpha > .001f,
+        semanticOwner = owner,
+        detailInteractive = owner == SemanticOwner.Detail,
+    )
+}
+
+fun quantizeAccessibleMinute(requested: Float): Int =
+    ((requested.coerceIn(0f, 1435f) / 5f).roundToInt() * 5).coerceIn(0, 1435)
+
+fun quantizeCircularMinute(minute: Int): Int = wrapTimelineMinute(((minute + 2) / 5) * 5)
+
+fun primitiveIsOutsideExclusion(bounds: SceneRect, exclusion: SceneRect?): Boolean =
+    exclusion == null || !bounds.overlaps(exclusion)
+
+fun primitiveLayerUsesNegativeSpace(layer: WheelPrimitiveLayer): Boolean = when (layer) {
+    WheelPrimitiveLayer.Pointer,
+    WheelPrimitiveLayer.Leader,
+    WheelPrimitiveLayer.Readout,
+    -> false
+    else -> true
+}
+
+fun returnToNowVisible(handoff: PresentationHandoff, minuteDistance: Int): Boolean =
+    handoff.detailInteractive && minuteDistance > 4
+
+fun formatTimelineMinute(minute: Int): String {
+    val wrapped = wrapTimelineMinute(minute)
+    return "%02d:%02d".format(wrapped / 60, wrapped % 60)
+}
+
+fun wrapTimelineMinute(minute: Int): Int {
+    val dayMinutes = 24 * 60
+    return ((minute % dayMinutes) + dayMinutes) % dayMinutes
 }
 
 internal fun timelineMinuteAngle(minute: Int, selectedMinute: Int): Float {
