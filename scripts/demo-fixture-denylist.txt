@@ -1,0 +1,75 @@
+# Demo-only resource identity sentinel
+bMuslim Demo
+
+# Every demo catalogue fixture ID
+thursday-fast
+subuh
+zikir-pagi
+dhuha
+zohor
+asar
+zikir-petang
+maghrib
+isyak
+al-mulk
+tahajud
+
+# Demo model BM labels, grades, and fixture literals
+Solat
+Zikir
+Quran
+Puasa
+Adab
+Fardhu
+Sunnah Muakkadah
+Sunnah
+Mandub
+Sahih
+Puasa sunat Khamis
+Cadangan sepanjang hari ini
+Solat Subuh
+Dirikan Subuh fardhu, 2 rakaat, dengan tenang dan khusyuk.
+Zikir pagi
+Selepas Subuh hingga Syuruk
+Zikir dan doa pagi, dibaca selepas Subuh hingga matahari terbit.
+Ya Allah, dengan-Mu kami memasuki waktu pagi dan petang.
+Solat Dhuha
+Selepas Syuruk hingga sebelum Zohor
+Solat sunat Dhuha, minimum dua rakaat, selepas matahari naik.
+Solat Zohor
+Dirikan Zohor fardhu, 4 rakaat, dengan tenang dan khusyuk.
+Solat Asar
+Dirikan Asar fardhu, 4 rakaat, dengan tenang dan khusyuk.
+Zikir petang
+Selepas Asar hingga Maghrib
+Zikir perlindungan dan kesyukuran menjelang petang.
+Kami memasuki petang dan segala kerajaan milik Allah.
+Solat Maghrib
+Dirikan Maghrib fardhu, 3 rakaat, dengan tenang dan khusyuk.
+Solat Isyak
+Dirikan Isyak fardhu, 4 rakaat, dengan tenang dan khusyuk.
+Baca Surah Al-Mulk
+Selepas Isyak hingga sebelum tidur
+Membaca Surah Al-Mulk sebelum tidur.
+Hasan
+Maha Berkat Dia yang menguasai segala kerajaan.
+Solat Tahajud
+Sepertiga akhir malam
+Solat sunat malam sebelum masuk waktu Subuh.
+Waktu solat
+Waktu solat JAKIM · WLY01
+Tidak berkaitan
+
+# Every Arabic demo catalogue fixture literal
+اللَّهُمَّ بِكَ أَصْبَحْنَا وَبِكَ أَمْسَيْنَا
+أَمْسَيْنَا وَأَمْسَى الْمُلْكُ لِلَّهِ
+تَبَارَكَ الَّذِي بِيَدِهِ الْمُلْكُ
+
+# Other known sample/prototype claims retained by the locked artifact contract
+Abu Dawud 5074
+Sahih Muslim 720
+Jami' at-Tirmidhi 2891
+Sahih al-Bukhari 1145
+Khamis, 2 Julai 2026
+17 Muharram 1448 H
+AMALAN UTAMA SEKARANG

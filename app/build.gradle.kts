@@ -16,6 +16,19 @@ android {
         versionName = "0.1.0"
     }
 
+    flavorDimensions += "truthMode"
+    productFlavors {
+        create("demo") {
+            dimension = "truthMode"
+            applicationIdSuffix = ".demo"
+            versionNameSuffix = "-demo"
+            resValue("string", "app_name", "bMuslim Demo")
+        }
+        create("production") {
+            dimension = "truthMode"
+        }
+    }
+
     buildTypes {
         release {
             isMinifyEnabled = false
@@ -34,6 +47,16 @@ android {
     }
     buildFeatures {
         compose = true
+    }
+}
+
+androidComponents {
+    beforeVariants(
+        selector()
+            .withFlavor("truthMode" to "demo")
+            .withBuildType("release"),
+    ) { variantBuilder ->
+        variantBuilder.enable = false
     }
 }
 

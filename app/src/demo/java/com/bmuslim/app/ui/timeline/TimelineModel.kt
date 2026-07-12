@@ -103,7 +103,15 @@ private fun forwardDistance(from: Int, to: Int): Int {
 }
 
 fun sampleDeeds(): List<TimelineDeed> = listOf(
-    prayer("subuh", "Solat Subuh", 5, 59, 6, 19, 2),
+    prayer(
+        "subuh",
+        "Solat Subuh",
+        5,
+        59,
+        6,
+        19,
+        "Dirikan Subuh fardhu, 2 rakaat, dengan tenang dan khusyuk.",
+    ),
     TimelineDeed(
         id = "zikir-pagi",
         title = "Zikir pagi",
@@ -134,8 +142,24 @@ fun sampleDeeds(): List<TimelineDeed> = listOf(
         description = "Solat sunat Dhuha, minimum dua rakaat, selepas matahari naik.",
         citation = "Sahih Muslim 720",
     ),
-    prayer("zohor", "Solat Zohor", 13, 21, 13, 41, 4),
-    prayer("asar", "Solat Asar", 16, 45, 17, 5, 4),
+    prayer(
+        "zohor",
+        "Solat Zohor",
+        13,
+        21,
+        13,
+        41,
+        "Dirikan Zohor fardhu, 4 rakaat, dengan tenang dan khusyuk.",
+    ),
+    prayer(
+        "asar",
+        "Solat Asar",
+        16,
+        45,
+        17,
+        5,
+        "Dirikan Asar fardhu, 4 rakaat, dengan tenang dan khusyuk.",
+    ),
     TimelineDeed(
         id = "zikir-petang",
         title = "Zikir petang",
@@ -152,8 +176,24 @@ fun sampleDeeds(): List<TimelineDeed> = listOf(
         arabic = "أَمْسَيْنَا وَأَمْسَى الْمُلْكُ لِلَّهِ",
         translation = "Kami memasuki petang dan segala kerajaan milik Allah.",
     ),
-    prayer("maghrib", "Solat Maghrib", 19, 29, 19, 49, 3),
-    prayer("isyak", "Solat Isyak", 20, 42, 21, 2, 4),
+    prayer(
+        "maghrib",
+        "Solat Maghrib",
+        19,
+        29,
+        19,
+        49,
+        "Dirikan Maghrib fardhu, 3 rakaat, dengan tenang dan khusyuk.",
+    ),
+    prayer(
+        "isyak",
+        "Solat Isyak",
+        20,
+        42,
+        21,
+        2,
+        "Dirikan Isyak fardhu, 4 rakaat, dengan tenang dan khusyuk.",
+    ),
     TimelineDeed(
         id = "al-mulk",
         title = "Baca Surah Al-Mulk",
@@ -194,7 +234,7 @@ private fun prayer(
     minute: Int,
     endHour: Int,
     endMinute: Int,
-    rakaat: Int,
+    description: String,
 ) = TimelineDeed(
     id = id,
     title = title,
@@ -205,7 +245,7 @@ private fun prayer(
     start = LocalTime.of(hour, minute),
     end = LocalTime.of(endHour, endMinute),
     actMinutes = 10,
-    description = "Dirikan ${title.removePrefix("Solat ")} fardhu, $rakaat rakaat, dengan tenang dan khusyuk.",
+    description = description,
     citation = "Waktu solat JAKIM · WLY01",
     grade = "Tidak berkaitan",
 )
