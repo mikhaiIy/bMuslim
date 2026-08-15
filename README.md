@@ -24,4 +24,11 @@ The app renders each window against today's real times, so the schedule bends to
 
 Kotlin · Jetpack Compose · MVVM · Room · Retrofit · WorkManager/AlarmManager · `java.time` HijrahChronology.
 
-Prayer times: [Waktu Solat API](https://api.waktusolat.app/) (JAKIM data).
+Prayer times: direct from the official [JAKIM e-Solat portal](https://www.e-solat.gov.my/) using
+its zone-based `TakwimSolat` endpoint. The live production almanac validates and renders Imsak,
+Subuh, Syuruk, Dhuha, Zohor, Asar, Maghrib and Isyak. Responses are strictly date/zone validated
+and remain memory-only; only the user's selected zone is persisted.
+
+The demo and production flavors render through one shared almanac shell. Demo supplies its clearly
+disclosed sample deed catalogue; production supplies only validated JAKIM points and an official
+schedule folio until reviewed guidance content is available.

@@ -129,7 +129,7 @@ fun homeSceneGeometry(
     val detailOuter = minOf(widthDp * .445f, wheelDetailCenter - 15f)
     // The wheel does not scale during presentation changes; only its center and aperture move.
     val glanceOuter = detailOuter
-    val externalReadoutBand = if (maximumType) 84f else 0f
+    val externalReadoutBand = if (maximumType) 84f else 72f
     val glanceViewport = glanceOuter * 2f + glanceClearance * 2f + externalReadoutBand
     val glanceGlobalCenter = heightDp * when {
         maximumType && compact -> .60f
@@ -219,16 +219,19 @@ fun readoutBayGeometry(
     external: Boolean,
 ): ReadoutBayGeometry {
     val pointerY = scene.centerY - scene.outerRadius * .88f - 13f
-    val left = if (external) 16f else widthDp / 2f + 30f
-    val right = minOf(widthDp - 16f, left + measuredWidthDp)
-    val top = if (external) 8f else pointerY + 10f
+    val wheelTopY = scene.centerY - scene.outerRadius
+    val bayWidth = minOf(measuredWidthDp, widthDp - 32f)
+    val left = (widthDp - bayWidth) / 2f
+    val right = left + bayWidth
+    val top = if (external) 8f else maxOf(6f, wheelTopY - measuredHeightDp - 12f)
     val bottom = top + measuredHeightDp
+    val centerX = widthDp / 2f
     return ReadoutBayGeometry(
         bounds = SceneRect(left, top, right, bottom),
-        leaderStartX = widthDp / 2f + 7f,
-        leaderBendX = if (external) widthDp / 2f + 18f else left - 8f,
-        leaderEndX = if (external) widthDp / 2f + 30f else left + 1f,
-        leaderY = if (external) bottom + 5f else top + 7f,
+        leaderStartX = centerX,
+        leaderBendX = centerX,
+        leaderEndX = centerX,
+        leaderY = bottom + 5f,
         external = external,
     )
 }
@@ -245,7 +248,7 @@ fun wheelReadoutAt(
 
     return if (prayer != null) {
         WheelReadout(
-            primary = "Waktu ${prayer.title.removePrefix("Solat ")} · ${formatTimelineMinute(minute)}",
+            primary = "${formatTimelineMinute(minute)} dipilih · Waktu ${prayer.title.removePrefix("Solat ")}",
             secondary = contextual?.let {
                 if (directManipulation) it.title else "Amalan berkaitan · ${it.title}"
             },
@@ -254,8 +257,8 @@ fun wheelReadoutAt(
         )
     } else {
         WheelReadout(
-            primary = contextual!!.title,
-            secondary = null,
+            primary = "${formatTimelineMinute(minute)} dipilih",
+            secondary = if (directManipulation) contextual!!.title else "Amalan berkaitan · ${contextual!!.title}",
             prayerId = null,
             contextualId = contextual.id,
         )
@@ -292,12 +295,18 @@ fun quantizeCircularMinute(minute: Int): Int = wrapTimelineMinute(((minute + 2) 
 fun primitiveIsOutsideExclusion(bounds: SceneRect, exclusion: SceneRect?): Boolean =
     exclusion == null || !bounds.overlaps(exclusion)
 
-fun primitiveLayerUsesNegativeSpace(layer: WheelPrimitiveLayer): Boolean = when (layer) {
+fun readoutMayClipPrimitiveLayer(layer: WheelPrimitiveLayer): Boolean = when (layer) {
+    WheelPrimitiveLayer.BroadRail,
+    WheelPrimitiveLayer.HourRail,
+    WheelPrimitiveLayer.PrayerRail,
+    WheelPrimitiveLayer.ContextualArc,
+    WheelPrimitiveLayer.CelestialRail,
+    WheelPrimitiveLayer.ActualNow,
+    WheelPrimitiveLayer.Keystone,
     WheelPrimitiveLayer.Pointer,
     WheelPrimitiveLayer.Leader,
     WheelPrimitiveLayer.Readout,
     -> false
-    else -> true
 }
 
 fun returnToNowVisible(handoff: PresentationHandoff, minuteDistance: Int): Boolean =

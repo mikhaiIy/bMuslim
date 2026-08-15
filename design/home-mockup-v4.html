@@ -1,0 +1,803 @@
+<!doctype html>
+<!--
+  Direction: Taqwim Langit Malaysia, a contemporary prayer almanac.
+  Research and judge rubric: ../docs/agent-design-research.md
+-->
+<html lang="ms">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+  <meta name="description" content="Konsep roda waktu bMuslim untuk amalan harian">
+  <title>bMuslim | Taqwim Langit</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@500;600&family=Noto+Naskh+Arabic:wght@500;700&family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+  <style>
+    :root {
+      color-scheme: light;
+      --ink: #10271f;
+      --ink-soft: #435c53;
+      --ink-faint: #6b8178;
+      --canvas: #e9efea;
+      --surface: #f7faf7;
+      --forest: #0b4a38;
+      --pine: #146047;
+      --leaf: #3b8066;
+      --mint: #c7d9d1;
+      --sun: #d89a32;
+      --saffron: #d89a32;
+      --line: rgba(8, 63, 50, .12);
+      --line-strong: rgba(8, 63, 50, .28);
+      --sky-a: #bdd3ca;
+      --sky-b: #dce8e1;
+      --sky-c: #edf2ed;
+      --hero-ink: #0b2e26;
+      --hero-muted: rgba(11, 46, 38, .62);
+      --glow: rgba(244, 185, 95, .42);
+      --ring: rgba(8, 63, 50, .13);
+      --shadow: 0 12px 36px rgba(25, 45, 37, .09);
+      --ease: cubic-bezier(.2, .75, .2, 1);
+    }
+
+    * { box-sizing: border-box; }
+
+    html, body { min-height: 100%; }
+
+    body {
+      margin: 0;
+      font-family: "Plus Jakarta Sans", system-ui, sans-serif;
+      color: var(--ink);
+      background:
+        radial-gradient(circle at 25% 8%, rgba(255,255,255,.76), transparent 32rem),
+        var(--canvas);
+      -webkit-font-smoothing: antialiased;
+    }
+
+    button { font: inherit; }
+
+    .studio {
+      min-height: 100dvh;
+      display: grid;
+      place-items: center;
+      padding: 28px;
+    }
+
+    .phone {
+      width: min(100%, 414px);
+      height: min(890px, calc(100dvh - 56px));
+      min-height: 720px;
+      overflow: hidden;
+      position: relative;
+      display: flex;
+      flex-direction: column;
+      border: 1px solid rgba(8,63,50,.11);
+      border-radius: 34px;
+      background: var(--canvas);
+      box-shadow: 0 34px 90px rgba(25, 45, 37, .17);
+      isolation: isolate;
+    }
+
+    .top {
+      position: relative;
+      height: 388px;
+      flex: 0 0 388px;
+      overflow: hidden;
+      color: var(--hero-ink);
+      background: linear-gradient(160deg, var(--sky-a), var(--sky-b) 54%, var(--sky-c));
+      transition: background 520ms var(--ease), color 420ms var(--ease);
+    }
+
+    .top::before {
+      content: "";
+      position: absolute;
+      inset: 0;
+      pointer-events: none;
+      opacity: .2;
+      background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 180 180' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='.9' numOctaves='2' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)' opacity='.16'/%3E%3C/svg%3E");
+      mix-blend-mode: soft-light;
+    }
+
+    .status {
+      position: relative;
+      z-index: 8;
+      height: 38px;
+      display: flex;
+      align-items: end;
+      justify-content: space-between;
+      padding: 0 24px 5px;
+      font-size: 12px;
+      font-weight: 800;
+      letter-spacing: .03em;
+    }
+
+    .head {
+      position: relative;
+      z-index: 8;
+      display: flex;
+      justify-content: space-between;
+      align-items: flex-start;
+      padding: 14px 22px 0;
+    }
+
+    .brand {
+      font-size: 14px;
+      font-weight: 800;
+      letter-spacing: -.03em;
+    }
+
+    .date { margin-top: 5px; font-size: 12px; font-weight: 600; color: var(--hero-muted); }
+
+    .progress {
+      display: grid;
+      grid-template-columns: 30px auto;
+      align-items: center;
+      gap: 8px;
+      color: var(--hero-ink);
+    }
+
+    .progress-ring { width: 30px; height: 30px; transform: rotate(-90deg); }
+    .progress-ring circle { fill: none; stroke-width: 3; }
+    .progress-ring .track { stroke: rgba(255,255,255,.38); }
+    .progress-ring .value { stroke: currentColor; stroke-linecap: round; transition: stroke-dashoffset 240ms var(--ease); }
+    .progress-copy b { display: block; font-size: 12px; line-height: 1; }
+    .progress-copy span { display: block; margin-top: 3px; font-size: 12px; font-weight: 700; color: var(--hero-muted); }
+
+    .time-readout {
+      position: relative;
+      z-index: 8;
+      text-align: center;
+      margin-top: 12px;
+      pointer-events: none;
+    }
+
+    .daypart { font-size: 13px; font-weight: 600; color: var(--hero-muted); }
+
+    .time {
+      margin-top: 3px;
+      font-size: clamp(38px, 11vw, 48px);
+      line-height: 1;
+      font-weight: 500;
+      letter-spacing: -.07em;
+      font-variant-numeric: tabular-nums;
+      font-family: "IBM Plex Mono", monospace;
+    }
+
+    .wheel-zone {
+      position: absolute;
+      z-index: 3;
+      left: 0;
+      right: 0;
+      bottom: 0;
+      height: 266px;
+      outline: none;
+      cursor: grab;
+      touch-action: pan-y;
+      user-select: none;
+    }
+    .wheel-zone:focus-visible { outline: 2px solid var(--saffron); outline-offset: -4px; }
+
+    .wheel-zone.dragging { cursor: grabbing; }
+
+    .dial-wrap {
+      position: absolute;
+      width: 540px;
+      height: 540px;
+      left: 50%;
+      top: 43px;
+      transform: translateX(-50%);
+    }
+
+    #dial { width: 100%; height: 100%; overflow: visible; }
+    #dial-rotor { transform-origin: 270px 270px; transition: transform 110ms linear; }
+    .dragging #dial-rotor { transition: none; }
+    .ring-base { fill: none; stroke: var(--ring); stroke-width: 45; }
+    .ring-inner { fill: none; stroke: rgba(255,255,255,.2); stroke-width: 1; }
+    .hour-tick { stroke: var(--hero-ink); opacity: .25; stroke-width: 1; }
+    .hour-tick.major { opacity: .56; stroke-width: 1.6; }
+    .hour-label { fill: var(--hero-ink); opacity: .7; font-family: "IBM Plex Mono", monospace; font-size: 12px; font-weight: 600; text-anchor: middle; dominant-baseline: middle; }
+    .prayer-dot { fill: var(--surface); stroke: var(--pine); stroke-width: 2.4; }
+    .prayer-label { display: none; }
+    .now-notch { fill: var(--forest); stroke: var(--surface); stroke-width: 2; }
+    .deed-window { fill: none; stroke-linecap: round; stroke-width: 8; opacity: .75; }
+    .deed-window.muakkadah { stroke: var(--hero-ink); opacity: .72; }
+    .deed-window.sunnah { stroke: var(--hero-ink); opacity: .4; }
+
+    .pointer {
+      position: absolute;
+      z-index: 6;
+      left: 50%;
+      top: 34px;
+      width: 2px;
+      height: 46px;
+      transform: translateX(-50%);
+      border-radius: 2px;
+      background: var(--saffron);
+    }
+
+    .pointer::after {
+      content: "";
+      position: absolute;
+      bottom: -5px;
+      left: 50%;
+      width: 10px;
+      height: 10px;
+      transform: translateX(-50%) rotate(45deg);
+      border-radius: 2px;
+      background: var(--saffron);
+    }
+
+    .celestial {
+      position: absolute;
+      z-index: 7;
+      left: 50%;
+      top: 82px;
+      width: 34px;
+      height: 34px;
+      transform: translate(calc(-50% + var(--celestial-x, 0px)), var(--celestial-y, 0px));
+      display: grid;
+      place-items: center;
+      color: var(--saffron);
+      filter: drop-shadow(0 0 14px var(--glow));
+      transition: transform 420ms var(--ease), color 420ms var(--ease);
+    }
+
+    .celestial svg { width: 23px; height: 23px; }
+
+    .now-button {
+      position: absolute;
+      z-index: 9;
+      right: 18px;
+      bottom: 12px;
+      min-height: 44px;
+      padding: 0 13px;
+      border: 1px solid rgba(255,255,255,.42);
+      border-radius: 12px;
+      color: var(--ink);
+      background: var(--surface);
+      box-shadow: 0 5px 16px rgba(0,0,0,.06);
+      font-size: 12px;
+      font-weight: 800;
+      cursor: pointer;
+      transition: opacity 180ms ease, transform 180ms ease;
+    }
+
+    .now-button[hidden] { display: block; visibility: hidden; opacity: 0; transform: translateY(5px); pointer-events: none; }
+
+    .content {
+      position: relative;
+      z-index: 5;
+      flex: 1;
+      min-height: 0;
+      overflow-y: auto;
+      padding: 0 16px 102px;
+      background: var(--canvas);
+      border-radius: 22px 22px 0 0;
+      margin-top: -10px;
+      scrollbar-width: none;
+    }
+
+    .content::-webkit-scrollbar { display: none; }
+
+    .day-banner {
+      display: flex;
+      align-items: center;
+      gap: 11px;
+      min-height: 48px;
+      padding: 9px 12px;
+      border-top: 1px solid var(--line);
+      border-bottom: 1px solid var(--line);
+      color: var(--forest);
+    }
+
+    .day-banner .icon { width: 28px; height: 28px; display: grid; place-items: center; color: var(--forest); }
+    .day-banner svg { width: 15px; }
+    .day-banner b { display: block; font-size: 14px; }
+    .day-banner span { font-size: 12px; color: var(--ink-soft); }
+
+    .detail { padding: 18px 3px 4px; }
+
+    .detail-kicker {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      font-size: 12px;
+      font-weight: 800;
+      color: var(--ink-faint);
+      letter-spacing: 0;
+    }
+
+    .window-time { font-family: "IBM Plex Mono", monospace; font-variant-numeric: tabular-nums; letter-spacing: .01em; text-transform: none; }
+
+    .deed-head {
+      display: grid;
+      grid-template-columns: 1fr auto;
+      gap: 14px;
+      align-items: start;
+      padding: 9px 0 13px;
+    }
+
+    .deed-title { margin: 0; max-width: 280px; font-size: 22px; line-height: 1.17; font-weight: 800; letter-spacing: -.045em; }
+    .deed-meta { margin-top: 7px; display: flex; gap: 6px; flex-wrap: wrap; }
+
+    .chip {
+      display: inline-flex;
+      align-items: center;
+      color: var(--ink-soft);
+      font-size: 13px;
+      font-weight: 600;
+    }
+
+    .chip + .chip::before { content: "/"; margin-right: 6px; color: var(--ink-faint); }
+    .chip.rule { color: var(--forest); }
+
+    .complete {
+      width: 44px;
+      height: 44px;
+      border: 1px solid var(--line-strong);
+      border-radius: 50%;
+      display: grid;
+      place-items: center;
+      color: var(--pine);
+      background: transparent;
+      cursor: pointer;
+      transition: background 180ms ease, color 180ms ease, transform 180ms ease;
+    }
+
+    .complete:hover { transform: scale(1.04); }
+    .complete.done { color: white; background: var(--pine); border-color: var(--pine); }
+    .complete svg { width: 18px; }
+
+    .description { margin: 0; color: var(--ink-soft); font-size: 14px; line-height: 1.65; }
+
+    .sacred {
+      margin: 13px 0 0;
+      padding: 14px 15px 12px;
+      border: 1px solid var(--line);
+      border-radius: 12px;
+      background: var(--surface);
+      box-shadow: 0 5px 18px rgba(25,45,37,.045);
+    }
+
+    .arabic { margin: 0; direction: rtl; text-align: right; font-family: "Noto Naskh Arabic", serif; font-size: 20px; line-height: 1.9; color: var(--forest); }
+    .translation { margin: 8px 0 0; padding-top: 10px; border-top: 1px solid var(--line); font-size: 13px; line-height: 1.65; color: var(--ink-soft); }
+    .citation { margin-top: 10px; display: flex; align-items: center; justify-content: space-between; gap: 12px; font-size: 12px; font-weight: 700; color: var(--ink-soft); }
+    .grade { color: var(--forest); font-weight: 800; }
+
+    .next-line {
+      display: grid;
+      grid-template-columns: auto 1fr auto;
+      gap: 9px;
+      align-items: center;
+      margin-top: 16px;
+      padding-top: 13px;
+      border-top: 1px solid var(--line);
+      font-size: 12px;
+      color: var(--ink-faint);
+    }
+
+    .next-line b { color: var(--ink); font-size: 12px; }
+    .next-line .next-title { color: var(--ink-soft); font-weight: 700; }
+
+    .nav {
+      position: absolute;
+      z-index: 15;
+      left: 0;
+      right: 0;
+      bottom: 0;
+      height: 72px;
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      padding: 4px 12px;
+      border: 0;
+      border-top: 1px solid var(--line);
+      border-radius: 0;
+      background: var(--surface);
+    }
+
+    .nav button {
+      border: 0;
+      border-radius: 0;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      gap: 4px;
+      color: var(--ink-faint);
+      background: transparent;
+      font-size: 12px;
+      font-weight: 700;
+    }
+
+    .nav button.active { color: var(--forest); background: transparent; font-weight: 800; }
+    .nav button.active::after { content: ""; width: 18px; height: 2px; background: var(--saffron); }
+    .nav svg { width: 17px; height: 17px; }
+
+    .sr-only {
+      position: absolute; width: 1px; height: 1px; padding: 0; margin: -1px;
+      overflow: hidden; clip: rect(0,0,0,0); white-space: nowrap; border: 0;
+    }
+
+    @media (max-width: 470px) {
+      .studio { padding: 0; display: block; }
+      .phone { width: 100%; height: 100dvh; min-height: 680px; border: 0; border-radius: 0; box-shadow: none; }
+    }
+
+    @media (max-width: 370px) {
+      .top { height: 380px; flex-basis: 380px; }
+      .head { padding-inline: 17px; }
+      .time-readout { margin-top: 8px; }
+      .wheel-zone { height: 256px; }
+      .dial-wrap { width: 510px; height: 510px; top: 45px; }
+      #dial-rotor { transform-origin: 270px 270px; }
+      .deed-title { font-size: 20px; }
+    }
+
+    @media (prefers-reduced-motion: reduce) {
+      *, *::before, *::after { scroll-behavior: auto !important; transition-duration: .01ms !important; animation-duration: .01ms !important; }
+    }
+  </style>
+</head>
+<body>
+  <main class="studio">
+    <article class="phone" aria-label="Mockup skrin utama bMuslim">
+      <header class="top" id="top">
+        <div class="status"><span>15:00</span><span>WLY01</span></div>
+        <div class="head">
+          <div>
+            <div class="brand">bMuslim</div>
+            <div class="date">Khamis, 2 Julai 2026 · 17 Muharram 1448 H</div>
+          </div>
+          <div class="progress" aria-label="Kemajuan hari ini">
+            <svg class="progress-ring" viewBox="0 0 32 32" aria-hidden="true">
+              <circle class="track" cx="16" cy="16" r="13"></circle>
+              <circle class="value" id="progress-value" cx="16" cy="16" r="13" stroke-dasharray="81.68" stroke-dashoffset="81.68"></circle>
+            </svg>
+            <div class="progress-copy"><b id="progress-copy">0/10</b><span>hari ini</span></div>
+          </div>
+        </div>
+
+        <div class="time-readout">
+          <div class="daypart" id="daypart">Petang, sebelum Asar</div>
+          <div class="time" id="time">15:00</div>
+        </div>
+
+        <div class="wheel-zone" id="wheel-zone" role="slider" tabindex="0" aria-label="Roda waktu 24 jam" aria-valuemin="0" aria-valuemax="1439" aria-valuenow="900" aria-valuetext="15:00">
+          <div class="dial-wrap">
+            <svg id="dial" viewBox="0 0 540 540" aria-hidden="true">
+              <g id="dial-rotor">
+                <circle class="ring-base" cx="270" cy="270" r="205"></circle>
+                <circle class="ring-inner" cx="270" cy="270" r="181"></circle>
+                <g id="deed-arcs"></g>
+                <g id="hour-ticks"></g>
+                <g id="prayer-marks"></g>
+              </g>
+            </svg>
+          </div>
+          <div class="pointer" aria-hidden="true"></div>
+          <div class="celestial" id="celestial" aria-hidden="true"></div>
+          <button class="now-button" id="now-button" type="button" hidden>Kembali ke sekarang</button>
+        </div>
+      </header>
+
+      <section class="content">
+        <div class="day-banner">
+          <div class="icon" aria-hidden="true" id="banner-icon"></div>
+          <div><b>Puasa sunat Khamis</b><span>Cadangan sepanjang hari ini</span></div>
+        </div>
+
+        <section class="detail">
+          <div class="detail-kicker"><span id="detail-state">Pada penunjuk</span><span class="window-time" id="detail-window"></span></div>
+          <div class="deed-head">
+            <div>
+              <h1 class="deed-title" id="deed-title">Solat Asar</h1>
+              <div class="deed-meta"><span class="chip" id="type-chip">Solat</span><span class="chip rule" id="rule-chip">Fardhu</span></div>
+            </div>
+            <button class="complete" id="complete" type="button" aria-label="Tandai amalan selesai"></button>
+          </div>
+          <p class="description" id="description"></p>
+          <div id="sacred-slot"></div>
+          <div class="next-line"><span>Seterusnya</span><span class="next-title" id="next-title"></span><b id="next-time"></b></div>
+        </section>
+      </section>
+
+      <nav class="nav" aria-label="Navigasi utama">
+        <button class="active" type="button" aria-current="page" id="nav-home"></button>
+        <button type="button" id="nav-plan"></button>
+        <button type="button" id="nav-settings"></button>
+      </nav>
+      <div class="sr-only" id="announcement" aria-live="polite"></div>
+    </article>
+  </main>
+
+  <script>
+    (function () {
+      "use strict";
+
+      var icons = {
+        sun: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round"><circle cx="12" cy="12" r="4"/><path d="M12 2v2M12 20v2M4.9 4.9l1.4 1.4M17.7 17.7l1.4 1.4M2 12h2M20 12h2M4.9 19.1l1.4-1.4M17.7 6.3l1.4-1.4"/></svg>',
+        moon: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><path d="M20 14.5A8 8 0 1 1 9.5 4 6.2 6.2 0 0 0 20 14.5Z"/></svg>',
+        dawn: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round"><path d="M4 17h16M7 17a5 5 0 0 1 10 0M12 5v3M5.6 9l2 2M18.4 9l-2 2"/></svg>',
+        check: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="m5 12 4 4L19 6"/></svg>',
+        home: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="m4 11 8-7 8 7M6 10v9h12v-9"/></svg><span>Hari ini</span>',
+        plan: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"><rect x="4" y="5" width="16" height="16" rx="3"/><path d="M4 9h16M9 3v4M15 3v4"/></svg><span>Perancang</span>',
+        settings: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"><circle cx="12" cy="12" r="3"/><path d="M12 3v3M12 18v3M3 12h3M18 12h3M5.6 5.6l2.1 2.1M16.3 16.3l2.1 2.1M18.4 5.6l-2.1 2.1M7.7 16.3l-2.1 2.1"/></svg><span>Tetapan</span>'
+      };
+
+      var prayers = [
+        { id: "subuh", title: "Solat Subuh", short: "Subuh", type: "Solat", rule: "Fardhu", at: 5.983, end: 6.316, description: "Solat fardhu Subuh, dua rakaat sebelum terbit matahari." },
+        { id: "zohor", title: "Solat Zohor", short: "Zohor", type: "Solat", rule: "Fardhu", at: 13.35, end: 13.683, description: "Solat fardhu Zohor, empat rakaat." },
+        { id: "asar", title: "Solat Asar", short: "Asar", type: "Solat", rule: "Fardhu", at: 16.75, end: 17.083, description: "Solat fardhu Asar, empat rakaat." },
+        { id: "maghrib", title: "Solat Maghrib", short: "Maghrib", type: "Solat", rule: "Fardhu", at: 19.483, end: 19.816, description: "Solat fardhu Maghrib, tiga rakaat selepas matahari terbenam." },
+        { id: "isyak", title: "Solat Isyak", short: "Isyak", type: "Solat", rule: "Fardhu", at: 20.70, end: 21.033, description: "Solat fardhu Isyak, empat rakaat." }
+      ];
+
+      var deeds = [
+        { id: "tahajud", title: "Solat Tahajud", type: "Solat", rule: "Sunnah Muakkadah", level: "muakkadah", start: 3.5, end: 5.5, act: 4.2, description: "Solat sunat malam pada sepertiga akhir malam, sebelum masuk waktu Subuh." },
+        { id: "zikir-pagi", title: "Zikir pagi", type: "Zikir", rule: "Sunnah Muakkadah", level: "muakkadah", start: 5.983, end: 7.183, act: 6.15, description: "Zikir dan doa pagi, dibaca selepas Subuh hingga Syuruk.", arabic: "اللّٰهُمَّ بِكَ أَصْبَحْنَا وَبِكَ أَمْسَيْنَا، وَبِكَ نَحْيَا وَبِكَ نَمُوتُ وَإِلَيْكَ النُّشُور", translation: "Ya Allah, dengan-Mu kami memasuki waktu pagi, dan dengan-Mu kami memasuki waktu petang; dengan-Mu kami hidup dan dengan-Mu kami mati, dan kepada-Mu tempat kembali.", citation: "Sunan Abu Dawud", grade: "Hasan" },
+        { id: "dhuha", title: "Solat Dhuha", type: "Solat", rule: "Sunnah", level: "sunnah", start: 7.5, end: 13.35, act: 8.4, description: "Solat sunat Dhuha, minimum dua rakaat, selepas matahari naik hingga sebelum Zohor." },
+        { id: "zikir-petang", title: "Zikir petang", type: "Zikir", rule: "Sunnah Muakkadah", level: "muakkadah", start: 16.75, end: 19.483, act: 17.1, description: "Zikir dan doa petang, dibaca selepas Asar hingga sebelum Maghrib." },
+        { id: "al-mulk", title: "Baca Surah Al-Mulk", type: "Quran", rule: "Sunnah", level: "sunnah", start: 20.70, end: 23, act: 21.9, description: "Membaca Surah Al-Mulk sebelum tidur." }
+      ];
+
+      var palettes = [
+        { max: 5.983, label: "Malam, sebelum Subuh", icon: "moon", a: "#06150f", b: "#0b2b20", c: "#123d30", ink: "#eef6f1", muted: "rgba(238,246,241,.68)", glow: "rgba(198,218,209,.22)", ring: "rgba(202,225,215,.16)" },
+        { max: 7.183, label: "Subuh, menuju Syuruk", icon: "dawn", a: "#789b8d", b: "#b9cfc5", c: "#e2e9e3", ink: "#102d24", muted: "rgba(16,45,36,.68)", glow: "rgba(216,154,50,.34)", ring: "rgba(16,45,36,.15)" },
+        { max: 13.35, label: "Pagi, selepas Syuruk", icon: "sun", a: "#afcbc0", b: "#d8e5df", c: "#edf2ed", ink: "#102d24", muted: "rgba(16,45,36,.66)", glow: "rgba(216,154,50,.32)", ring: "rgba(16,45,36,.14)" },
+        { max: 16.75, label: "Petang, sebelum Asar", icon: "sun", a: "#b7cfc5", b: "#dce8e1", c: "#edf2ed", ink: "#102d24", muted: "rgba(16,45,36,.66)", glow: "rgba(216,154,50,.28)", ring: "rgba(16,45,36,.14)" },
+        { max: 19.483, label: "Petang, menuju Maghrib", icon: "sun", a: "#91ad9f", b: "#c0d1c8", c: "#e3e9e4", ink: "#102d24", muted: "rgba(16,45,36,.66)", glow: "rgba(216,154,50,.38)", ring: "rgba(16,45,36,.15)" },
+        { max: 20.70, label: "Senja, menuju Isyak", icon: "dawn", a: "#315849", b: "#718f80", c: "#b4c2b7", ink: "#f3f7f4", muted: "rgba(243,247,244,.7)", glow: "rgba(216,154,50,.44)", ring: "rgba(243,247,244,.17)" },
+        { max: 24, label: "Malam, selepas Isyak", icon: "moon", a: "#06150f", b: "#0b2b20", c: "#123d30", ink: "#eef6f1", muted: "rgba(238,246,241,.68)", glow: "rgba(198,218,209,.22)", ring: "rgba(202,225,215,.16)" }
+      ];
+
+      var NOW = 15;
+      var current = NOW;
+      var dragging = false;
+      var pointerX = 0;
+      var pointerY = 0;
+      var dragMode = "pending";
+      var done = {};
+      var storageKey = "bmuslim-home-v4-done";
+
+      try { done = JSON.parse(localStorage.getItem(storageKey) || "{}"); } catch (e) { done = {}; }
+
+      var $ = function (id) { return document.getElementById(id); };
+      var wheel = $("wheel-zone");
+      var rotor = $("dial-rotor");
+      var circumference = 81.68;
+
+      function fmt(hour) {
+        var total = Math.round(hour * 60) % 1440;
+        if (total < 0) total += 1440;
+        return String(Math.floor(total / 60)).padStart(2, "0") + ":" + String(total % 60).padStart(2, "0");
+      }
+
+      function polar(radius, hour) {
+        var angle = (hour * 15 - 90) * Math.PI / 180;
+        return { x: 270 + radius * Math.cos(angle), y: 270 + radius * Math.sin(angle) };
+      }
+
+      function arcPath(radius, start, end) {
+        var a = polar(radius, start);
+        var b = polar(radius, end);
+        var span = ((end - start) + 24) % 24;
+        return "M " + a.x.toFixed(2) + " " + a.y.toFixed(2) + " A " + radius + " " + radius + " 0 " + (span > 12 ? 1 : 0) + " 1 " + b.x.toFixed(2) + " " + b.y.toFixed(2);
+      }
+
+      function svgEl(name, attrs, text) {
+        var el = document.createElementNS("http://www.w3.org/2000/svg", name);
+        Object.keys(attrs || {}).forEach(function (key) { el.setAttribute(key, attrs[key]); });
+        if (text != null) el.textContent = text;
+        return el;
+      }
+
+      function buildDial() {
+        var tickGroup = $("hour-ticks");
+        for (var h = 0; h < 24; h++) {
+          var major = h % 3 === 0;
+          var p1 = polar(major ? 178 : 184, h);
+          var p2 = polar(196, h);
+          tickGroup.appendChild(svgEl("line", { x1: p1.x, y1: p1.y, x2: p2.x, y2: p2.y, "class": "hour-tick" + (major ? " major" : "") }));
+          if (major) {
+            var label = polar(164, h);
+            tickGroup.appendChild(svgEl("text", { x: label.x, y: label.y, "class": "hour-label", transform: "rotate(" + (h * 15) + " " + label.x + " " + label.y + ")" }, String(h).padStart(2, "0")));
+          }
+        }
+
+        deeds.forEach(function (deed, index) {
+          $("deed-arcs").appendChild(svgEl("path", { d: arcPath(222 + (index % 2) * 11, deed.start, deed.end), "class": "deed-window " + deed.level }));
+        });
+
+        prayers.forEach(function (prayer) {
+          var p = polar(205, prayer.at);
+          $("prayer-marks").appendChild(svgEl("circle", { cx: p.x, cy: p.y, r: 5, "class": "prayer-dot" }));
+        });
+        var nowPoint = polar(205, NOW);
+        $("prayer-marks").appendChild(svgEl("path", {
+          d: "M " + nowPoint.x + " " + (nowPoint.y - 8) + " l 7 12 h -14 z",
+          "class": "now-notch"
+        }));
+      }
+
+      function paletteAt(hour) {
+        for (var i = 0; i < palettes.length; i++) if (hour < palettes[i].max) return palettes[i];
+        return palettes[palettes.length - 1];
+      }
+
+      function itemPriority(item) {
+        return prayers.some(function (prayer) { return prayer.id === item.id; }) ? 0 : 1;
+      }
+
+      function sortByTimeThenPriority(a, b) {
+        var aTime = a.start == null ? a.at : a.start;
+        var bTime = b.start == null ? b.at : b.start;
+        return aTime - bTime || itemPriority(a) - itemPriority(b);
+      }
+
+      function itemAt(hour) {
+        var activePrayer = prayers.filter(function (p) { return hour >= p.at && hour <= p.end; });
+        if (activePrayer.length) return { item: activePrayer[0], state: "Waktu solat" };
+        var activeDeeds = deeds.filter(function (d) { return hour >= d.start && hour <= d.end; });
+        if (activeDeeds.length) return { item: activeDeeds[0], state: "Boleh diamalkan" };
+        var all = prayers.concat(deeds).slice().sort(sortByTimeThenPriority);
+        var next = all.find(function (item) { return (item.start == null ? item.at : item.start) > hour; }) || all[0];
+        return { item: next, state: "Amalan seterusnya" };
+      }
+
+      function nextAfter(item, hour) {
+        var all = prayers.concat(deeds).filter(function (candidate) { return candidate.id !== item.id; }).map(function (candidate) {
+          return { item: candidate, time: candidate.start == null ? candidate.at : candidate.start };
+        }).sort(function (a, b) { return a.time - b.time || itemPriority(a.item) - itemPriority(b.item); });
+        return all.find(function (entry) { return entry.time > hour + .01; }) || all[0];
+      }
+
+      function updateProgress() {
+        var total = deeds.length + prayers.length;
+        var count = Object.keys(done).filter(function (id) { return done[id]; }).length;
+        $("progress-copy").textContent = count + "/" + total;
+        $("progress-value").style.strokeDashoffset = circumference * (1 - count / total);
+        $("progress-value").parentNode.parentNode.setAttribute("aria-label", "Kemajuan " + count + " daripada " + total);
+      }
+
+      function renderDetail(selection) {
+        var item = selection.item;
+        var start = item.start == null ? item.at : item.start;
+        var end = item.end;
+        $("detail-state").textContent = selection.state;
+        $("detail-window").textContent = fmt(start) + (end != null ? " hingga " + fmt(end) : "");
+        $("deed-title").textContent = item.title;
+        $("type-chip").textContent = item.type;
+        $("rule-chip").textContent = item.rule;
+        $("description").textContent = item.description;
+        $("complete").classList.toggle("done", !!done[item.id]);
+        $("complete").setAttribute("aria-label", done[item.id] ? "Batalkan tanda selesai untuk " + item.title : "Tandai " + item.title + " selesai");
+        $("complete").dataset.itemId = item.id;
+        $("complete").innerHTML = icons.check;
+
+        if (item.arabic) {
+          $("sacred-slot").innerHTML = '<div class="sacred"><p class="arabic">' + item.arabic + '</p><p class="translation">' + item.translation + '</p><div class="citation"><span>' + item.citation + '</span><span class="grade">' + item.grade + '</span></div></div>';
+        } else {
+          $("sacred-slot").innerHTML = "";
+        }
+
+        var next = nextAfter(item, current);
+        $("next-title").textContent = next.item.title;
+        $("next-time").textContent = fmt(next.time);
+      }
+
+      function celestialPosition(hour, icon) {
+        var progress;
+        if (icon === "dawn" && hour < 7.183) {
+          progress = Math.max(0, Math.min(.12, ((hour - 5.983) / (7.183 - 5.983)) * .12));
+        } else if (icon === "dawn") {
+          progress = .88 + Math.max(0, Math.min(.12, ((hour - 19.483) / (20.70 - 19.483)) * .12));
+        } else if (icon === "sun") {
+          progress = Math.max(0, Math.min(1, (hour - 7.183) / (19.483 - 7.183)));
+        } else {
+          var nightHour = hour < 5.983 ? hour + 24 : hour;
+          progress = Math.max(0, Math.min(1, (nightHour - 20.70) / ((24 + 5.983) - 20.70)));
+        }
+        return { x: -118 + progress * 236, y: 22 - Math.sin(progress * Math.PI) * 62 };
+      }
+
+      function update(hour) {
+        current = Math.max(0, Math.min(23.983, hour));
+        var text = fmt(current);
+        var palette = paletteAt(current);
+        var root = document.documentElement.style;
+        root.setProperty("--sky-a", palette.a);
+        root.setProperty("--sky-b", palette.b);
+        root.setProperty("--sky-c", palette.c);
+        root.setProperty("--hero-ink", palette.ink);
+        root.setProperty("--hero-muted", palette.muted);
+        root.setProperty("--glow", palette.glow);
+        root.setProperty("--ring", palette.ring);
+        var orbit = celestialPosition(current, palette.icon);
+        root.setProperty("--celestial-x", orbit.x.toFixed(1) + "px");
+        root.setProperty("--celestial-y", orbit.y.toFixed(1) + "px");
+        rotor.style.transform = "rotate(" + (-current * 15) + "deg)";
+        $("time").textContent = text;
+        $("daypart").textContent = palette.label;
+        $("celestial").innerHTML = icons[palette.icon];
+        $("wheel-zone").setAttribute("aria-valuenow", Math.round(current * 60));
+        $("wheel-zone").setAttribute("aria-valuetext", text + ", " + palette.label);
+        $("now-button").hidden = Math.abs(current - NOW) < .04;
+        renderDetail(itemAt(current));
+      }
+
+      function moveBy(deltaHours) { update(current + deltaHours); }
+
+      wheel.addEventListener("pointerdown", function (event) {
+        dragging = true;
+        pointerX = event.clientX;
+        pointerY = event.clientY;
+        dragMode = "pending";
+      });
+
+      wheel.addEventListener("pointermove", function (event) {
+        if (!dragging) return;
+        var dx = event.clientX - pointerX;
+        var dy = event.clientY - pointerY;
+        if (dragMode === "pending") {
+          if (Math.hypot(dx, dy) < 8) return;
+          if (Math.abs(dy) >= Math.abs(dx) * 1.2) { dragging = false; dragMode = "vertical"; return; }
+          dragMode = "horizontal";
+          wheel.classList.add("dragging");
+          wheel.setPointerCapture(event.pointerId);
+        }
+        if (dragMode !== "horizontal") return;
+        pointerX = event.clientX;
+        pointerY = event.clientY;
+        moveBy(-dx / 22);
+      });
+
+      function stopDrag() {
+        dragging = false;
+        dragMode = "pending";
+        wheel.classList.remove("dragging");
+        update(Math.round(current * 12) / 12);
+        $("announcement").textContent = "Masa dipilih " + fmt(current) + ", " + paletteAt(current).label;
+      }
+      wheel.addEventListener("pointerup", stopDrag);
+      wheel.addEventListener("pointercancel", stopDrag);
+
+      wheel.addEventListener("wheel", function (event) {
+        if (!event.shiftKey && Math.abs(event.deltaX) <= Math.abs(event.deltaY)) return;
+        event.preventDefault();
+        moveBy((event.deltaX || event.deltaY) / 180);
+      }, { passive: false });
+
+      wheel.addEventListener("keydown", function (event) {
+        var delta = 0;
+        if (event.key === "ArrowRight") delta = .25;
+        if (event.key === "ArrowLeft") delta = -.25;
+        if (event.key === "ArrowUp") delta = 1;
+        if (event.key === "ArrowDown") delta = -1;
+        if (event.key === "Home") { event.preventDefault(); update(0); return; }
+        if (event.key === "End") { event.preventDefault(); update(23.983); return; }
+        if (delta) { event.preventDefault(); moveBy(delta); }
+      });
+
+      $("now-button").addEventListener("click", function (event) { event.stopPropagation(); update(NOW); });
+
+      $("complete").addEventListener("click", function () {
+        var id = this.dataset.itemId;
+        done[id] = !done[id];
+        try { localStorage.setItem(storageKey, JSON.stringify(done)); } catch (e) {}
+        updateProgress();
+        renderDetail(itemAt(current));
+      });
+
+      $("nav-home").innerHTML = icons.home;
+      $("nav-plan").innerHTML = icons.plan;
+      $("nav-settings").innerHTML = icons.settings;
+      $("banner-icon").innerHTML = icons.moon;
+      buildDial();
+      updateProgress();
+      var requested = new URLSearchParams(location.search).get("time");
+      var parts = requested && requested.match(/^(\d{1,2}):(\d{2})$/);
+      var initial = parts ? Math.min(23.983, Number(parts[1]) + Number(parts[2]) / 60) : NOW;
+      update(initial);
+    }());
+  </script>
+</body>
+</html>

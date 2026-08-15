@@ -4,9 +4,32 @@ import java.time.LocalTime
 import org.junit.Assert.assertEquals
 import org.junit.Assert.assertTrue
 import org.junit.Test
+import com.bmuslim.app.ui.almanac.AlmanacVisualRole
 
 class TimelineModelTest {
     private val deeds = sampleDeeds()
+
+    @Test
+    fun demoMapperTargetsSharedContractWithoutMovingFixtureOwnership() {
+        val model = demoAlmanacModel(deeds, 15 * 60)
+        assertEquals("demo-stable-fixture", model.modelKey)
+        assertEquals(5, model.points.count { it.role == AlmanacVisualRole.Primary })
+        assertEquals(deeds.count { it.ruling != Ruling.Fardh }, model.intervals.size)
+        assertEquals(5, model.minuteStep)
+        assertTrue(model.points.none { it.title.contains("Khamis") })
+        assertEquals(6 * 60, model.sunriseMinute)
+    }
+
+    @Test
+    fun demoIntervalLanesUseOriginalOverlapAwareAssignment() {
+        val base = deeds.first { it.id == "zikir-pagi" }
+        val overlapping = listOf(
+            base.copy(id = "a", start = LocalTime.of(6, 0), end = LocalTime.of(8, 0)),
+            base.copy(id = "b", start = LocalTime.of(7, 0), end = LocalTime.of(9, 0)),
+            base.copy(id = "c", start = LocalTime.of(9, 0), end = LocalTime.of(10, 0)),
+        )
+        assertEquals(mapOf("a" to 0, "b" to 1, "c" to 0), assignDemoDeedLanes(overlapping))
+    }
 
     @Test
     fun activeDeedsArePriorityOrderedWhenWindowsOverlap() {
@@ -53,13 +76,14 @@ class TimelineModelTest {
         val overlapStart = wheelReadoutAt(deeds, 5 * 60 + 59, false)!!
         assertEquals("subuh", overlapStart.prayerId)
         assertEquals("zikir-pagi", overlapStart.contextualId)
-        assertEquals("Waktu Subuh · 05:59", overlapStart.primary)
+        assertEquals("05:59 dipilih · Waktu Subuh", overlapStart.primary)
         assertEquals("Amalan berkaitan · Zikir pagi", overlapStart.secondary)
 
         assertEquals("subuh", wheelReadoutAt(deeds, 6 * 60 + 19, false)!!.prayerId)
         val afterPrayer = wheelReadoutAt(deeds, 6 * 60 + 20, false)!!
         assertEquals(null, afterPrayer.prayerId)
-        assertEquals("Zikir pagi", afterPrayer.primary)
+        assertEquals("06:20 dipilih", afterPrayer.primary)
+        assertEquals("Amalan berkaitan · Zikir pagi", afterPrayer.secondary)
     }
 
     @Test
@@ -69,6 +93,20 @@ class TimelineModelTest {
         assertEquals(settled.primary, touching.primary)
         assertEquals("Amalan berkaitan · Zikir petang", settled.secondary)
         assertEquals("Zikir petang", touching.secondary)
+    }
+
+    @Test
+    fun sharedDemoReadoutVisiblyOwnsEveryExactSelectedMinute() {
+        val model = demoAlmanacModel(deeds, 15 * 60)
+        (0 until 24 * 60).forEach { minute ->
+            val selection = model.selectionPolicy.select(model.points, minute)
+            val readout = model.wheelReadout(selection, minute, false)
+            assertTrue(
+                "selected minute $minute",
+                listOfNotNull(readout.first, readout.second).joinToString(" ").contains(formatTimelineMinute(minute)),
+            )
+        }
+        assertEquals("Leret roda kiri atau kanan untuk pilih waktu", model.copy.wheelHint)
     }
 
     @Test
@@ -83,7 +121,7 @@ class TimelineModelTest {
             val readout = wheelReadoutAt(deeds, minute, false)!!
             assertEquals(prayerId, readout.prayerId)
             assertEquals(contextualId, readout.contextualId)
-            assertTrue(readout.primary.startsWith("Waktu "))
+            assertTrue(readout.primary.contains(" · Waktu "))
             assertTrue(readout.secondary!!.startsWith("Amalan berkaitan "))
         }
 

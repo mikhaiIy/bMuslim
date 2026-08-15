@@ -1,0 +1,1069 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://amuslim.local/schema/starter-catalog-v2.json",
+  "title": "aMuslim starter deed research catalog v2",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "schemaVersion",
+    "catalogId",
+    "contentVersion",
+    "purpose",
+    "lifecycle",
+    "defaultLocale",
+    "supportedLocales",
+    "researchAdmissionPolicy",
+    "entries",
+    "evidence",
+    "approvals"
+  ],
+  "properties": {
+    "$schema": {
+      "type": "string"
+    },
+    "schemaVersion": {
+      "const": 2
+    },
+    "catalogId": {
+      "const": "amuslim.starter"
+    },
+    "contentVersion": {
+      "type": "string",
+      "pattern": "^0\\.[0-9]+\\.[0-9]+-draft$"
+    },
+    "purpose": {
+      "const": "RESEARCH_CANDIDATE"
+    },
+    "lifecycle": {
+      "const": "IN_REVIEW"
+    },
+    "defaultLocale": {
+      "const": "ms-MY"
+    },
+    "supportedLocales": {
+      "type": "array",
+      "const": [
+        "ms-MY",
+        "en-GB"
+      ]
+    },
+    "researchAdmissionPolicy": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "acceptedCandidateAssessments",
+        "publicationReviewRequired"
+      ],
+      "properties": {
+        "acceptedCandidateAssessments": {
+          "const": [
+            "SAHIH_COLLECTION",
+            "DISPLAYED_SAHIH_WITH_NAMED_GRADER",
+            "DISPLAYED_HASAN_WITH_NAMED_GRADER"
+          ]
+        },
+        "publicationReviewRequired": {
+          "const": true
+        }
+      }
+    },
+    "entries": {
+      "type": "array",
+      "minItems": 11,
+      "items": {
+        "$ref": "#/$defs/entry"
+      },
+      "maxItems": 11
+    },
+    "evidence": {
+      "type": "array",
+      "minItems": 14,
+      "items": {
+        "$ref": "#/$defs/evidence"
+      },
+      "maxItems": 14
+    },
+    "approvals": {
+      "type": "array",
+      "maxItems": 0
+    }
+  },
+  "$defs": {
+    "localizedText": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "ms-MY",
+        "en-GB"
+      ],
+      "properties": {
+        "ms-MY": {
+          "type": "string",
+          "pattern": "\\S"
+        },
+        "en-GB": {
+          "type": "string",
+          "pattern": "\\S"
+        }
+      }
+    },
+    "claimBase": {
+      "type": "object",
+      "required": [
+        "id",
+        "claimType",
+        "reviewStatus",
+        "evidenceIds",
+        "payload"
+      ],
+      "properties": {
+        "id": {
+          "type": "string",
+          "pattern": "^claim\\.[a-z0-9._-]+$"
+        },
+        "claimType": {
+          "enum": [
+            "ACT",
+            "TIMING"
+          ]
+        },
+        "reviewStatus": {
+          "const": "UNREVIEWED"
+        },
+        "evidenceIds": {
+          "type": "array",
+          "minItems": 1,
+          "uniqueItems": true,
+          "items": {
+            "type": "string",
+            "pattern": "^evidence\\.[a-z0-9._-]+$"
+          }
+        },
+        "corroborativeEvidenceIds": {
+          "type": "array",
+          "uniqueItems": true,
+          "items": {
+            "type": "string",
+            "pattern": "^evidence\\.[a-z0-9._-]+$"
+          }
+        },
+        "payload": {
+          "type": "object"
+        }
+      }
+    },
+    "actionClaim": {
+      "unevaluatedProperties": false,
+      "allOf": [
+        {
+          "$ref": "#/$defs/claimBase"
+        },
+        {
+          "type": "object",
+          "properties": {
+            "claimType": {
+              "const": "ACT"
+            },
+            "variationEvidenceIds": {
+              "type": "array",
+              "uniqueItems": true,
+              "items": {
+                "type": "string",
+                "pattern": "^evidence\\.[a-z0-9._-]+$"
+              }
+            },
+            "payload": {
+              "type": "object",
+              "additionalProperties": false,
+              "required": [
+                "title",
+                "instruction"
+              ],
+              "properties": {
+                "title": {
+                  "$ref": "#/$defs/localizedText"
+                },
+                "instruction": {
+                  "$ref": "#/$defs/localizedText"
+                },
+                "detailRequirement": {
+                  "const": "REQUIRES_APPROVED_TEXT_CLAIM"
+                }
+              }
+            }
+          }
+        }
+      ]
+    },
+    "timingClaim": {
+      "unevaluatedProperties": false,
+      "allOf": [
+        {
+          "$ref": "#/$defs/claimBase"
+        },
+        {
+          "type": "object",
+          "properties": {
+            "claimType": {
+              "const": "TIMING"
+            },
+            "variationEvidenceIds": {
+              "type": "array",
+              "uniqueItems": true,
+              "items": {
+                "type": "string",
+                "pattern": "^evidence\\.[a-z0-9._-]+$"
+              }
+            },
+            "payload": {
+              "type": "object",
+              "additionalProperties": false,
+              "required": [
+                "sourceTimePhrase",
+                "recurrence",
+                "expression",
+                "resolutionStatus",
+                "unsupportedInferences"
+              ],
+              "properties": {
+                "sourceTimePhrase": {
+                  "$ref": "#/$defs/localizedText"
+                },
+                "recurrence": {
+                  "type": "object",
+                  "additionalProperties": false,
+                  "required": [
+                    "kind",
+                    "dateBasis"
+                  ],
+                  "properties": {
+                    "kind": {
+                      "enum": [
+                        "EVERY_DAY",
+                        "TWICE_DAILY_NAMED_PERIODS",
+                        "AFTER_EACH_PRAYER",
+                        "ON_PERSONAL_EVENT",
+                        "SOURCE_RECURRENCE_UNSPECIFIED",
+                        "WEEKDAY_SET",
+                        "MONTHLY_CONTEXT"
+                      ]
+                    },
+                    "weekdays": {
+                      "type": "array",
+                      "uniqueItems": true,
+                      "items": {
+                        "enum": [
+                          "MONDAY",
+                          "TUESDAY",
+                          "WEDNESDAY",
+                          "THURSDAY",
+                          "FRIDAY",
+                          "SATURDAY",
+                          "SUNDAY"
+                        ]
+                      }
+                    },
+                    "event": {
+                      "enum": [
+                        "INTEND_SLEEP",
+                        "INTEND_SLEEP_AT_NIGHT"
+                      ]
+                    },
+                    "dateBasis": {
+                      "enum": [
+                        "SCHEDULE_ZONE_LOCAL_DATE",
+                        "SCHEDULE_ZONE_LOCAL_WEEKDAY",
+                        "PERSONAL_EVENT_OCCURRENCE",
+                        "NIGHT_OCCURRENCE",
+                        "SOURCE_RECURRENCE_UNSPECIFIED",
+                        "RELIGIOUS_DAY_POLICY_REQUIRED",
+                        "RELIGIOUS_LUNAR_DATE_POLICY_REQUIRED"
+                      ]
+                    }
+                  },
+                  "allOf": [
+                    {
+                      "if": {
+                        "properties": {
+                          "kind": {
+                            "const": "WEEKDAY_SET"
+                          }
+                        }
+                      },
+                      "then": {
+                        "required": [
+                          "weekdays"
+                        ]
+                      },
+                      "else": {
+                        "not": {
+                          "required": [
+                            "weekdays"
+                          ]
+                        }
+                      }
+                    },
+                    {
+                      "if": {
+                        "properties": {
+                          "kind": {
+                            "const": "ON_PERSONAL_EVENT"
+                          }
+                        }
+                      },
+                      "then": {
+                        "required": [
+                          "event"
+                        ]
+                      },
+                      "else": {
+                        "not": {
+                          "required": [
+                            "event"
+                          ]
+                        }
+                      }
+                    },
+                    {
+                      "if": {
+                        "properties": {
+                          "kind": {
+                            "const": "AFTER_EACH_PRAYER"
+                          }
+                        }
+                      },
+                      "then": {
+                        "properties": {
+                          "dateBasis": {
+                            "const": "PERSONAL_EVENT_OCCURRENCE"
+                          }
+                        }
+                      }
+                    },
+                    {
+                      "if": {
+                        "properties": {
+                          "kind": {
+                            "const": "ON_PERSONAL_EVENT"
+                          }
+                        }
+                      },
+                      "then": {
+                        "properties": {
+                          "dateBasis": {
+                            "const": "PERSONAL_EVENT_OCCURRENCE"
+                          }
+                        }
+                      }
+                    },
+                    {
+                      "if": {
+                        "properties": {
+                          "kind": {
+                            "const": "SOURCE_RECURRENCE_UNSPECIFIED"
+                          }
+                        }
+                      },
+                      "then": {
+                        "properties": {
+                          "dateBasis": {
+                            "const": "SOURCE_RECURRENCE_UNSPECIFIED"
+                          }
+                        }
+                      }
+                    },
+                    {
+                      "if": {
+                        "properties": {
+                          "kind": {
+                            "const": "MONTHLY_CONTEXT"
+                          }
+                        }
+                      },
+                      "then": {
+                        "properties": {
+                          "dateBasis": {
+                            "const": "RELIGIOUS_LUNAR_DATE_POLICY_REQUIRED"
+                          }
+                        }
+                      }
+                    }
+                  ]
+                },
+                "expression": {
+                  "type": "object",
+                  "additionalProperties": false,
+                  "required": [
+                    "kind",
+                    "parameters",
+                    "precision"
+                  ],
+                  "properties": {
+                    "kind": {
+                      "enum": [
+                        "SEMANTIC_PERIODS",
+                        "AFTER_USER_EVENT",
+                        "PERSONAL_EVENT",
+                        "NIGHT_SEGMENT",
+                        "FASTING_WEEKDAYS",
+                        "RELIGIOUS_WEEKDAY",
+                        "WEEKDAY_FINAL_PERIOD_AFTER_PRAYER",
+                        "FASTING_LUNAR_DATES"
+                      ]
+                    },
+                    "parameters": {
+                      "type": "object"
+                    },
+                    "precision": {
+                      "enum": [
+                        "DIRECT_TRIGGER",
+                        "BROAD_CONTEXT",
+                        "UNRESOLVED"
+                      ]
+                    }
+                  },
+                  "allOf": [
+                    {
+                      "if": {
+                        "properties": {
+                          "kind": {
+                            "const": "SEMANTIC_PERIODS"
+                          }
+                        }
+                      },
+                      "then": {
+                        "properties": {
+                          "parameters": {
+                            "type": "object",
+                            "additionalProperties": false,
+                            "required": [
+                              "periods"
+                            ],
+                            "properties": {
+                              "periods": {
+                                "type": "array",
+                                "minItems": 1,
+                                "uniqueItems": true,
+                                "items": {
+                                  "enum": [
+                                    "MORNING",
+                                    "EVENING",
+                                    "FORENOON"
+                                  ]
+                                }
+                              }
+                            }
+                          }
+                        }
+                      }
+                    },
+                    {
+                      "if": {
+                        "properties": {
+                          "kind": {
+                            "const": "AFTER_USER_EVENT"
+                          }
+                        }
+                      },
+                      "then": {
+                        "properties": {
+                          "parameters": {
+                            "type": "object",
+                            "additionalProperties": false,
+                            "required": [
+                              "event",
+                              "prayerScope"
+                            ],
+                            "properties": {
+                              "event": {
+                                "const": "PRAYER_COMPLETED"
+                              },
+                              "prayerScope": {
+                                "const": "PRESCRIBED_ONLY"
+                              }
+                            }
+                          }
+                        }
+                      }
+                    },
+                    {
+                      "if": {
+                        "properties": {
+                          "kind": {
+                            "const": "PERSONAL_EVENT"
+                          }
+                        }
+                      },
+                      "then": {
+                        "properties": {
+                          "parameters": {
+                            "type": "object",
+                            "additionalProperties": false,
+                            "required": [
+                              "relation",
+                              "event"
+                            ],
+                            "properties": {
+                              "relation": {
+                                "enum": [
+                                  "AT",
+                                  "BEFORE"
+                                ]
+                              },
+                              "event": {
+                                "enum": [
+                                  "INTEND_SLEEP",
+                                  "INTEND_SLEEP_AT_NIGHT"
+                                ]
+                              }
+                            }
+                          }
+                        }
+                      }
+                    },
+                    {
+                      "if": {
+                        "properties": {
+                          "kind": {
+                            "const": "NIGHT_SEGMENT"
+                          }
+                        }
+                      },
+                      "then": {
+                        "properties": {
+                          "parameters": {
+                            "type": "object",
+                            "additionalProperties": false,
+                            "required": [
+                              "segment",
+                              "nightBoundaryPolicy"
+                            ],
+                            "properties": {
+                              "segment": {
+                                "const": "LAST_THIRD"
+                              },
+                              "nightBoundaryPolicy": {
+                                "const": "REQUIRES_MALAYSIAN_SCHOLAR_REVIEW"
+                              }
+                            }
+                          }
+                        }
+                      }
+                    },
+                    {
+                      "if": {
+                        "properties": {
+                          "kind": {
+                            "const": "FASTING_WEEKDAYS"
+                          }
+                        }
+                      },
+                      "then": {
+                        "properties": {
+                          "parameters": {
+                            "type": "object",
+                            "additionalProperties": false,
+                            "required": [
+                              "weekdays"
+                            ],
+                            "properties": {
+                              "weekdays": {
+                                "type": "array",
+                                "minItems": 1,
+                                "uniqueItems": true,
+                                "items": {
+                                  "enum": [
+                                    "MONDAY",
+                                    "THURSDAY"
+                                  ]
+                                }
+                              }
+                            }
+                          }
+                        }
+                      }
+                    },
+                    {
+                      "if": {
+                        "properties": {
+                          "kind": {
+                            "const": "RELIGIOUS_WEEKDAY"
+                          }
+                        }
+                      },
+                      "then": {
+                        "properties": {
+                          "parameters": {
+                            "type": "object",
+                            "additionalProperties": false,
+                            "required": [
+                              "weekday"
+                            ],
+                            "properties": {
+                              "weekday": {
+                                "const": "FRIDAY"
+                              }
+                            }
+                          }
+                        }
+                      }
+                    },
+                    {
+                      "if": {
+                        "properties": {
+                          "kind": {
+                            "const": "WEEKDAY_FINAL_PERIOD_AFTER_PRAYER"
+                          }
+                        }
+                      },
+                      "then": {
+                        "properties": {
+                          "parameters": {
+                            "type": "object",
+                            "additionalProperties": false,
+                            "required": [
+                              "weekday",
+                              "after",
+                              "focus",
+                              "endBoundaryPolicy"
+                            ],
+                            "properties": {
+                              "weekday": {
+                                "const": "FRIDAY"
+                              },
+                              "after": {
+                                "const": "ASR"
+                              },
+                              "focus": {
+                                "const": "FINAL_PORTION"
+                              },
+                              "endBoundaryPolicy": {
+                                "const": "UNRESOLVED"
+                              }
+                            }
+                          }
+                        }
+                      }
+                    },
+                    {
+                      "if": {
+                        "properties": {
+                          "kind": {
+                            "const": "FASTING_LUNAR_DATES"
+                          }
+                        }
+                      },
+                      "then": {
+                        "properties": {
+                          "parameters": {
+                            "type": "object",
+                            "additionalProperties": false,
+                            "required": [
+                              "dateSet",
+                              "eligibilityPolicy"
+                            ],
+                            "properties": {
+                              "dateSet": {
+                                "type": "object",
+                                "additionalProperties": false,
+                                "required": [
+                                  "kind",
+                                  "dates"
+                                ],
+                                "properties": {
+                                  "kind": {
+                                    "const": "LUNAR_DATE_SET"
+                                  },
+                                  "dates": {
+                                    "type": "array",
+                                    "minItems": 3,
+                                    "maxItems": 3,
+                                    "uniqueItems": true,
+                                    "items": {
+                                      "type": "integer",
+                                      "enum": [
+                                        13,
+                                        14,
+                                        15
+                                      ]
+                                    }
+                                  }
+                                }
+                              },
+                              "eligibilityPolicy": {
+                                "const": "REQUIRES_REVIEWED_CALENDAR_AND_ELIGIBILITY_POLICY"
+                              }
+                            }
+                          }
+                        }
+                      }
+                    }
+                  ]
+                },
+                "resolutionStatus": {
+                  "enum": [
+                    "DIRECT_EVENT_ONLY",
+                    "REQUIRES_REVIEWED_TEMPORAL_POLICY",
+                    "REQUIRES_REVIEWED_CALENDAR_AND_ELIGIBILITY_POLICY"
+                  ]
+                },
+                "unsupportedInferences": {
+                  "type": "array",
+                  "minItems": 1,
+                  "items": {
+                    "type": "string",
+                    "pattern": "\\S"
+                  }
+                }
+              },
+              "allOf": [
+                {
+                  "if": {
+                    "properties": {
+                      "recurrence": {
+                        "properties": {
+                          "kind": {
+                            "const": "TWICE_DAILY_NAMED_PERIODS"
+                          }
+                        }
+                      }
+                    }
+                  },
+                  "then": {
+                    "properties": {
+                      "expression": {
+                        "properties": {
+                          "kind": {
+                            "const": "SEMANTIC_PERIODS"
+                          }
+                        }
+                      }
+                    }
+                  }
+                },
+                {
+                  "if": {
+                    "properties": {
+                      "recurrence": {
+                        "properties": {
+                          "kind": {
+                            "const": "AFTER_EACH_PRAYER"
+                          }
+                        }
+                      }
+                    }
+                  },
+                  "then": {
+                    "properties": {
+                      "expression": {
+                        "properties": {
+                          "kind": {
+                            "const": "AFTER_USER_EVENT"
+                          }
+                        }
+                      }
+                    }
+                  }
+                },
+                {
+                  "if": {
+                    "properties": {
+                      "recurrence": {
+                        "properties": {
+                          "kind": {
+                            "const": "ON_PERSONAL_EVENT"
+                          }
+                        }
+                      }
+                    }
+                  },
+                  "then": {
+                    "properties": {
+                      "expression": {
+                        "properties": {
+                          "kind": {
+                            "const": "PERSONAL_EVENT"
+                          }
+                        }
+                      }
+                    }
+                  }
+                },
+                {
+                  "if": {
+                    "properties": {
+                      "recurrence": {
+                        "properties": {
+                          "kind": {
+                            "const": "SOURCE_RECURRENCE_UNSPECIFIED"
+                          }
+                        }
+                      }
+                    }
+                  },
+                  "then": {
+                    "properties": {
+                      "expression": {
+                        "properties": {
+                          "kind": {
+                            "const": "SEMANTIC_PERIODS"
+                          }
+                        }
+                      }
+                    }
+                  }
+                },
+                {
+                  "if": {
+                    "properties": {
+                      "recurrence": {
+                        "properties": {
+                          "kind": {
+                            "const": "EVERY_DAY"
+                          }
+                        }
+                      }
+                    }
+                  },
+                  "then": {
+                    "properties": {
+                      "expression": {
+                        "properties": {
+                          "kind": {
+                            "const": "NIGHT_SEGMENT"
+                          }
+                        }
+                      }
+                    }
+                  }
+                },
+                {
+                  "if": {
+                    "properties": {
+                      "recurrence": {
+                        "properties": {
+                          "kind": {
+                            "const": "WEEKDAY_SET"
+                          }
+                        }
+                      }
+                    }
+                  },
+                  "then": {
+                    "properties": {
+                      "expression": {
+                        "properties": {
+                          "kind": {
+                            "enum": [
+                              "FASTING_WEEKDAYS",
+                              "RELIGIOUS_WEEKDAY",
+                              "WEEKDAY_FINAL_PERIOD_AFTER_PRAYER"
+                            ]
+                          }
+                        }
+                      }
+                    }
+                  }
+                },
+                {
+                  "if": {
+                    "properties": {
+                      "recurrence": {
+                        "properties": {
+                          "kind": {
+                            "const": "MONTHLY_CONTEXT"
+                          }
+                        }
+                      }
+                    }
+                  },
+                  "then": {
+                    "properties": {
+                      "expression": {
+                        "properties": {
+                          "kind": {
+                            "const": "FASTING_LUNAR_DATES"
+                          }
+                        }
+                      }
+                    }
+                  }
+                }
+              ]
+            }
+          }
+        }
+      ]
+    },
+    "entry": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "id",
+        "lifecycle",
+        "practiceKind",
+        "completionMode",
+        "actionClaim",
+        "timingClaim"
+      ],
+      "properties": {
+        "id": {
+          "type": "string",
+          "pattern": "^deed\\.[a-z0-9._-]+$"
+        },
+        "lifecycle": {
+          "const": "IN_REVIEW"
+        },
+        "practiceKind": {
+          "enum": [
+            "SALAH",
+            "DHIKR",
+            "QURAN",
+            "FASTING",
+            "DUA",
+            "ADAB"
+          ]
+        },
+        "completionMode": {
+          "enum": [
+            "ONCE",
+            "REPEATABLE_NO_TARGET",
+            "PER_TRIGGER",
+            "TWICE_PER_DAY"
+          ]
+        },
+        "actionClaim": {
+          "$ref": "#/$defs/actionClaim"
+        },
+        "timingClaim": {
+          "$ref": "#/$defs/timingClaim"
+        }
+      }
+    },
+    "evidence": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "id",
+        "sourceType",
+        "attributionLevel",
+        "collection",
+        "reference",
+        "canonicalUrl",
+        "reportedAssessment",
+        "supportsClaimTypes",
+        "sourceSummary",
+        "usagePermission"
+      ],
+      "properties": {
+        "id": {
+          "type": "string",
+          "pattern": "^evidence\\.[a-z0-9._-]+$"
+        },
+        "sourceType": {
+          "const": "HADITH"
+        },
+        "attributionLevel": {
+          "const": "PROPHETIC"
+        },
+        "collection": {
+          "type": "string",
+          "pattern": "\\S"
+        },
+        "reference": {
+          "type": "string",
+          "pattern": "\\S"
+        },
+        "canonicalUrl": {
+          "type": "string",
+          "pattern": "^https://"
+        },
+        "reportedAssessment": {
+          "type": "object",
+          "additionalProperties": false,
+          "required": [
+            "kind",
+            "label"
+          ],
+          "properties": {
+            "kind": {
+              "enum": [
+                "DISPLAYED_GRADE",
+                "SAHIH_COLLECTION"
+              ]
+            },
+            "label": {
+              "type": "string",
+              "pattern": "\\S"
+            },
+            "grader": {
+              "type": [
+                "string",
+                "null"
+              ]
+            }
+          },
+          "allOf": [
+            {
+              "if": {
+                "properties": {
+                  "kind": {
+                    "const": "DISPLAYED_GRADE"
+                  }
+                }
+              },
+              "then": {
+                "required": [
+                  "grader"
+                ],
+                "properties": {
+                  "grader": {
+                    "type": "string",
+                    "pattern": "\\S"
+                  }
+                }
+              }
+            },
+            {
+              "if": {
+                "properties": {
+                  "kind": {
+                    "const": "SAHIH_COLLECTION"
+                  }
+                }
+              },
+              "then": {
+                "required": [
+                  "grader"
+                ],
+                "properties": {
+                  "grader": {
+                    "type": "null"
+                  }
+                }
+              }
+            }
+          ]
+        },
+        "supportsClaimTypes": {
+          "type": "array",
+          "minItems": 1,
+          "uniqueItems": true,
+          "items": {
+            "enum": [
+              "ACT",
+              "TIMING"
+            ]
+          }
+        },
+        "sourceSummary": {
+          "type": "string",
+          "pattern": "\\S"
+        },
+        "usagePermission": {
+          "const": "LINK_AND_PARAPHRASE_ONLY"
+        }
+      }
+    }
+  }
+}

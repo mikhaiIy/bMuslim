@@ -126,18 +126,20 @@ class HomeSceneTest {
     }
 
     @Test
-    fun protectedReadoutPlacementIsStableAcrossTouchAndDirection() {
+    fun protectedReadoutPlacementIsCenteredAcrossTouchAndTypeScale() {
         val scene = homeSceneGeometry(390f, 844f, compact = false, progress = .25f)
         val settled = readoutBayGeometry(390f, scene, 132f, 42f, external = false)
         val touching = readoutBayGeometry(390f, scene, 132f, 42f, external = false)
         assertEquals(settled, touching)
         assertTrue(settled.bounds.left >= 16f)
         assertTrue(settled.bounds.right <= 390f - 16f)
-        assertTrue(settled.leaderStartX < settled.leaderEndX)
+        assertEquals(195f, (settled.bounds.left + settled.bounds.right) / 2f, .001f)
+        assertEquals(settled.leaderStartX, settled.leaderEndX, .001f)
+        assertEquals(scene.centerY - scene.outerRadius - 12f, settled.bounds.bottom, .001f)
 
         val maximumScene = homeSceneGeometry(360f, 640f, true, 0f, maximumType = true)
         val maximumType = readoutBayGeometry(360f, maximumScene, 280f, 64f, external = true)
-        assertEquals(16f, maximumType.bounds.left, 0f)
+        assertEquals(40f, maximumType.bounds.left, 0f)
         assertEquals(280f, maximumType.bounds.width, 0f)
         assertTrue(maximumType.leaderEndX - maximumType.leaderStartX <= 24f)
         assertTrue(maximumType.bounds.bottom < maximumScene.centerY - maximumScene.outerRadius)
@@ -223,20 +225,8 @@ class HomeSceneTest {
     }
 
     @Test
-    fun everyNonOwnerWheelLayerUsesTheMeasuredNegativeSpaceClip() {
-        val nonOwners = listOf(
-            WheelPrimitiveLayer.BroadRail,
-            WheelPrimitiveLayer.HourRail,
-            WheelPrimitiveLayer.PrayerRail,
-            WheelPrimitiveLayer.ContextualArc,
-            WheelPrimitiveLayer.CelestialRail,
-            WheelPrimitiveLayer.ActualNow,
-            WheelPrimitiveLayer.Keystone,
-        )
-        assertTrue(nonOwners.all(::primitiveLayerUsesNegativeSpace))
-        assertFalse(primitiveLayerUsesNegativeSpace(WheelPrimitiveLayer.Pointer))
-        assertFalse(primitiveLayerUsesNegativeSpace(WheelPrimitiveLayer.Leader))
-        assertFalse(primitiveLayerUsesNegativeSpace(WheelPrimitiveLayer.Readout))
+    fun readoutNeverCutsAVisualPrimitiveOutOfTheWheel() {
+        assertFalse(WheelPrimitiveLayer.entries.any(::readoutMayClipPrimitiveLayer))
     }
 
     @Test

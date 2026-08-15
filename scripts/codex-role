@@ -1,0 +1,43 @@
+#!/usr/bin/env bash
+set -euo pipefail
+
+usage() {
+  printf 'Usage: %s <role> [prompt]\n' "${0##*/}" >&2
+  printf 'Roles: research_scout, research_synthesizer, design_orchestrator, design_judge, native_executor, implementation_judge\n' >&2
+  exit 64
+}
+
+[[ $# -ge 1 ]] || usage
+
+role="$1"
+shift
+
+case "$role" in
+  research_scout|research_synthesizer|design_orchestrator|design_judge|implementation_judge)
+    model="gpt-5.6-sol"
+    effort="xhigh"
+    sandbox="read-only"
+    ;;
+  native_executor)
+    model="gpt-5.6-luna"
+    effort="max"
+    sandbox="workspace-write"
+    ;;
+  *)
+    usage
+    ;;
+esac
+
+args=(
+  exec
+  --strict-config
+  --model "$model"
+  --config "model_reasoning_effort=\"$effort\""
+  --sandbox "$sandbox"
+)
+
+if [[ $# -eq 0 ]]; then
+  exec codex "${args[@]}" -
+fi
+
+exec codex "${args[@]}" "$*"

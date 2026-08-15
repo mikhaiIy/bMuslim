@@ -1,0 +1,31 @@
+model = "gpt-5.6-sol"
+model_reasoning_effort = "xhigh"
+
+[agents]
+max_threads = 4
+max_depth = 1
+job_max_runtime_seconds = 1800
+
+[agents.research_scout]
+description = "Evidence-first researcher for authoritative source discovery and verification."
+config_file = "./agents/research_scout.toml"
+
+[agents.research_synthesizer]
+description = "Senior researcher who reconciles evidence into a decision-ready research lock."
+config_file = "./agents/research_synthesizer.toml"
+
+[agents.design_orchestrator]
+description = "Product design lead who turns validated research into implementation-ready directions."
+config_file = "./agents/design_orchestrator.toml"
+
+[agents.design_judge]
+description = "Independent critic who selects and sharpens the strongest design direction."
+config_file = "./agents/design_judge.toml"
+
+[agents.native_executor]
+description = "Sole implementation worker for narrow, fully specified Android changes."
+config_file = "./agents/native_executor.toml"
+
+[agents.implementation_judge]
+description = "Independent reviewer focused on correctness, fidelity, runtime behavior, and regressions."
+config_file = "./agents/implementation_judge.toml"

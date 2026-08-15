@@ -1,8 +1,12 @@
-# Android / Gradle
+# Local learning notes
+/learn/
+
+# Android / Gradle local state
 *.iml
 .gradle/
 /local.properties
 /.idea/
+
 .DS_Store
 /build/
 **/build/
@@ -17,5 +21,7 @@
 # Kotlin
 .kotlin/
 
-# Claude Code local state (skills are regenerable via skills-lock.json)
+# Agent/web-research local state (regenerable)
+/.agents/
 /.claude/
+/.firecrawl/

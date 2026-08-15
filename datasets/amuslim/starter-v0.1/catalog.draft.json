@@ -1,0 +1,632 @@
+{
+  "$schema": "./catalog.schema.json",
+  "schemaVersion": 1,
+  "catalogId": "amuslim.starter",
+  "contentVersion": "0.1.0-draft",
+  "purpose": "RESEARCH_CANDIDATE",
+  "lifecycle": "IN_REVIEW",
+  "defaultLocale": "ms-MY",
+  "supportedLocales": ["ms-MY", "en-GB"],
+  "researchAdmissionPolicy": {
+    "acceptedCandidateAssessments": [
+      "SAHIH_COLLECTION",
+      "DISPLAYED_SAHIH_WITH_NAMED_GRADER",
+      "DISPLAYED_HASAN_WITH_NAMED_GRADER"
+    ],
+    "publicationReviewRequired": true
+  },
+  "entries": [
+    {
+      "id": "deed.daily.three-quls-morning-evening",
+      "lifecycle": "IN_REVIEW",
+      "practiceKind": "QURAN",
+      "completionMode": "TWICE_PER_DAY",
+      "actionClaim": {
+        "id": "claim.daily.three-quls-morning-evening.act",
+        "claimType": "ACT",
+        "reviewStatus": "UNREVIEWED",
+        "evidenceIds": ["evidence.abudawud.5082"],
+        "payload": {
+          "title": {
+            "ms-MY": "Baca tiga surah perlindungan",
+            "en-GB": "Recite the three protective surahs"
+          },
+          "instruction": {
+            "ms-MY": "Baca Surah al-Ikhlas, al-Falaq dan al-Nas tiga kali setiap satu.",
+            "en-GB": "Recite Surah al-Ikhlas, al-Falaq and al-Nas three times each."
+          }
+        }
+      },
+      "timingClaim": {
+        "id": "claim.daily.three-quls-morning-evening.timing",
+        "claimType": "TIMING",
+        "reviewStatus": "UNREVIEWED",
+        "evidenceIds": ["evidence.abudawud.5082"],
+        "payload": {
+          "sourceTimePhrase": {
+            "ms-MY": "Pada waktu pagi dan petang.",
+            "en-GB": "In the morning and evening."
+          },
+          "recurrence": {
+            "kind": "TWICE_DAILY_NAMED_PERIODS",
+            "dateBasis": "SCHEDULE_ZONE_LOCAL_DATE"
+          },
+          "expression": {
+            "kind": "SEMANTIC_PERIODS",
+            "parameters": { "periods": ["MORNING", "EVENING"] },
+            "precision": "UNRESOLVED"
+          },
+          "resolutionStatus": "REQUIRES_REVIEWED_TEMPORAL_POLICY",
+          "unsupportedInferences": [
+            "Do not equate morning automatically with Fajr-to-Syuruk.",
+            "Do not equate evening automatically with Asr-to-Maghrib."
+          ]
+        }
+      }
+    },
+    {
+      "id": "deed.daily.post-prayer-tasbih",
+      "lifecycle": "IN_REVIEW",
+      "practiceKind": "DHIKR",
+      "completionMode": "PER_TRIGGER",
+      "actionClaim": {
+        "id": "claim.daily.post-prayer-tasbih.act",
+        "claimType": "ACT",
+        "reviewStatus": "UNREVIEWED",
+        "evidenceIds": ["evidence.muslim.597a"],
+        "payload": {
+          "title": {
+            "ms-MY": "Tasbih selepas solat",
+            "en-GB": "Remembrance after prayer"
+          },
+          "instruction": {
+            "ms-MY": "Bertasbih 33 kali, bertahmid 33 kali, bertakbir 33 kali, kemudian sempurnakan seratus dengan tahlil yang dinyatakan dalam riwayat.",
+            "en-GB": "Say tasbih 33 times, tahmid 33 times and takbir 33 times, then complete one hundred with the tahlil stated in the report."
+          },
+          "detailRequirement": "REQUIRES_APPROVED_TEXT_CLAIM"
+        }
+      },
+      "timingClaim": {
+        "id": "claim.daily.post-prayer-tasbih.timing",
+        "claimType": "TIMING",
+        "reviewStatus": "UNREVIEWED",
+        "evidenceIds": ["evidence.muslim.597a"],
+        "payload": {
+          "sourceTimePhrase": {
+            "ms-MY": "Selepas setiap solat.",
+            "en-GB": "After every prayer."
+          },
+          "recurrence": {
+            "kind": "AFTER_EACH_PRAYER",
+            "dateBasis": "PERSONAL_EVENT_OCCURRENCE"
+          },
+          "expression": {
+            "kind": "AFTER_USER_EVENT",
+            "parameters": { "event": "PRAYER_COMPLETED" },
+            "precision": "DIRECT_TRIGGER"
+          },
+          "resolutionStatus": "DIRECT_EVENT_ONLY",
+          "unsupportedInferences": [
+            "Do not use the scheduled prayer start as proof that the user has completed prayer.",
+            "Do not extend availability until the next prayer."
+          ]
+        }
+      }
+    },
+    {
+      "id": "deed.daily.duha-two-rakah",
+      "lifecycle": "IN_REVIEW",
+      "practiceKind": "SALAH",
+      "completionMode": "ONCE",
+      "actionClaim": {
+        "id": "claim.daily.duha-two-rakah.act",
+        "claimType": "ACT",
+        "reviewStatus": "UNREVIEWED",
+        "evidenceIds": ["evidence.muslim.720"],
+        "payload": {
+          "title": {
+            "ms-MY": "Solat Dhuha dua rakaat",
+            "en-GB": "Two rak'ahs of Duha"
+          },
+          "instruction": {
+            "ms-MY": "Tunaikan dua rakaat solat Dhuha.",
+            "en-GB": "Pray two rak'ahs of Duha."
+          }
+        }
+      },
+      "timingClaim": {
+        "id": "claim.daily.duha-two-rakah.timing",
+        "claimType": "TIMING",
+        "reviewStatus": "UNREVIEWED",
+        "evidenceIds": ["evidence.muslim.720"],
+        "payload": {
+          "sourceTimePhrase": {
+            "ms-MY": "Pada waktu dhuha atau waktu pagi menjelang tengah hari.",
+            "en-GB": "In the forenoon."
+          },
+          "recurrence": {
+            "kind": "SOURCE_RECURRENCE_UNSPECIFIED",
+            "dateBasis": "SOURCE_RECURRENCE_UNSPECIFIED"
+          },
+          "expression": {
+            "kind": "SEMANTIC_PERIODS",
+            "parameters": { "periods": ["FORENOON"] },
+            "precision": "UNRESOLVED"
+          },
+          "resolutionStatus": "REQUIRES_REVIEWED_TEMPORAL_POLICY",
+          "unsupportedInferences": [
+            "This evidence alone does not establish a fixed offset after Syuruk.",
+            "This evidence alone does not establish an exact end before Zohor.",
+            "A JAKIM Dhuha marker requires a separately approved mapping policy."
+          ]
+        }
+      }
+    },
+    {
+      "id": "deed.daily.bedtime-three-quls",
+      "lifecycle": "IN_REVIEW",
+      "practiceKind": "QURAN",
+      "completionMode": "ONCE",
+      "actionClaim": {
+        "id": "claim.daily.bedtime-three-quls.act",
+        "claimType": "ACT",
+        "reviewStatus": "UNREVIEWED",
+        "evidenceIds": ["evidence.bukhari.5017"],
+        "payload": {
+          "title": {
+            "ms-MY": "Tiga surah sebelum tidur",
+            "en-GB": "Three surahs at bedtime"
+          },
+          "instruction": {
+            "ms-MY": "Rapatkan kedua tapak tangan, baca al-Ikhlas, al-Falaq dan al-Nas, tiup perlahan lalu sapu kepala, muka, bahagian hadapan dan bahagian tubuh lain yang mampu; ulang tiga kali.",
+            "en-GB": "Cup both hands, recite al-Ikhlas, al-Falaq and al-Nas, blow lightly, then wipe the head, face, front and as much of the rest of the body as possible; repeat three times."
+          }
+        }
+      },
+      "timingClaim": {
+        "id": "claim.daily.bedtime-three-quls.timing",
+        "claimType": "TIMING",
+        "reviewStatus": "UNREVIEWED",
+        "evidenceIds": ["evidence.bukhari.5017"],
+        "payload": {
+          "sourceTimePhrase": {
+            "ms-MY": "Apabila hendak ke tempat tidur pada setiap malam.",
+            "en-GB": "When going to bed each night."
+          },
+          "recurrence": {
+            "kind": "ON_PERSONAL_EVENT",
+            "event": "INTEND_SLEEP_AT_NIGHT",
+            "dateBasis": "PERSONAL_EVENT_OCCURRENCE"
+          },
+          "expression": {
+            "kind": "PERSONAL_EVENT",
+            "parameters": { "relation": "AT", "event": "INTEND_SLEEP_AT_NIGHT" },
+            "precision": "DIRECT_TRIGGER"
+          },
+          "resolutionStatus": "DIRECT_EVENT_ONLY",
+          "unsupportedInferences": [
+            "Do not bind the deed to Isyak or to a fixed clock time.",
+            "Do not omit the blowing and wiping sequence from the action claim."
+          ]
+        }
+      }
+    },
+    {
+      "id": "deed.daily.last-third-dua-istighfar",
+      "lifecycle": "IN_REVIEW",
+      "practiceKind": "DUA",
+      "completionMode": "REPEATABLE_NO_TARGET",
+      "actionClaim": {
+        "id": "claim.daily.last-third-dua-istighfar.act",
+        "claimType": "ACT",
+        "reviewStatus": "UNREVIEWED",
+        "evidenceIds": ["evidence.bukhari.1145"],
+        "payload": {
+          "title": {
+            "ms-MY": "Berdoa dan beristighfar pada akhir malam",
+            "en-GB": "Supplication and seeking forgiveness late at night"
+          },
+          "instruction": {
+            "ms-MY": "Berdoa, memohon kepada Allah dan beristighfar.",
+            "en-GB": "Invoke Allah, ask of Him and seek His forgiveness."
+          }
+        }
+      },
+      "timingClaim": {
+        "id": "claim.daily.last-third-dua-istighfar.timing",
+        "claimType": "TIMING",
+        "reviewStatus": "UNREVIEWED",
+        "evidenceIds": ["evidence.bukhari.1145"],
+        "payload": {
+          "sourceTimePhrase": {
+            "ms-MY": "Apabila tinggal sepertiga terakhir malam.",
+            "en-GB": "When the last third of the night remains."
+          },
+          "recurrence": {
+            "kind": "EVERY_DAY",
+            "dateBasis": "NIGHT_OCCURRENCE"
+          },
+          "expression": {
+            "kind": "NIGHT_SEGMENT",
+            "parameters": {
+              "segment": "LAST_THIRD",
+              "nightBoundaryPolicy": "REQUIRES_MALAYSIAN_SCHOLAR_REVIEW"
+            },
+            "precision": "UNRESOLVED"
+          },
+          "resolutionStatus": "REQUIRES_REVIEWED_TEMPORAL_POLICY",
+          "unsupportedInferences": [
+            "Do not label the action Tahajjud from this report alone.",
+            "Do not calculate the night boundary without an approved sunset-to-Fajr policy."
+          ]
+        }
+      }
+    },
+    {
+      "id": "deed.daily.witr-before-sleep",
+      "lifecycle": "IN_REVIEW",
+      "practiceKind": "SALAH",
+      "completionMode": "ONCE",
+      "actionClaim": {
+        "id": "claim.daily.witr-before-sleep.act",
+        "claimType": "ACT",
+        "reviewStatus": "UNREVIEWED",
+        "evidenceIds": ["evidence.bukhari.1981"],
+        "payload": {
+          "title": {
+            "ms-MY": "Solat Witir sebelum tidur",
+            "en-GB": "Witr before sleep"
+          },
+          "instruction": {
+            "ms-MY": "Tunaikan solat Witir sebelum tidur.",
+            "en-GB": "Pray Witr before sleeping."
+          }
+        }
+      },
+      "timingClaim": {
+        "id": "claim.daily.witr-before-sleep.timing",
+        "claimType": "TIMING",
+        "reviewStatus": "UNREVIEWED",
+        "evidenceIds": ["evidence.bukhari.1981"],
+        "payload": {
+          "sourceTimePhrase": {
+            "ms-MY": "Sebelum tidur.",
+            "en-GB": "Before sleeping."
+          },
+          "recurrence": {
+            "kind": "ON_PERSONAL_EVENT",
+            "event": "INTEND_SLEEP",
+            "dateBasis": "PERSONAL_EVENT_OCCURRENCE"
+          },
+          "expression": {
+            "kind": "PERSONAL_EVENT",
+            "parameters": { "relation": "BEFORE", "event": "INTEND_SLEEP" },
+            "precision": "DIRECT_TRIGGER"
+          },
+          "resolutionStatus": "DIRECT_EVENT_ONLY",
+          "unsupportedInferences": [
+            "Do not bind the deed to a fixed time after Isyak.",
+            "Do not infer a universal latest minute before sleep."
+          ]
+        }
+      }
+    },
+    {
+      "id": "deed.weekly.fast-monday-thursday",
+      "lifecycle": "IN_REVIEW",
+      "practiceKind": "FASTING",
+      "completionMode": "ONCE",
+      "actionClaim": {
+        "id": "claim.weekly.fast-monday-thursday.act",
+        "claimType": "ACT",
+        "reviewStatus": "UNREVIEWED",
+        "evidenceIds": ["evidence.abudawud.2436"],
+        "payload": {
+          "title": {
+            "ms-MY": "Puasa Isnin dan Khamis",
+            "en-GB": "Fast on Monday and Thursday"
+          },
+          "instruction": {
+            "ms-MY": "Berpuasa pada hari Isnin atau Khamis apabila mampu dan sesuai.",
+            "en-GB": "Fast on Monday or Thursday when able and appropriate."
+          }
+        }
+      },
+      "timingClaim": {
+        "id": "claim.weekly.fast-monday-thursday.timing",
+        "claimType": "TIMING",
+        "reviewStatus": "UNREVIEWED",
+        "evidenceIds": ["evidence.abudawud.2436"],
+        "payload": {
+          "sourceTimePhrase": {
+            "ms-MY": "Pada hari Isnin dan Khamis.",
+            "en-GB": "On Monday and Thursday."
+          },
+          "recurrence": {
+            "kind": "WEEKDAY_SET",
+            "weekdays": ["MONDAY", "THURSDAY"],
+            "dateBasis": "SCHEDULE_ZONE_LOCAL_WEEKDAY"
+          },
+          "expression": {
+            "kind": "FASTING_WEEKDAYS",
+            "parameters": { "weekdays": ["MONDAY", "THURSDAY"] },
+            "precision": "BROAD_CONTEXT"
+          },
+          "resolutionStatus": "REQUIRES_REVIEWED_TEMPORAL_POLICY",
+          "unsupportedInferences": [
+            "This source does not by itself define the fast's dawn and sunset boundaries.",
+            "Do not display the deed when fasting is prohibited or unsafe without a separate eligibility policy."
+          ]
+        }
+      }
+    },
+    {
+      "id": "deed.weekly.friday-salawat",
+      "lifecycle": "IN_REVIEW",
+      "practiceKind": "DHIKR",
+      "completionMode": "REPEATABLE_NO_TARGET",
+      "actionClaim": {
+        "id": "claim.weekly.friday-salawat.act",
+        "claimType": "ACT",
+        "reviewStatus": "UNREVIEWED",
+        "evidenceIds": ["evidence.abudawud.1047"],
+        "payload": {
+          "title": {
+            "ms-MY": "Perbanyakkan selawat pada hari Jumaat",
+            "en-GB": "Increase salawat on Friday"
+          },
+          "instruction": {
+            "ms-MY": "Perbanyakkan selawat ke atas Nabi SAW tanpa menetapkan bilangan yang tidak disebut oleh sumber ini.",
+            "en-GB": "Increase blessings upon the Prophet without assigning a count not stated by this source."
+          }
+        }
+      },
+      "timingClaim": {
+        "id": "claim.weekly.friday-salawat.timing",
+        "claimType": "TIMING",
+        "reviewStatus": "UNREVIEWED",
+        "evidenceIds": ["evidence.abudawud.1047"],
+        "payload": {
+          "sourceTimePhrase": {
+            "ms-MY": "Pada hari Jumaat.",
+            "en-GB": "On Friday."
+          },
+          "recurrence": {
+            "kind": "WEEKDAY_SET",
+            "weekdays": ["FRIDAY"],
+            "dateBasis": "RELIGIOUS_DAY_POLICY_REQUIRED"
+          },
+          "expression": {
+            "kind": "RELIGIOUS_WEEKDAY",
+            "parameters": { "weekday": "FRIDAY" },
+            "precision": "UNRESOLVED"
+          },
+          "resolutionStatus": "REQUIRES_REVIEWED_TEMPORAL_POLICY",
+          "unsupportedInferences": [
+            "Do not assign a fixed count such as 80 or 200 from this source.",
+            "Do not extend the UI window to Thursday night without a reviewed day-boundary policy."
+          ]
+        }
+      }
+    },
+    {
+      "id": "deed.weekly.friday-final-period-dua",
+      "lifecycle": "IN_REVIEW",
+      "practiceKind": "DUA",
+      "completionMode": "REPEATABLE_NO_TARGET",
+      "actionClaim": {
+        "id": "claim.weekly.friday-final-period-dua.act",
+        "claimType": "ACT",
+        "reviewStatus": "UNREVIEWED",
+        "evidenceIds": ["evidence.abudawud.1048"],
+        "corroborativeEvidenceIds": ["evidence.bukhari.935"],
+        "payload": {
+          "title": {
+            "ms-MY": "Berdoa pada penghujung Jumaat",
+            "en-GB": "Supplicate in Friday's final period"
+          },
+          "instruction": {
+            "ms-MY": "Berdoa dan memohon kepada Allah pada bahagian akhir selepas Asar.",
+            "en-GB": "Supplicate and ask Allah in the final period after Asr."
+          }
+        }
+      },
+      "timingClaim": {
+        "id": "claim.weekly.friday-final-period-dua.timing",
+        "claimType": "TIMING",
+        "reviewStatus": "UNREVIEWED",
+        "evidenceIds": ["evidence.abudawud.1048"],
+        "corroborativeEvidenceIds": ["evidence.bukhari.935"],
+        "payload": {
+          "sourceTimePhrase": {
+            "ms-MY": "Cari waktu itu pada bahagian terakhir selepas Asar pada hari Jumaat.",
+            "en-GB": "Seek it in the final period after Asr on Friday."
+          },
+          "recurrence": {
+            "kind": "WEEKDAY_SET",
+            "weekdays": ["FRIDAY"],
+            "dateBasis": "RELIGIOUS_DAY_POLICY_REQUIRED"
+          },
+          "expression": {
+            "kind": "WEEKDAY_FINAL_PERIOD_AFTER_PRAYER",
+            "parameters": {
+              "weekday": "FRIDAY",
+              "after": "ASR",
+              "focus": "FINAL_PORTION",
+              "endBoundaryPolicy": "UNRESOLVED"
+            },
+            "precision": "BROAD_CONTEXT"
+          },
+          "resolutionStatus": "REQUIRES_REVIEWED_TEMPORAL_POLICY",
+          "unsupportedInferences": [
+            "Do not claim the entire Asar-to-Maghrib interval is the response time.",
+            "Do not convert the source term hour into exactly sixty minutes without review."
+          ]
+        }
+      }
+    }
+  ],
+  "evidence": [
+    {
+      "id": "evidence.abudawud.5082",
+      "sourceType": "HADITH",
+      "attributionLevel": "PROPHETIC",
+      "collection": "Sunan Abi Dawud",
+      "reference": "5082",
+      "canonicalUrl": "https://sunnah.com/abudawud:5082",
+      "reportedAssessment": {
+        "kind": "DISPLAYED_GRADE",
+        "label": "Hasan",
+        "grader": "Al-Albani"
+      },
+      "supportsClaimTypes": ["ACT", "TIMING"],
+      "sourceSummary": "Instruction to recite al-Ikhlas and the two protecting surahs three times in the morning and evening.",
+      "usagePermission": "LINK_AND_PARAPHRASE_ONLY"
+    },
+    {
+      "id": "evidence.muslim.597a",
+      "sourceType": "HADITH",
+      "attributionLevel": "PROPHETIC",
+      "collection": "Sahih Muslim",
+      "reference": "597a",
+      "canonicalUrl": "https://sunnah.com/muslim:597a",
+      "reportedAssessment": {
+        "kind": "SAHIH_COLLECTION",
+        "label": "Sahih Muslim; no separate grade displayed",
+        "grader": null
+      },
+      "supportsClaimTypes": ["ACT", "TIMING"],
+      "sourceSummary": "Describes a hundred-count sequence of remembrance after every prayer.",
+      "usagePermission": "LINK_AND_PARAPHRASE_ONLY"
+    },
+    {
+      "id": "evidence.muslim.720",
+      "sourceType": "HADITH",
+      "attributionLevel": "PROPHETIC",
+      "collection": "Sahih Muslim",
+      "reference": "720",
+      "canonicalUrl": "https://sunnah.com/muslim:720",
+      "reportedAssessment": {
+        "kind": "SAHIH_COLLECTION",
+        "label": "Sahih Muslim; no separate grade displayed",
+        "grader": null
+      },
+      "supportsClaimTypes": ["ACT", "TIMING"],
+      "sourceSummary": "States that two rak'ahs in the forenoon suffice for the charity described for the morning.",
+      "usagePermission": "LINK_AND_PARAPHRASE_ONLY"
+    },
+    {
+      "id": "evidence.bukhari.5017",
+      "sourceType": "HADITH",
+      "attributionLevel": "PROPHETIC",
+      "collection": "Sahih al-Bukhari",
+      "reference": "5017",
+      "canonicalUrl": "https://sunnah.com/bukhari:5017",
+      "reportedAssessment": {
+        "kind": "SAHIH_COLLECTION",
+        "label": "Sahih al-Bukhari; no separate grade displayed",
+        "grader": null
+      },
+      "supportsClaimTypes": ["ACT", "TIMING"],
+      "sourceSummary": "Reports the three-surah recitation, blowing and wiping sequence whenever the Prophet went to bed at night.",
+      "usagePermission": "LINK_AND_PARAPHRASE_ONLY"
+    },
+    {
+      "id": "evidence.bukhari.1145",
+      "sourceType": "HADITH",
+      "attributionLevel": "PROPHETIC",
+      "collection": "Sahih al-Bukhari",
+      "reference": "1145",
+      "canonicalUrl": "https://sunnah.com/bukhari:1145",
+      "reportedAssessment": {
+        "kind": "SAHIH_COLLECTION",
+        "label": "Sahih al-Bukhari; no separate grade displayed",
+        "grader": null
+      },
+      "supportsClaimTypes": ["ACT", "TIMING"],
+      "sourceSummary": "Explicitly connects invocation, asking and seeking forgiveness with the last third of every night.",
+      "usagePermission": "LINK_AND_PARAPHRASE_ONLY"
+    },
+    {
+      "id": "evidence.bukhari.1981",
+      "sourceType": "HADITH",
+      "attributionLevel": "PROPHETIC",
+      "collection": "Sahih al-Bukhari",
+      "reference": "1981",
+      "canonicalUrl": "https://sunnah.com/bukhari:1981",
+      "reportedAssessment": {
+        "kind": "SAHIH_COLLECTION",
+        "label": "Sahih al-Bukhari; no separate grade displayed",
+        "grader": null
+      },
+      "supportsClaimTypes": ["ACT", "TIMING"],
+      "sourceSummary": "Includes advice to pray Witr before sleeping.",
+      "usagePermission": "LINK_AND_PARAPHRASE_ONLY"
+    },
+    {
+      "id": "evidence.abudawud.2436",
+      "sourceType": "HADITH",
+      "attributionLevel": "PROPHETIC",
+      "collection": "Sunan Abi Dawud",
+      "reference": "2436",
+      "canonicalUrl": "https://sunnah.com/abudawud:2436",
+      "reportedAssessment": {
+        "kind": "DISPLAYED_GRADE",
+        "label": "Sahih",
+        "grader": "Al-Albani"
+      },
+      "supportsClaimTypes": ["ACT", "TIMING"],
+      "sourceSummary": "Reports that the Prophet fasted Monday and Thursday and names those weekdays explicitly.",
+      "usagePermission": "LINK_AND_PARAPHRASE_ONLY"
+    },
+    {
+      "id": "evidence.abudawud.1047",
+      "sourceType": "HADITH",
+      "attributionLevel": "PROPHETIC",
+      "collection": "Sunan Abi Dawud",
+      "reference": "1047",
+      "canonicalUrl": "https://sunnah.com/abudawud:1047",
+      "reportedAssessment": {
+        "kind": "DISPLAYED_GRADE",
+        "label": "Sahih",
+        "grader": "Al-Albani"
+      },
+      "supportsClaimTypes": ["ACT", "TIMING"],
+      "sourceSummary": "Instructs Muslims to increase blessings upon the Prophet on Friday without specifying a count.",
+      "usagePermission": "LINK_AND_PARAPHRASE_ONLY"
+    },
+    {
+      "id": "evidence.abudawud.1048",
+      "sourceType": "HADITH",
+      "attributionLevel": "PROPHETIC",
+      "collection": "Sunan Abi Dawud",
+      "reference": "1048",
+      "canonicalUrl": "https://sunnah.com/abudawud:1048",
+      "reportedAssessment": {
+        "kind": "DISPLAYED_GRADE",
+        "label": "Sahih",
+        "grader": "Al-Albani"
+      },
+      "supportsClaimTypes": ["ACT", "TIMING"],
+      "sourceSummary": "Directs seekers to the final period after Asr on Friday for the response time.",
+      "usagePermission": "LINK_AND_PARAPHRASE_ONLY"
+    },
+    {
+      "id": "evidence.bukhari.935",
+      "sourceType": "HADITH",
+      "attributionLevel": "PROPHETIC",
+      "collection": "Sahih al-Bukhari",
+      "reference": "935",
+      "canonicalUrl": "https://sunnah.com/bukhari:935",
+      "reportedAssessment": {
+        "kind": "SAHIH_COLLECTION",
+        "label": "Sahih al-Bukhari; no separate grade displayed",
+        "grader": null
+      },
+      "supportsClaimTypes": ["ACT", "TIMING"],
+      "sourceSummary": "Corroborates that Friday contains a short time in which supplication is answered.",
+      "usagePermission": "LINK_AND_PARAPHRASE_ONLY"
+    }
+  ],
+  "approvals": []
+}
